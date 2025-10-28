@@ -1,0 +1,4 @@
+numpy
+pyverilator
+cocotb
+cocotb-test
