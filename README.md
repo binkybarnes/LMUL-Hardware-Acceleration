@@ -15,11 +15,10 @@ Install Docker, clone the repository, and choose a setup method
 docker build -t lmul-dev .
 docker run -it --rm \
   -p 8888:8888 \
-
   -v "$PWD":/workspace \
   -w /workspace \
   lmul-dev \
-  jupyter lab --ip=0.0.0.0 --no-browser
+  jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.password='' \
+  --allow-root
 ```
 Then open http://localhost:8888
-

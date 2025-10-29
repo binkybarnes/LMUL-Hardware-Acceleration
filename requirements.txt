@@ -4,3 +4,4 @@ cocotb
 cocotb-test
 ipykernel
 matplotlib
+jupyterlab
