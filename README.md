@@ -2,7 +2,7 @@
 
 ## Setup
 
-Clone the repository and choose a setup method
+Install Docker, clone the repository, and choose a setup method
 
 ### 1) VS Code
 
