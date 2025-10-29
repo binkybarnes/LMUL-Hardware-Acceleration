@@ -22,3 +22,8 @@ docker run -it --rm \
   --allow-root
 ```
 Then open http://localhost:8888
+
+## Structure
+
+- `rtl/`: verilog files
+- `sim/`: simulation/testing files
