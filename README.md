@@ -1,11 +1,21 @@
 # LMUL-Hardware-Acceleration
 
-## Environment Setup Commands
+## Setup
+
+Clone the repository and choose a setup method
+
+### 1) VS Code
+
+- Install Dev Containers extension
+
+- Open a remote window -> Reopen in dev container
+
+### 2) Terminal
 ```
 docker build -t lmul-dev .
-
 docker run -it --rm \
   -p 8888:8888 \
+
   -v "$PWD":/workspace \
   -w /workspace \
   lmul-dev \
@@ -13,8 +23,3 @@ docker run -it --rm \
 ```
 Then open http://localhost:8888
 
-## VS Code
-
-- Install Dev Containers extension
-
-- Open a remote window -> Reopen in dev container
