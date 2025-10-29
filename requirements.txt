@@ -3,3 +3,4 @@ pyverilator
 cocotb
 cocotb-test
 ipykernel
+matplotlib
