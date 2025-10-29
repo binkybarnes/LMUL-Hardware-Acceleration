@@ -4,15 +4,17 @@
 ```
 docker build -t lmul-dev .
 
-docker run -it --rm -v "$PWD":/workspace -w /workspace lmul-dev
+docker run -it --rm \
+  -p 8888:8888 \
+  -v "$PWD":/workspace \
+  -w /workspace \
+  lmul-dev \
+  jupyter lab --ip=0.0.0.0 --no-browser
 ```
+Then open http://localhost:8888
 
 ## VS Code
 
 - Install Dev Containers extension
 
-- Reopen in dev container
-
-- Make sure Python + Jupyter extensions are installed in the container
-
-- You may also be prompted with an ipykernel installation before running cells
+- Open a remote window -> Reopen in dev container
