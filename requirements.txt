@@ -5,3 +5,5 @@ cocotb-test
 ipykernel
 matplotlib
 jupyterlab
+torch
+torchvision
