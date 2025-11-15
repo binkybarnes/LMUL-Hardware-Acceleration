@@ -1,25 +1,30 @@
-% !TEX root = relative/or/absolute/path/to/root/file.tex
 % !TEX TS-program = xelatex
 % !BIB TS-program = bibtex
 \documentclass[12pt,letterpaper]{article}
-\usepackage{style/dsc180reportstyle} % import dsc180reportstyle.sty
+\usepackage{style/dsc180reportstyle} % import 
+\usepackage{footmisc}
+% dsc180reportstyle.sty
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Title and Authors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{DSC Capstone LaTeX Template}
+\title{DSC Capstone | Hardware Accelerators}
 
-\author{First Author \\
-  {\tt email@ucsd.edu} \\\And
-  Second Author \\
-  {\tt email@ucsd.edu} \\\And
-  Third Author \\
-  {\tt email@ucsd.edu} \\\And
-  Fourth Author \\
-  {\tt email@ucsd.edu} \\\And
-  Mentor Name (Always Last) \\
-  {\tt email@ucsd.edu} \\}
+\author{Owen Shi \\
+  {\tt a4shi@ucsd.edu} \\\And
+  Pranav Kumarsubha \\
+  {\tt pkumarsubha@ucsd.edu} \\\And
+  Brendan Kuang \\
+  {\tt blkuang@ucsd.edu} \\\And
+  Edgar Guzman \\
+  {\tt eiguzman@ucsd.edu} \\\And
+  Idhant Kumar \\
+  {\tt ikumar@ucsd.edu} \\\And
+  Brandon Chiou \\
+  {\tt 	brchiou@ucsd.edu} \\\And
+  Rajesh Gupta \\
+  {\tt rgupta@ucsd.edu} \\}
 
 \begin{document}
 \maketitle
@@ -28,30 +33,12 @@
 %%%% Abstract and Links
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-{\color{blue} Welcome to the Capstone LaTeX template! To use this template:
-\begin{itemize}
-    \item Create an Overleaf account (it's free).
-    \item Click the ``Menu" button in the top left, then click ``Copy Project."
-    \item To share the project with your group members, click ``Share" in the top menu bar, turn on link sharing, and send the edit link to your group members.
-\end{itemize}
-
-The lines you see in blue are instructions from us; \textbf{remove them} or comment them out with \texttt{\%} as you actually edit this template. \textbf{Your actual submissions should not have any blue in them!}
-
-This template mostly exists for style purposes. \textbf{Not all headings provided in the template will actually be useful for you; you can add or remove headings as you please, and the headings you end up using are up to you and your mentor.} Look to the ``Anatomy of a Scientific Paper" section of \href{https://dsc-capstone.org/lessons/04/#anatomy-of-a-scientific-paper}{Methodology Lesson 4} for guidance on which headings to use, and \href{https://dsc-capstone.org/assignments/methodology/05/}{Methodology Lesson 7} for more resources on LaTeX.
-}
-
 \begin{abstract}
-    {
-    \color{blue}
-    Replace the \texttt{lipsum[1]} in the source code with your abstract. Don't include an abstract with your Quarter 2 Proposal.
-    }
-    \textcolor{LightGrey}{\lipsum[1]}
+    In this project, we try to integrate an approximate linear time multiplication algorithm (L-Mul) to use in neural networks. We have made a multilayer perceptron that uses L-Mul instead of normal floating point multiplication at inference. We show that L-Mul receives nearly identical accuracy as conventional multiplication, displaying the potential for energy savings and silicon area in hardware implementations. Our future work entails designing a processing element array suitable for inference in Verilog to simulate performance on an FPGA. The goal being to examine inference latency, area, and power in a hardware environment. Our project aims to display L-Mul as a practical measure for energy efficient applications beyond MLPs, such as LSTMs and transformers. 
 \end{abstract}
 
-{\color{blue} For your Quarter 1 Project, you won't link a website, but will link your code. For your Quarter 2 Proposal, you won't link either of these. For your actual Quarter 2 Project, you'll link both of these.}
 \begin{center}
-Website: \url{https://abc.github.io/} \\
-Code: \url{https://github.com/abc}
+Code: \url{https://github.com/oowenn/LMUL-Hardware-Acceleration}
 \end{center}
 
 \maketoc
@@ -63,179 +50,209 @@ Code: \url{https://github.com/abc}
 
 \section{Introduction}
 
+As artificial intelligence systems continue to scale in complexity and computational demand, energy efficiency has emerged as a critical constraint. Neural networks require billions of floating-point operations during inference, with traditional IEEE 754 multiplication incurring substantial computational overhead. The \textit{L-Mul} (Linear-complexity Multiplication) algorithm presents an alternative approach: replacing expensive mantissa multiplication with addition-based operations to achieve $O(n)$ complexity compared to standard multiplication's $O(n^2)$ complexity.
+
+This report presents our implementation and validation of the L-Mul algorithm for neural network inference. We focus specifically on BFloat16 (BF16) arithmetic, a 16-bit floating-point format widely adopted in machine learning due to its compatibility with FP32 exponents while requiring only half the storage. Building upon theoretical foundations established by prior work, we address three primary objectives: developing a functionally correct Verilog implementation of L-Mul for BF16 arithmetic, creating a simulation infrastructure that bridges hardware description with Python-based workflows, and validating L-Mul's accuracy through integration into a multilayer perceptron for MNIST digit classification.
+
 \section{Methods}
+
+\subsection{Standard BFloat16 Multiplication}
+\label{subsec:standard_bf16}
+
+Before discussing the L-Mul approximation, we first establish how standard BFloat16 multiplication works. BFloat16 (BF16) is a 16-bit floating-point format consisting of 1 sign bit, 8 exponent bits, and 7 mantissa bits. This format is particularly popular in machine learning due to its compatibility with single-precision (FP32) exponents while requiring only half the storage.
+
+A BF16 number $x$ represents the value:
+\begin{equation}
+x = (-1)^s \times 2^{e - 127} \times (1.m)
+\label{eq:bf16_representation}
+\end{equation}
+where $s$ is the sign bit, $e$ is the 8-bit exponent, $m$ represents the 7-bit mantissa, and 127 is the bias.
+
+Standard BF16 multiplication follows the IEEE 754 approach: the signs are XORed, the exponents are added (with bias correction), and the mantissas are multiplied. This mantissa multiplication is the expensive part—it requires a hardware multiplier and subsequent normalization logic to handle carries. For neural network inference where millions of multiplications occur, this computational cost adds up quickly in terms of both latency and power consumption.
+
+\subsection{LMUL Algorithm}
+\label{subsec:lmul_algorithm}
+
+The L-Mul algorithm takes a different approach \footnote{\texttt{rtl/lmul\_bf16.v}}\label{fn:lmul_bf16}. Instead of treating the exponent and mantissa as separate entities, it exploits a clever observation: if we treat the combined exponent-mantissa field as a single fixed-point number, multiplication can be approximated by simple addition. This works because logarithms transform multiplication into addition, and the floating-point exponent already represents a logarithmic quantity.
+
+\paragraph{Algorithm Overview.}
+Given two BF16 operands $a$ and $b$, L-Mul works by adding their exponent-mantissa fields directly. Here's how it breaks down:
+
+\textbf{Step 1: Extract the fields.} We pull out the components from each 16-bit operand:
+\begin{align}
+a_{sign} &= a[15], \quad b_{sign} = b[15] \\
+a_{field} &= a[14:0], \quad b_{field} = b[14:0]
+\end{align}
+The $field$ values contain the concatenated exponent and mantissa bits, which we'll treat as a single 15-bit integer.
+
+\textbf{Step 2: Handle edge cases.} If either input is zero or subnormal (indicated by a zero exponent), we immediately return zero. This keeps the algorithm simple and handles the most common edge case:
+\begin{equation}
+\text{if } a_{exp} = 0 \text{ or } b_{exp} = 0 \text{, return } 0
+\end{equation}
+
+\textbf{Step 3: Add the fields.} We add the two fields together, but we need to correct for the fact that adding exponents naturally doubles the bias:
+\begin{equation}
+\text{sum}_{full} = a_{field} + b_{field} + \text{OFFSET}_{MOD}
+\label{eq:lmul_addition}
+\end{equation}
+The offset term compensates for this doubled bias:
+\begin{equation}
+\text{OFFSET}_{MOD} = ((2^{15}) - (127 \ll 7)) \text{ AND } 0x7FFF = 0x4080
+\end{equation}
+We use 17 bits for the sum to capture potential overflow.
+
+\textbf{Step 4: Check for overflow or underflow.} The top two bits of our 17-bit sum tell us what happened:
+\begin{equation}
+\text{carry}_2 = \text{sum}_{full}[16:15]
+\end{equation}
+These bits give us three cases:
+\begin{itemize}
+    \item $00_2$: The result underflowed—return zero
+    \item $01_2$: Normal result—use the lower 15 bits
+    \item $1x_2$: The result overflowed—saturate to maximum value ($0x7FFF$)
+\end{itemize}
+
+\textbf{Step 5: Calculate the sign.} This follows standard multiplication rules—XOR the input signs, but force the result to positive zero if the magnitude is zero:
+\begin{equation}
+s_{result} = \begin{cases}
+0 & \text{if field} = 0 \\
+a_{sign} \oplus b_{sign} & \text{otherwise}
+\end{cases}
+\end{equation}
+
+\textbf{Step 6: Pack the result.} Finally, we combine the sign bit with the selected field value:
+\begin{equation}
+\text{result} = (s_{result} \ll 15) \text{ OR } \text{field}_{sel}
+\end{equation}
+
+\paragraph{Why This Works.}
+The key insight is that the exponent field already represents a logarithm (base 2), and the mantissa can be approximated as part of this logarithmic representation. When we add these combined fields, we're essentially performing multiplication in log space. The approximation comes from treating the mantissa bits as part of a continuous logarithmic scale rather than as a separate fractional multiplier. For neural network inference, this approximation is remarkably accurate—accurate enough that we see virtually no loss in classification accuracy, as we'll show in the results.
+
+\subsection{Verilog Simulation and Testing Infrastructure}
+\label{subsec:simulation_infrastructure}
+
+To validate our LMUL hardware design and enable integration with machine learning workloads, we developed a simulation pipeline that bridges Verilog hardware descriptions with Python-based testing and neural network frameworks. This infrastructure allows us to verify correctness, measure performance characteristics, and ultimately test LMUL on real ML tasks without requiring physical hardware.
+
+\paragraph{Simulation Approach.}
+We use Icarus Verilog (iverilog), an open-source Verilog simulator, to compile and execute our hardware descriptions. The simulation flow works as follows: our Verilog modules are compiled into an executable simulation model, which we then run using the \texttt{vvp} (Verilog VVP) runtime. This generates cycle-accurate behavior that matches what the actual hardware would do, including all timing, handshaking protocols, and pipeline stages.
+
+The key challenge was creating a seamless interface between this low-level hardware simulation and high-level Python code. We needed a way to feed test vectors into the simulator, run the hardware through multiple clock cycles, and extract results—all from within a Python environment where we could easily work with ML frameworks like PyTorch.
+
+\paragraph{Batch Testing Architecture.}
+Rather than spawning a new simulation process for every single multiplication (which would be prohibitively slow), we developed a batch testing system. Our \texttt{BatchLMULTester} class \footnote{\texttt{rtl/lmul\_tester.py}}\label{fn:lmul_tester} generates a complete Verilog testbench that includes:
+\begin{itemize}
+    \item Arrays of pre-loaded test input pairs ($a$, $b$)
+    \item Clock generation and reset logic
+    \item Ready/valid handshaking to properly interface with our LMUL module's pipeline
+    \item Result capture logic that stores outputs as they become available
+    \item Automatic result printing for parsing by Python
+\end{itemize}
+
+This approach means we compile and run the simulator once per batch, rather than once per operation. For testing 1000 multiplications, this reduces overhead from roughly 50 seconds to about 30 milliseconds—a speedup of over 1500x compared to naive per-operation simulation.
+
+\paragraph{Python Integration.}
+The Python side of our infrastructure handles three main tasks. First, it converts floating-point test data into BF16 format. Second, it dynamically generates Verilog testbenches with embedded test vectors, compiles them with iverilog, runs the simulation, and parses the output. Third, it provides a clean interface that looks like a regular Python function call, hiding all the complexity of the underlying simulation process.
+
+We also implemented a pure Python reference implementation of LMUL \footnote{\texttt{rtl/py\_lmul.py}}\label{fn:py_lmul}. This serves two purposes: it gives us a fast way to generate expected results for validation, and it lets us compare the performance characteristics of hardware simulation versus software execution. The Python version follows the exact same algorithm as our Verilog implementation, ensuring bit-exact matches for verification.
+
+\subsection{MLP–L-Mul Integration}
+\label{subsec:mlp_lmul}
+
+To investigate the integration of approximate arithmetic within neural networks, we implemented a modified multilayer perceptron (MLP) in PyTorch \footnote{\texttt{mnistmlptest/lmul\_mlp\_mnist.ipynb}}\label{fn:lmul_mlp_mnist} capable of operating under both conventional and L-Mul modes. The objective was to directly substitute the standard floating-point multiply operation in the forward pass with an approximate function that more closely resembles a hardware-efficient arithmetic primitive.
+
+\paragraph{Model Architecture.}
+The MLP architecture consists of two fully connected layers with ReLU activations, followed by a log-softmax output layer. The first layer maps a flattened $28\times 28$ input image to a 128-dimensional hidden representation, while the second projects to the 10 output classes corresponding to the MNIST digits. 
+
+\paragraph{Vectorized Implementation.}
+For efficiency, a custom function \texttt{lmul\_linear} was implemented to perform the equivalent of a dense linear transformation using L-Mul arithmetic. Given an input tensor $x \in \mathbb{R}^{B \times I}$ and a weight matrix $W \in \mathbb{R}^{O \times I}$, the computation proceeds as
+\[
+Y_{b,o} = \sum_{i=1}^{I} \text{L-Mul}(x_{b,i}, W_{o,i}) + b_o,
+\]
+where $b$ denotes the batch dimension. Broadcasting and tensor expansion were used to apply L-Mul elementwise over all input–weight pairs, followed by summation across input features.
+
+\paragraph{Training and Evaluation Procedure.}
+The model was first trained for both two and five epochs on the MNIST training set using standard floating-point arithmetic and the Adam optimizer. After training, the learned weights were evaluated under the L-Mul mode using the same architecture and parameter values. This allowed direct comparison between true multiplication and its L-Mul approximation under identical learned representations. All experiments were conducted on CPU using PyTorch’s built-in automatic differentiation and tensor operations.
+
+\subsection{Development Environment and Docker Configuration}
+
+Docker was used for containerization to ensure consistent package reliability across different machines. Using the relevant files \footnote{\texttt{Dockerfile}}\label{fn:dockerfile}\footnote{\texttt{.devcontainer/devcontainer.json}}\label{fn:devcontainer.json}\footnote{\texttt{requirements.txt}}\label{fn:requirements.txt}, a VS Code pipeline was developed to automate the installation of necessary Python and Verilog dependencies, while ensuring compatability, as well as relevant VS Code extensions such as Python and Jupyter.
+
 
 \section{Results}
 
+\subsection{Numerical Accuracy Evaluation}
+
+To quantify the accuracy of the LMUL hardware implementation, we evaluated its output against two reference baselines: (1) a software re-implementation of the LMUL arithmetic in Python, and (2) standard IEEE 32-bit python floating-point multiplication \footnote{\texttt{sim/lmul\_accuracy\_tester.ipynb}}\label{fn:lmul\_accuracy}. For each test configuration, a set of $N = 10,000$ randomly sampled operand pairs were generated, with each operand drawn uniformly from the range [-10,000, +10,000]. These inputs were evaluated by all three multiplication methods, and the average absolute error was normalized by the numerical range of the test dataset to yield a percentage error metric.
+
+The results are summarized below:
+
+\begin{itemize}
+    \item The Verilog LMUL implementation matches the Python LMUL emulator exactly, with an average numerical difference of \textbf{0.000000}, corresponding to \textbf{0.00\%} of the input value range. This confirms that the hardware design faithfully implements the intended arithmetic behavior.
+    \item When compared to standard Python floating-point multiplication, LMUL exhibits an average difference of \textbf{913.80} units, or \textbf{1.51\%} of the value range. This error arises from the reduced precision of the BF16-style format used internally by LMUL.
+\end{itemize}
+
+These results indicate that LMUL preserves correctness relative to its software specification, while introducing a bounded and predictable precision loss with respect to full-precision floating-point arithmetic. The magnitude of this discrepancy is consistent with the precision gap between BF16 and FP32, and is small enough to support downstream inference tasks, as shown in later sections.
+
+\subsection{Execution Speed}
+
+We benchmarked four multiplication backends---native Python \texttt{float32}, NumPy vectorized multiplication, the Verilog LMUL implementation, and a Python LMUL software model---across batch sizes ranging from $10^1$ to $10^5$ operations\footnote{\texttt{sim/lmul\_speed\_tester.ipynb}}. The measured quantity is the average time per multiplication after removing initialization overhead.
+
+As shown in Figure~\ref{fig:speed}, NumPy achieves the lowest latency due to optimized vectorized execution, reaching sub-nanosecond performance for large batches. Standard Python multiplication is slower by roughly one order of magnitude but still scales well as loop overhead amortizes.
+
+The LMUL hardware path incurs a larger per-call overhead from Verilog simulation, but its time per operation decreases with batch size and settles near $10^{-5}$ seconds per op. This reflects simulator cost rather than hardware speed---a synthesized implementation would operate at clock-cycle scale. The Python LMUL model is the slowest, as expected, due to explicit bit-level emulation.
+
+Overall, the results confirm correctness of the hardware path while illustrating that simulation performance is not indicative of real hardware throughput.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figure/speed.png}
+    \caption{Average time per multiplication (log--log scale) for four implementations over increasing batch sizes.}
+    \label{fig:speed}
+\end{figure}
+
+
+\subsection{MLP–L-Mul Integration Results}
+
+After training the baseline multilayer perceptron (MLP) for five epochs on the MNIST dataset using standard floating-point arithmetic, the model achieved a test accuracy of \textbf{97.02\%}. The same trained weights were subsequently evaluated using the L-Mul arithmetic mode, in which all elementwise multiplications within the linear layers were replaced by the approximate L-Mul operator as described in Section~\ref{subsec:mlp_lmul}. The resulting test accuracy under L-Mul computation was \textbf{97.01\%}.
+
+This outcome supports the hypothesis that approximate arithmetic primitives such as L-Mul can be integrated into neural inference pipelines without sacrificing predictive accuracy, provided that proper magnitude calibration is applied. The finding also suggests that hardware implementations based on L-Mul may yield reductions in power consumption or silicon area without compromising functional correctness at the algorithmic level. However, further testing may be needed to investigate the breadth of this claim across different neural network architectures (e.g Transformers, LSTM, etc.).
+
 \section{Discussion}
+The results obtained from our experiments demonstrate that the L-Mul algorithm can serve as a highly efficient approximation to standard floating-point multiplication with minimal loss in numerical accuracy. The negligible accuracy difference (97.01\% vs. 97.02\%) suggests neural networks tolerate small arithmetic errors well. Reiterating the remark at the end of Section 3.3, this claim needs more tests for the breadth of its validity. More complex architectures such as convolutional or transformer networks may respond differently to L-Mul-induced approximation, especially in layers with high sensitivity to numerical error (e.g., attention mechanisms or normalization layers). This resilience suggests that strict IEEE-754 compliance is unnecessary for effective inference, enabling hardware designs that favor efficiency over precision through L-Mul or similar methods.
+
+From a hardware perspective, the implications are quite substantial. Traditional floating-point multiplication is among the most power- and area-intensive operations in digital accelerators. By substituting multiplication with primarily addition-based logic, L-Mul could significantly reduce gate count, critical path delay, and overall power consumption. These are improvements that would be profoundly impactful for energy-constrained or edge-deployed AI and machine learning systems and in the larger scheme of machine learning ecosystems as a whole. 
+
+However, it is important to keep in mind the limitations of the testing we have performed to this point. Our testing focused on a simple MLP trained on MNIST, which is a relatively small and clean dataset. More complex models such as CNNs or Transformers, particularly models where the task is language based or vision tasks at scale, may depend on accurate multiplicative factors to a greater degree. Also, models will have layers that may behave differently under approximation. While the preliminary observations are impressive, we need to evaluate L-Mul on more complicated, and realistically sized architectures before reaching more broadly applicable conclusions.
+
+We must keep in mind that the speed results from our Verilog tests, do not represent a valid execution speed of L-Mul performance on hardware. Added load will come from operation in a simulated environment, that wouldn’t exist on a real chip. The next step, would be to take the revisions and improvements and try eventually converting a design to FPGA or ASIC hardware to evaluate true timing and power.
 
 \section{Conclusion}
 
-\section{\LaTeX{} Typesetting Examples}
+In our report, we focused on the integration of the L-Mul algorithm into a multilayer perceptron (MLP) to explore how arithmetic approximation can coexist with conventional neural network operations. Our results showcase the successful implementation of an L-Mul and simulation framework, alongside initial correctness and performance benchmarks.
 
-{\color{blue} This is not a real section; it's just here to show examples of how to format various components. Remove it before submitting!}
+This project developed a modified MLP using L-Mul in the forward pass, substituting standard floating-point multiplications with an approximation operation. The architecture maintained equivalent predictive accuracy to the baseline, validating our hypothesis that incorporating L-Mul can be achieved without compromising algorithmic performance while potentially offering significant benefits in hardware implementations such as reduced power consumption and smaller silicon area.
 
-\subsection{\LaTeX{} Basics}
+However, our integration efforts are still in progress. The project we are reproducing integrates the algorithm across multiple float point precision variables as well as through multiple matrix dimensions with minor differences in cycle times. Our next logical step involves benchmarking with Verilator to achieve cycle-accurate reporting. Conducting these benchmarks will help the group understand performance gains in hardware implementations compared to traditional IEEE floating-point arithmetic.
 
-Here's \textbf{bold} and \textit{italicized} text. Here's \texttt{text\_that\_looks.like(code)}.
+Our immediate milestones include transitioning our L-Mul architecture to FPGA and ASIC prototypes to analyze the real-world implications of our findings. We aim to synthesize our design for these platforms in order to yield greater speed benefits. This will form the basis of our next checkpoints, allowing us to accurately assess the efficiency of L-Mul against conventional implementations. 
 
-\begin{itemize}
-    \item Here's a regular bulleted list item.
-    \item And another.
-\end{itemize}
+Our final deliverable will focus on quantifying the measurable speed and area advantages of the L-Mul computation compared to the IEEE standard. This comparison will encompass multiple architectures, extending beyond the MLP to include various neural network types like Transformers and LSTMs, ensuring comprehensive coverage of our findings.
 
-Here's a \href{https://datascience.ucsd.edu}{hyperlink}. If you want to use a numbered list, you can experiment with:
-
-\begin{enumerate}
-    \item This.
-    \item This.
-    \item And this.
-\end{enumerate}
-
-Here's how you might include a snippet of actual code:
-
-\begin{verbatim}
-# If you want to use syntax highlighting, look into the minted package.
-def f(x):
-    return 2 * x + 3
-\end{verbatim}
-
-Here's how you might format a single equation:
-
-$$\int_{-\infty}^\infty f_X(x)dx = 1$$
-
-And a chain of equations:
-
-\begin{align*}
-    \frac{1}{n}\sum_{i = 1}^n (x_i - \bar{x})^2 &= \frac{1}{n}\sum_{i = 1}^n (x_i^2 - 2x_i\bar{x} + \bar{x}^2)
-    \\ &= \frac{1}{n}\sum_{i = 1}^n x_i^2 - \frac{2}{n}\bar{x}\sum_{i = 1}^n x_i + \frac{\bar{x}^2}{n}\sum_{i = 1}^n 1
-    \\ &= \frac{1}{n}\sum_{i = 1}^n x_i^2 - 2\bar{x}^2 + \bar{x}^2
-    \\ &= \frac{1}{n}\sum_{i = 1}^n x_i^2 - \bar{x}^2
-\end{align*}
-
-
-\subsection{Figure Examples}
-
-Here are some example figures. 
-Figure \ref{fig:somefig1} presents a scatter plot.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=.65\linewidth]{figure/somefig1.pdf}
-\caption{Yes, put a few words or sentences here explaining what is in the figure.}
-\label{fig:somefig1}
-\end{figure}
-
-Figure \ref{fig:someotherfigs} presents some summaries of the performance of our model.
-The left panel of Figure \ref{fig:someotherfigs} presents something.
-The right panel of Figure \ref{fig:someotherfigs} presents some other things.
-
-\begin{figure}[htbp]
-\begin{minipage}{0.53\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{figure/somefig2.png}
-\end{minipage}
-\begin{minipage}{0.42\linewidth}
-  \centering
-  \includegraphics[width=\linewidth]{figure/somefig3.png}
-\end{minipage}
-\caption{You can put figures side-by-side as well.}
-\label{fig:someotherfigs}
-\end{figure}
-
-
-\subsection{Table Examples}
-
-Table \ref{tab:sometab1} presents some summary of the data.
-
-\begin{table}[htbp]
-\caption{Some Table Caption}
-\label{tab:sometab1}
-\resizebox{0.4\linewidth}{!}{\input{table/sometab1}}
-\end{table}
-
-Table \ref{tab:sometab2} presents some summaries of the performance of our model.
-
-\begin{table}[htbp]
-\caption{Some Other Table Caption}
-\label{tab:sometab2}
-\resizebox{0.9\linewidth}{!}{\input{table/sometab2}}
-\end{table}
-
-\subsection{Equations and Algorithms Examples}
-
-Algorithm \ref{alg:fuzzyKmeans} implements Fuzzy K-means.
-
-\begin{algorithm}
-\caption{Fuzzy K-means clustering algorithm}
-\label{alg:fuzzyKmeans}
-\begin{enumerate}
-    \item Choose primary centroids $v_{k}$
-    \item Compute the membership degree of all feature vectors in all clusters
-    \begin{equation}
-    u_{ki}  = \frac{1}{ \sum_{j=1}^K ( \frac{D^{2}(x_{i} - v_{k})}{D^{2}(x_{i} - v_{j})})^\frac{2} 
-    {m-1}}
-    \label{eq:kmeans}
-    \end{equation}
-\end{enumerate}
-\end{algorithm}
-
-Algorithm \ref{alg:net} calculates net activation.
-
-
-\begin{algorithm}
-\caption{Computing Net Activation}
-\label{alg:net}
-% \DontPrintSemicolon
-% \LinesNumbered
-\KwIn{$x_1, \ldots, x_n, w_1, \ldots, w_n$}
-\KwOut{$y$, the net activation}
-$y\leftarrow 0$\;
-\For{$i\leftarrow 1$ \KwTo $n$}{
-$y \leftarrow y + w_i*x_i$\;
-}
-\end{algorithm}
-
-In Variational Autoencoder (VAE), we directly maximize the Evidence Lower Bound (ELBO) using the following Equations \ref{eq:bla}--\ref{eq:blablabla}.
-\begin{align}
-  \mathbb{E}_{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\left[\log\frac{p(\boldsymbol{x}, \boldsymbol{z})}{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\right]
-  &= \mathbb{E}_{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\left[\log\frac{p_{\boldsymbol{\theta}}(\boldsymbol{x}\mid\boldsymbol{z})p(\boldsymbol{z})}{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\right] \label{eq:bla} \\
-  &= \mathbb{E}_{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\left[\log p_{\boldsymbol{\theta}}(\boldsymbol{x}\mid\boldsymbol{z})\right] + \mathbb{E}_{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\left[\log\frac{p(\boldsymbol{z})}{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\right] \label{eq:blabla} \\
-  &= \underbrace{\mathbb{E}_{q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x})}\left[\log p_{\boldsymbol{\theta}}(\boldsymbol{x}\mid\boldsymbol{z})\right]}_\text{reconstruction term} - \underbrace{\mathcal{D}_{\text{KL}}(q_{\boldsymbol{\phi}}(\boldsymbol{z}\mid\boldsymbol{x}) \mid\mid p(\boldsymbol{z}))}_\text{prior matching term} \label{eq:blablabla}
-\end{align}
-
-\subsection{Inline Citation Examples}
-
-Citation in text (no parentheses): use \texttt{{\textbackslash}cite\{citekey\}}. 
-For example, \cite{breiman2011}, \cite{devlin2019bert}.
-
-Citation in parentheses: use \texttt{{\textbackslash}citep\{citekey\}}. 
-For example: \citep{vaswani2023attention}, \citep{karras2019stylebased}.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%% Reference / Bibliography
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\makereference
-
-{\color{blue} To edit the contents of the ``References" section, edit \texttt{reference.bib}. Many conference websites format citations in BibTeX that you can copy into \texttt{reference.bib} directly; you can also search for the paper on Google Scholar, click ``Cite", and then click ``BibTeX" (\href{https://scholar.google.com/scholar?hl=en&as_sdt=0%2C23&q=attention+is+all+you+need&btnG=#d=gs_cit&t=1700436667623&u=%2Fscholar%3Fq%3Dinfo%3A5Gohgn6QFikJ%3Ascholar.google.com%2F%26output%3Dcite%26scirp%3D0%26hl%3Den}{here}'s an example).}
-
-\bibliography{reference}
-\bibliographystyle{style/dsc180bibstyle}
+% \bibliography{reference}
+% \bibliographystyle{style/dsc180bibstyle}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\clearpage
-\makeappendix
+% \clearpage
+% \makeappendix
 
-\subsection{Training Details}
+% \subsection{Training Details}
 
-\subsection{Additional Figures}
+% \subsection{Additional Figures}
 
-\subsection{Additional Tables}
+% \subsection{Additional Tables}
 
 
 \end{document}
