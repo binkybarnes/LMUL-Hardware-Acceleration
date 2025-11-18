@@ -27,3 +27,13 @@ __pycache__/
 .DS_Store
 *.swp
 *~
+
+# Report metadata
+report/report.aux
+report/report.bbl
+report/report.fdb_latexmk
+report/report.fls
+report/report.log
+report/report.synctex.gz
+report/report.thm
+report/report.toc
