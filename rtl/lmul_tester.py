@@ -180,7 +180,7 @@ class BatchLMULTester:
             rtl_dir = os.path.abspath('rtl')
             top_file = os.path.join(rtl_dir, 'top_lmul.v')
             lmul_file = os.path.join(rtl_dir, 'lmul_bf16.v')
-            out_file = '/tmp/lmul_batch_sim.out'
+            out_file = os.path.join(tempfile.gettempdir(), 'lmul_batch_sim.out')
             
             compile_result = subprocess.run(
                 ['iverilog', '-o', out_file, '-g2012',
@@ -235,38 +235,40 @@ class BatchLMULTester:
             if os.path.exists(out_file):
                 os.remove(out_file)
 
+import subprocess
+import tempfile
+import os
+import struct
+import numpy as np
+from pathlib import Path
+import time
 class BatchLMULTesterParallel:
     """Test LMUL with batch operations in single simulation, parallelized with 4 DUTs"""
-
-    def __init__(self, verilog_file='rtl/top_lmul.v'):
+    def _init_(self, verilog_file='rtl/top_lmul.v'):
         self.verilog_file = verilog_file
-
     def test_batch(self, test_pairs, verbose=True):
         """
         Test multiple multiplications in one simulation run with 4 DUTs in parallel.
+        
         Args:
             test_pairs: List of (a_bf16, b_bf16) tuples
+            
         Returns:
             List of result_bf16 values
         """
         num_tests = len(test_pairs)
-        # Pad test_pairs to be multiple of 4
+        # Pad test_pairs to be a multiple of 4
         pad = (4 - (num_tests % 4)) % 4
-        test_pairs += [(0,0)] * pad  # pad with zeros
+        test_pairs += [(0, 0)] * pad  # pad with zeros
         total_ops = len(test_pairs)
-
         # Generate test vectors for 4 DUTs in parallel
         test_vectors = ""
-        for i, (a, b) in enumerate(test_pairs):
-            # For each cycle, we will assign 4 input pairs
-            # but here, we prepare vectors for all input pairs
-            test_vectors += f"        i_a[{i}] = 16'h{a:04x};\n"
-            test_vectors += f"        i_b[{i}] = 16'h{b:04x};\n"
-
+        for i in range(total_ops):
+            test_vectors += f"        i_a[{i}] = 16'h{test_pairs[i][0]:04x};\n"
+            test_vectors += f"        i_b[{i}] = 16'h{test_pairs[i][1]:04x};\n"
         # Create testbench
         testbench = f'''
 `timescale 1ns/1ps
-
 module tb;
     reg clk;
     reg rstn;
@@ -276,22 +278,11 @@ module tb;
     reg [15:0] i_b [0:{total_ops-1}];
     wire [3:0] o_valid;    // 4 output valid signals
     reg  [3:0] o_ready;    // 4 ready signals
-    wire [15:0] o_p [0:{total_ops-1}];
-
-    integer test_idx;
-    integer result_idx;
-
+    wire [15:0] o_p [0:3]; // Only need space for 4 outputs (maximum per clock cycle)
+    reg [15:0] results [0:{total_ops-1}]; // Array to save results
+    integer result_count;
     // Instantiate 4 DUTs
-    // For simplicity, instantiate 4 copies with separate signals
-    // Each DUT handles one input pair per cycle, synchronized
-
-    // DUT 0
-    lmul_bf16 #(
-        .E_BITS(8),
-        .M_BITS(7),
-        .EM_BITS(15),
-        .BITW(16)
-    ) dut0 (
+    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut0 (
         .clk(clk),
         .rstn(rstn),
         .i_valid(i_valid[0]),
@@ -302,14 +293,7 @@ module tb;
         .o_ready(o_ready[0]),
         .o_p(o_p[0])
     );
-
-    // DUT 1
-    lmul_bf16 #(
-        .E_BITS(8),
-        .M_BITS(7),
-        .EM_BITS(15),
-        .BITW(16)
-    ) dut1 (
+    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut1 (
         .clk(clk),
         .rstn(rstn),
         .i_valid(i_valid[1]),
@@ -320,14 +304,7 @@ module tb;
         .o_ready(o_ready[1]),
         .o_p(o_p[1])
     );
-
-    // DUT 2
-    lmul_bf16 #(
-        .E_BITS(8),
-        .M_BITS(7),
-        .EM_BITS(15),
-        .BITW(16)
-    ) dut2 (
+    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut2 (
         .clk(clk),
         .rstn(rstn),
         .i_valid(i_valid[2]),
@@ -338,14 +315,7 @@ module tb;
         .o_ready(o_ready[2]),
         .o_p(o_p[2])
     );
-
-    // DUT 3
-    lmul_bf16 #(
-        .E_BITS(8),
-        .M_BITS(7),
-        .EM_BITS(15),
-        .BITW(16)
-    ) dut3 (
+    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut3 (
         .clk(clk),
         .rstn(rstn),
         .i_valid(i_valid[3]),
@@ -356,103 +326,81 @@ module tb;
         .o_ready(o_ready[3]),
         .o_p(o_p[3])
     );
-
     // Clock generation
     initial clk = 0;
     always #5 clk = ~clk;  // 10ns period
-
     // Capture outputs
     always @(posedge clk) begin
-        for (test_idx = 0; test_idx < {total_ops}; test_idx = test_idx + 1) begin
-            // For each cycle, check if output valid
-            if (o_valid[test_idx % 4] && o_ready[test_idx % 4]) begin
-                // Store result
-                // We need a way to store all results
-                // But since we are focusing on core, we can store inline or in an array
-                // For simplicity, assume we process after simulation
+        // Check each DUT's valid output and store the result
+        for (integer j = 0; j < 4; j = j + 1) begin
+            if (o_valid[j] && o_ready[j]) begin
+                results[result_count] <= o_p[j];
+                result_count <= result_count + 1;
             end
         end
     end
-
     initial begin
         // Initialize test vectors
-{test_vectors}
+        {test_vectors}
         
         // Reset
         rstn = 0;
         i_valid = 4'b0000;
         o_ready = 4'b1111;  // All ready
-        for (test_idx = 0; test_idx < {total_ops}; test_idx = test_idx + 1) begin
-            i_a[test_idx] = 16'h0000;
-            i_b[test_idx] = 16'h0000;
-        end
-        test_idx = 0;
-        result_idx = 0;
         
-        repeat(4) @(posedge clk);
-        rstn = 1;
-        repeat(2) @(posedge clk);
-        
-        // Send input pairs in chunks of 4
-        for (test_idx = 0; test_idx < {total_ops}; test_idx = test_idx + 4) begin
+        repeat(4) @(posedge clk);  // Wait for a few clock cycles
+        rstn = 1;  // Release reset
+        // Process input pairs in chunks of 4
+        for (integer test_idx = 0; test_idx < {total_ops}; test_idx += 4) begin
             // Set i_valid high for all 4 inputs
             i_valid = 4'b1111;
             // Assign inputs for 4 pairs
-            for (int j=0; j<4; j++) begin
+            for (integer j = 0; j < 4; j++) begin
                 if (test_idx + j < {total_ops}) begin
                     i_a[test_idx + j] = i_a[test_idx + j];
                     i_b[test_idx + j] = i_b[test_idx + j];
                 end
             end
-            @(posedge clk);
+            
+            @(posedge clk);  // Wait for the next clock cycle
         end
+        
         // Deassert valid
         i_valid = 4'b0000;
-
-        // Wait for all results
-        // Since outputs are produced asynchronously, wait until all are valid
-        // For simplicity, wait fixed number of cycles
-        repeat(20) @(posedge clk);
-
-        // Print results
-        for (test_idx = 0; test_idx < {total_ops}; test_idx = test_idx + 1) begin
-            $display("%04h", o_p[test_idx]);
+        // Wait until all results are valid
+        repeat (10) @(posedge clk);
+        
+        // Print results upon completion
+        for (integer k = 0; k < result_count; k = k + 1) begin
+            $display("%04h", results[k]);
         end
-
         $finish;
     end
-
     initial begin
-        #1000;
+        #{num_tests * 30};  // Set timeout duration
         $display("ERROR: Timeout");
         $finish;
     end
 endmodule
 '''
-        # Note: The above is a schematic; the main idea is to instantiate 4 DUTs, feed 4 inputs per cycle, and collect 4 outputs.
-
         # Write testbench
         with tempfile.NamedTemporaryFile(mode='w', suffix='.v', delete=False) as f:
             tb_file = f.name
             f.write(testbench)
-
         try:
             # Compile
             rtl_dir = os.path.abspath('rtl')
             top_file = os.path.join(rtl_dir, 'top_lmul.v')
             lmul_file = os.path.join(rtl_dir, 'lmul_bf16.v')
             out_file = os.path.join(tempfile.gettempdir(), 'lmul_parallel_sim.out')
-
             compile_result = subprocess.run(
                 ['iverilog', '-o', out_file, '-g2012',
                  top_file, lmul_file, tb_file],
                 capture_output=True,
                 text=True
             )
-
             if compile_result.returncode != 0:
                 raise RuntimeError(f"Compilation failed:\n{compile_result.stderr}")
-
             # Run simulation
             start = time.time()
             sim_result = subprocess.run(
@@ -462,7 +410,6 @@ endmodule
                 timeout=10
             )
             end = time.time()
-
             # Parse results
             lines = sim_result.stdout.strip().split('\n')
             results = []
@@ -473,9 +420,7 @@ endmodule
                     results.append(int(line, 16))
                 except ValueError:
                     continue
-
             return results, end - start
-
         finally:
             # Cleanup
             if os.path.exists(tb_file):
