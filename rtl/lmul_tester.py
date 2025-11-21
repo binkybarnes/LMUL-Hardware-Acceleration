@@ -235,147 +235,123 @@ class BatchLMULTester:
             if os.path.exists(out_file):
                 os.remove(out_file)
 
-import subprocess
-import tempfile
-import os
-import struct
-import numpy as np
-from pathlib import Path
-import time
 class BatchLMULTesterParallel:
-    """Test LMUL with batch operations in single simulation, parallelized with 4 DUTs"""
+    """Test LMUL with batch operations in single simulation, parallelized with multiple DUTs"""
     def _init_(self, verilog_file='rtl/top_lmul.v'):
         self.verilog_file = verilog_file
-    def test_batch(self, test_pairs, verbose=True):
+    def test_batch(self, test_pairs, degrees=4, verbose=True):
         """
-        Test multiple multiplications in one simulation run with 4 DUTs in parallel.
+        Test multiple multiplications in one simulation run with parallel DUTs.
         
         Args:
             test_pairs: List of (a_bf16, b_bf16) tuples
+            degrees: Integer number of degrees of parallelism, defaults to 2
             
         Returns:
             List of result_bf16 values
         """
         num_tests = len(test_pairs)
-        # Pad test_pairs to be a multiple of 4
-        pad = (4 - (num_tests % 4)) % 4
+        # Pad test_pairs to be a multiple of degrees
+        pad = (degrees - (num_tests % degrees)) % degrees
         test_pairs += [(0, 0)] * pad  # pad with zeros
         total_ops = len(test_pairs)
-        # Generate test vectors for 4 DUTs in parallel
+        # Generate test vectors for DUTs in parallel
         test_vectors = ""
         for i in range(total_ops):
-            test_vectors += f"        i_a[{i}] = 16'h{test_pairs[i][0]:04x};\n"
-            test_vectors += f"        i_b[{i}] = 16'h{test_pairs[i][1]:04x};\n"
+            for d in range(degrees):
+                index = i * degrees + d
+                if index < len(test_pairs):
+                    a_val, b_val = test_pairs[index]
+                    test_vectors += f"        i_a[{index}] = 16'h{a_val:04x};\n"
+                    test_vectors += f"        i_b[{index}] = 16'h{b_val:04x};\n"
         # Create testbench
         testbench = f'''
 `timescale 1ns/1ps
 module tb;
     reg clk;
     reg rstn;
-    reg [3:0] i_valid;     // 4 input valid signals
-    wire [3:0] i_ready;    // 4 ready signals
+    reg [{degrees - 1}:0] i_valid;     // input valid signals
+    wire [{degrees - 1}:0] i_ready;    // ready signals
     reg [15:0] i_a [0:{total_ops-1}];
     reg [15:0] i_b [0:{total_ops-1}];
-    wire [3:0] o_valid;    // 4 output valid signals
-    reg  [3:0] o_ready;    // 4 ready signals
-    wire [15:0] o_p [0:3]; // Only need space for 4 outputs (maximum per clock cycle)
-    reg [15:0] results [0:{total_ops-1}]; // Array to save results
+    wire [{degrees - 1}:0] o_valid;    // output valid signals
+    reg  [{degrees - 1}:0] o_ready;    // ready signals
+    wire [15:0] o_p [0:{degrees - 1}];
+    reg [15:0] results [0:{total_ops-1}];    // Array to save results
     integer result_count;
-    // Instantiate 4 DUTs
-    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut0 (
-        .clk(clk),
-        .rstn(rstn),
-        .i_valid(i_valid[0]),
-        .i_ready(i_ready[0]),
-        .i_a(i_a[0]),
-        .i_b(i_b[0]),
-        .o_valid(o_valid[0]),
-        .o_ready(o_ready[0]),
-        .o_p(o_p[0])
-    );
-    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut1 (
-        .clk(clk),
-        .rstn(rstn),
-        .i_valid(i_valid[1]),
-        .i_ready(i_ready[1]),
-        .i_a(i_a[1]),
-        .i_b(i_b[1]),
-        .o_valid(o_valid[1]),
-        .o_ready(o_ready[1]),
-        .o_p(o_p[1])
-    );
-    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut2 (
-        .clk(clk),
-        .rstn(rstn),
-        .i_valid(i_valid[2]),
-        .i_ready(i_ready[2]),
-        .i_a(i_a[2]),
-        .i_b(i_b[2]),
-        .o_valid(o_valid[2]),
-        .o_ready(o_ready[2]),
-        .o_p(o_p[2])
-    );
-    lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut3 (
-        .clk(clk),
-        .rstn(rstn),
-        .i_valid(i_valid[3]),
-        .i_ready(i_ready[3]),
-        .i_a(i_a[3]),
-        .i_b(i_b[3]),
-        .o_valid(o_valid[3]),
-        .o_ready(o_ready[3]),
-        .o_p(o_p[3])
-    );
+
+    // Instantiate multiple DUTs in a generate loop
+    genvar i;
+    for (i=0; i<{degrees}; i=i+1) begin : dut_array
+        lmul_bf16 #(.E_BITS(8), .M_BITS(7), .EM_BITS(15), .BITW(16)) dut (
+            .clk(clk),
+            .rstn(rstn),
+            .i_valid(i_valid[i]),
+            .i_ready(i_ready[i]),
+            .i_a(i_a[i]),
+            .i_b(i_b[i]),
+            .o_valid(o_valid[i]),
+            .o_ready(o_ready[i]),
+            .o_p(o_p[i])
+        );
+    end
+
     // Clock generation
     initial clk = 0;
     always #5 clk = ~clk;  // 10ns period
+
     // Capture outputs
     always @(posedge clk) begin
         // Check each DUT's valid output and store the result
-        for (integer j = 0; j < 4; j = j + 1) begin
+        for (integer j = 0; j < {degrees}; j = j + 1) begin
             if (o_valid[j] && o_ready[j]) begin
                 results[result_count] <= o_p[j];
                 result_count <= result_count + 1;
             end
         end
     end
+
     initial begin
         // Initialize test vectors
         {test_vectors}
-        
+
         // Reset
         rstn = 0;
         i_valid = 4'b0000;
         o_ready = 4'b1111;  // All ready
-        
-        repeat(4) @(posedge clk);  // Wait for a few clock cycles
+        repeat({degrees}) @(posedge clk);  // Wait for a few clock cycles
         rstn = 1;  // Release reset
-        // Process input pairs in chunks of 4
-        for (integer test_idx = 0; test_idx < {total_ops}; test_idx += 4) begin
-            // Set i_valid high for all 4 inputs
+
+        // Process input pairs in parallel
+        for (integer test_idx = 0; test_idx < {total_ops}; test_idx += {degrees}) begin
+            // Set i_valid high for all inputs
             i_valid = 4'b1111;
-            // Assign inputs for 4 pairs
-            for (integer j = 0; j < 4; j++) begin
+        
+            // Assign inputs for all pairs
+            for (integer j = 0; j < {degrees}; j++) begin
                 if (test_idx + j < {total_ops}) begin
                     i_a[test_idx + j] = i_a[test_idx + j];
                     i_b[test_idx + j] = i_b[test_idx + j];
                 end
             end
-            
+
             @(posedge clk);  // Wait for the next clock cycle
         end
         
         // Deassert valid
         i_valid = 4'b0000;
+
         // Wait until all results are valid
-        repeat (10) @(posedge clk);
+        repeat ({degrees}) @(posedge clk);
         
         // Print results upon completion
         for (integer k = 0; k < result_count; k = k + 1) begin
             $display("%04h", results[k]);
         end
+
         $finish;
     end
+
     initial begin
         #{num_tests * 30};  // Set timeout duration
         $display("ERROR: Timeout");
