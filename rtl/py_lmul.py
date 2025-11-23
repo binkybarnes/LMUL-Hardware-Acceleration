@@ -1,12 +1,9 @@
 def lmul(a_bf16: int, b_bf16: int) -> int:
     """
-    Bare-bones LMUL: BF16 int in, BF16 int out
-    No conversions, no error checking, maximum speed
-    
+    Bare-bones LMUL: BF16 int in, BF16 int out    
     Args:
         a_bf16: 16-bit BF16 integer
-        b_bf16: 16-bit BF16 integer
-    
+        b_bf16: 16-bit BF16 integer    
     Returns:
         16-bit BF16 integer result
     """
@@ -22,7 +19,6 @@ def lmul(a_bf16: int, b_bf16: int) -> int:
         return 0
     
     # Calculate offset: OFFSET_MOD = ((1<<15) - (127<<7)) & 0x7FFF
-    # This equals 0x4080, not 0x7F81!
     OFFSET_MOD = 0x4080
     
     # Add fields with offset
