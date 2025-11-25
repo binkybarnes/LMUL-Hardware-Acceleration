@@ -40,9 +40,8 @@ try:
         return result
     
     
-    def lmul_torch_float(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-        a_bf16 = float_to_bf16_tensor(a)
-        b_bf16 = float_to_bf16_tensor(b)
+    def lmul_torch_float(a_bf16: torch.Tensor, b_bf16: torch.Tensor) -> torch.Tensor:
+        """LMUL on uint16 BF16 tensors, returns float32 tensor."""
         result_bf16 = lmul_torch_vectorized(a_bf16, b_bf16)
         return bf16_to_float_tensor(result_bf16)
     
@@ -63,6 +62,39 @@ try:
     
     def lmul_torch(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         return LMULFunction.apply(a, b)
+    
+    
+    def lmul_torch_matmul(a_bf16: torch.Tensor, b_bf16: torch.Tensor) -> torch.Tensor:
+        """
+        Matrix multiplication using LMUL for element-wise operations.
+        
+        Args:
+            a_bf16: PyTorch tensor of shape (m, n) with uint16 BF16 values
+            b_bf16: PyTorch tensor of shape (n, p) with uint16 BF16 values
+        
+        Returns:
+            PyTorch tensor of shape (m, p) with LMUL-based matrix multiplication (float32)
+        """
+        # Expand dimensions for broadcasting: (m, n) -> (m, n, 1) and (n, p) -> (1, n, p)
+        # This allows element-wise LMUL: result[i, k, j] = LMUL(A[i, k], B[k, j])
+        a_expanded = a_bf16.unsqueeze(2)  # (m, n, 1)
+        b_expanded = b_bf16.unsqueeze(0)  # (1, n, p)
+        
+        # Explicitly expand to ensure consistent shapes before passing to lmul_torch_vectorized
+        # PyTorch will broadcast automatically, but we need to ensure the shapes are compatible
+        a_broadcast = a_expanded.expand(-1, -1, b_expanded.size(2))  # (m, n, p)
+        b_broadcast = b_expanded.expand(a_expanded.size(0), -1, -1)  # (m, n, p)
+        
+        # Perform element-wise LMUL multiplication: (m, n, p)
+        products_bf16 = lmul_torch_vectorized(a_broadcast, b_broadcast)
+        
+        # Convert products back to float before summing to avoid BF16 overflow
+        products_float = bf16_to_float_tensor(products_bf16)
+        
+        # Sum along the n dimension (axis 1) to get (m, p)
+        result = products_float.sum(dim=1)
+        
+        return result
     
 except ImportError:
     pass

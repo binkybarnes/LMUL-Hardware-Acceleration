@@ -38,9 +38,43 @@ def lmul_numpy_vectorized(a_bf16: np.ndarray, b_bf16: np.ndarray) -> np.ndarray:
     return (out_sign.astype(np.uint16) << 15) | field_sel
 
 
-def lmul_numpy_float(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    a_bf16 = float_to_bf16_array(a)
-    b_bf16 = float_to_bf16_array(b)
+def lmul_numpy_float(a_bf16: np.ndarray, b_bf16: np.ndarray) -> np.ndarray:
+    """LMUL on uint16 BF16 arrays, returns float32 array."""
     result_bf16 = lmul_numpy_vectorized(a_bf16, b_bf16)
     return bf16_to_float_array(result_bf16)
+
+
+def lmul_numpy_matmul(a_bf16: np.ndarray, b_bf16: np.ndarray) -> np.ndarray:
+    """
+    Matrix multiplication using LMUL for element-wise operations.
+    
+    Args:
+        a_bf16: NumPy array of shape (m, n) with uint16 BF16 values
+        b_bf16: NumPy array of shape (n, p) with uint16 BF16 values
+    
+    Returns:
+        NumPy array of shape (m, p) with LMUL-based matrix multiplication (float32)
+    """
+    m, n = a_bf16.shape
+    n_b, p = b_bf16.shape
+    
+    # Expand dimensions for broadcasting: (m, n) -> (m, n, 1) and (n, p) -> (1, n, p)
+    # This allows element-wise LMUL: result[i, k, j] = LMUL(A[i, k], B[k, j])
+    a_expanded = a_bf16[:, :, np.newaxis]  # (m, n, 1)
+    b_expanded = b_bf16[np.newaxis, :, :]  # (1, n, p)
+    
+    # Explicitly broadcast to full shape (m, n, p) to avoid shape mismatches in lmul_numpy_vectorized
+    a_broadcast = np.broadcast_to(a_expanded, (m, n, p))
+    b_broadcast = np.broadcast_to(b_expanded, (m, n, p))
+    
+    # Perform element-wise LMUL multiplication: (m, n, p)
+    products_bf16 = lmul_numpy_vectorized(a_broadcast, b_broadcast)
+    
+    # Convert products back to float before summing to avoid BF16 overflow
+    products_float = bf16_to_float_array(products_bf16)
+    
+    # Sum along the n dimension (axis 1) to get (m, p)
+    result = products_float.sum(axis=1)
+    
+    return result
 
