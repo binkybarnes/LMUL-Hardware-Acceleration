@@ -86,11 +86,28 @@ class BatchLMULTester:
             end
             
             // Capture outputs and track last output cycle
+            // Since o_ready is always 1, o_valid is high for exactly one cycle per result
+            // Use edge detection to ensure we capture each result exactly once
+            // Only capture after we've started applying inputs (to avoid capturing reset state)
+            reg o_valid_prev;
+            reg inputs_started;
+            initial begin
+                o_valid_prev = 0;
+                inputs_started = 0;
+            end
             always @(posedge clk) begin
-                if (o_valid && o_ready) begin
-                    results[result_idx] = o_p;
-                    result_idx          = result_idx + 1;
-                    last_output_cycle   = cycle;
+                if (!rstn) begin
+                    o_valid_prev <= 1'b0;
+                    inputs_started <= 1'b0;
+                end else begin
+                    // Capture on rising edge of o_valid to avoid duplicate captures
+                    // Only capture after inputs have started (prevents capturing reset state 0)
+                    if (inputs_started && o_valid && o_ready && !o_valid_prev && result_idx < {num_tests}) begin
+                        results[result_idx] = o_p;
+                        result_idx          = result_idx + 1;
+                        last_output_cycle   = cycle;
+                    end
+                    o_valid_prev <= o_valid;
                 end
             end
             
@@ -116,30 +133,38 @@ class BatchLMULTester:
                 // Apply reset (minimal but safe)
                 repeat(2) @(posedge clk);
                 rstn = 1;
-                repeat(1) @(posedge clk);
+                repeat(2) @(posedge clk);  // Wait a bit longer after reset
                 
                 // Drive all test vectors
                 for (test_idx = 0; test_idx < {num_tests}; test_idx = test_idx + 1) begin
                     // Wait for ready (0 cycles if DUT is always ready)
                     while (!i_ready) @(posedge clk);
                     
-                    // Apply inputs and assert valid for one cycle
+                    // Apply inputs and assert valid
                     i_a     = test_a[test_idx];
                     i_b     = test_b[test_idx];
+                    #1;  // Small delay to ensure inputs are stable
                     i_valid = 1;
 
                     // Record first accept cycle at first handshake
                     if (!started && i_ready) begin
                         started            = 1;
                         first_accept_cycle = cycle;
+                        inputs_started     = 1;  // Enable result capture
                     end
                     
                     // Advance one clock so DUT samples this transaction
+                    @(posedge clk);
+                    
+                    // Wait one more cycle for result to appear (DUT has 1-cycle latency)
                     @(posedge clk);
 
                     // Deassert valid before next transaction
                     i_valid = 0;
                 end
+                
+                // Wait a few cycles for the last input to propagate through the pipeline
+                repeat(5) @(posedge clk);
                 
                 // Wait until all results are captured
                 while (result_idx < {num_tests}) begin
