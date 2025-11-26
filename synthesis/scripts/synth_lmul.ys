@@ -27,8 +27,8 @@ dfflibmap -liberty lib/NangateOpenCellLibrary_typical.lib
 techmap
 
 # Map combinational logic to standard cells using ABC
-# -D 2.0 means target clock period of 2ns (500 MHz)
-abc -liberty lib/NangateOpenCellLibrary_typical.lib -D 2.0
+# -D 1.0 means target clock period of 1ns (1 GHz) - pushing for speed limits
+abc -liberty lib/NangateOpenCellLibrary_typical.lib -D 1.0
 
 # Final optimizations
 opt;
