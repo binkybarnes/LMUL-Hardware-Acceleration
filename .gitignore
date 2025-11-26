@@ -37,3 +37,11 @@ report/report.log
 report/report.synctex.gz
 report/report.thm
 report/report.toc
+
+# Synthesis library files (downloaded during Docker build)
+lib/*.lib
+
+# Synthesis output files (can be regenerated)
+synthesis/out/*
+!synthesis/out/.gitkeep
+!synthesis/out/README.md
