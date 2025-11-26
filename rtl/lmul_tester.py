@@ -261,16 +261,17 @@ class BatchLMULTester:
                 os.remove(out_file)
 
 class BatchLMULTesterParallel:
-    """Test LMUL with batch operations in single simulation, parallelized with multiple DUTs"""
-    def _init_(self, verilog_file='rtl/top_lmul.v'):
+    """Test LMUL with batch operations in a parallelized manner with multiple DUTs"""
+    def init(self, verilog_file='rtl/top_lmul.v'):
         self.verilog_file = verilog_file
+
     def test_batch(self, test_pairs, degrees=4, verbose=True):
         """
         Test multiple multiplications in one simulation run with parallel DUTs.
         
         Args:
             test_pairs: List of (a_bf16, b_bf16) tuples
-            degrees: Integer number of degrees of parallelism, defaults to 2
+            degrees: Integer number of degrees of parallelism, defaults to 4
             
         Returns:
             List of result_bf16 values
@@ -280,30 +281,35 @@ class BatchLMULTesterParallel:
         pad = (degrees - (num_tests % degrees)) % degrees
         test_pairs += [(0, 0)] * pad  # pad with zeros
         total_ops = len(test_pairs)
-        # Generate test vectors for DUTs in parallel
+        
+        # Prepare test vectors for input signals
         test_vectors = ""
         for i in range(total_ops):
-            for d in range(degrees):
-                index = i * degrees + d
-                if index < len(test_pairs):
-                    a_val, b_val = test_pairs[index]
-                    test_vectors += f"        i_a[{index}] = 16'h{a_val:04x};\n"
-                    test_vectors += f"        i_b[{index}] = 16'h{b_val:04x};\n"
+            a_val, b_val = test_pairs[i]
+            test_vectors += f"        i_a[{i}] = 16'h{a_val:04x};\n"
+            test_vectors += f"        i_b[{i}] = 16'h{b_val:04x};\n"
+        
         # Create testbench
         testbench = f'''
 `timescale 1ns/1ps
+
 module tb;
     reg clk;
     reg rstn;
-    reg [{degrees - 1}:0] i_valid;     // input valid signals
-    wire [{degrees - 1}:0] i_ready;    // ready signals
+    reg [{degrees - 1}:0] i_valid;          // input valid signals array
+    wire [{degrees - 1}:0] i_ready;         // input ready signals array
     reg [15:0] i_a [0:{total_ops-1}];
     reg [15:0] i_b [0:{total_ops-1}];
-    wire [{degrees - 1}:0] o_valid;    // output valid signals
-    reg  [{degrees - 1}:0] o_ready;    // ready signals
-    wire [15:0] o_p [0:{degrees - 1}];
-    reg [15:0] results [0:{total_ops-1}];    // Array to save results
+    wire [{degrees - 1}:0] o_valid;         // output valid signals array
+    reg  [{degrees - 1}:0] o_ready;         // output ready signals array
+    wire [15:0] o_p [{degrees - 1}:0]; 
+    reg [15:0] results [0:{total_ops-1}];   // Array to save results
+
+    // Additional vars for parallel junction handling
     integer result_count;
+    integer current_index;
+    integer j;
+    integer idx;
 
     // Instantiate multiple DUTs in a generate loop
     genvar i;
@@ -327,11 +333,10 @@ module tb;
 
     // Capture outputs
     always @(posedge clk) begin
-        // Check each DUT's valid output and store the result
-        for (integer j = 0; j < {degrees}; j = j + 1) begin
+        for (j=0; j<{degrees}; j=j+1) begin
             if (o_valid[j] && o_ready[j]) begin
-                results[result_count] <= o_p[j];
-                result_count <= result_count + 1;
+                results[result_count] = o_p[j];
+                result_count = result_count + 1;
             end
         end
     end
@@ -342,49 +347,57 @@ module tb;
 
         // Reset
         rstn = 0;
-        i_valid = 4'b0000;
-        o_ready = 4'b1111;  // All ready
-        repeat({degrees}) @(posedge clk);  // Wait for a few clock cycles
+        i_valid = {degrees}'b0000;  // array of states for each DUT
+        o_ready = {degrees}'b1111;  // All ready to accept outputs
+        result_count = 0;
+        current_index = 0;
+
+        repeat({degrees}) @(posedge clk);  // Wait for reset to settle
         rstn = 1;  // Release reset
 
-        // Process input pairs in parallel
-        for (integer test_idx = 0; test_idx < {total_ops}; test_idx += {degrees}) begin
-            // Set i_valid high for all inputs
-            i_valid = 4'b1111;
-        
-            // Assign inputs for all pairs
-            for (integer j = 0; j < {degrees}; j++) begin
-                if (test_idx + j < {total_ops}) begin
-                    i_a[test_idx + j] = i_a[test_idx + j];
-                    i_b[test_idx + j] = i_b[test_idx + j];
+        // Drive input pairs in parallel in chunks of 'degrees'
+        while (current_index < {total_ops}) begin
+            // Set input valid signals high
+            i_valid = {degrees}'b1111;
+
+            // Assign input signals for current batch
+            for (j=0; j<{degrees}; j=j+1) begin
+                idx = current_index + j;
+                if (idx < {total_ops}) begin
+                    i_a[j] = i_a[idx];
+                    i_b[j] = i_b[idx];
                 end
             end
 
-            @(posedge clk);  // Wait for the next clock cycle
-        end
-        
-        // Deassert valid
-        i_valid = 4'b0000;
+            @(posedge clk);  // Wait for a clock cycle to latch inputs
 
-        // Wait until all results are valid
-        repeat ({degrees}) @(posedge clk);
-        
-        // Print results upon completion
-        for (integer k = 0; k < result_count; k = k + 1) begin
-            $display("%04h", results[k]);
+            // Move to next batch
+            current_index = current_index + {degrees};
         end
 
+        // Deassert valid signals after all inputs are driven
+        i_valid = {degrees}'b0000;
+
+        // Wait until all results are captured
+        wait (result_count >= {num_tests});
+        // Print results
+        for (j=0; j<{num_tests}; j=j+1) begin
+            $display("%04h", results[j]);
+        end
+
+        // Finish simulation
         $finish;
     end
 
     initial begin
-        #{num_tests * 30};  // Set timeout duration
+        #{num_tests * 30};  // Timeout duration
         $display("ERROR: Timeout");
         $finish;
     end
 endmodule
 '''
-        # Write testbench
+
+        # Write testbench to temporary file
         with tempfile.NamedTemporaryFile(mode='w', suffix='.v', delete=False) as f:
             tb_file = f.name
             f.write(testbench)
@@ -402,16 +415,18 @@ endmodule
             )
             if compile_result.returncode != 0:
                 raise RuntimeError(f"Compilation failed:\n{compile_result.stderr}")
+
             # Run simulation
-            start = time.time()
+            start_time = time.time()
             sim_result = subprocess.run(
                 ['vvp', out_file],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=20
             )
-            end = time.time()
-            # Parse results
+            end_time = time.time()
+
+            # Parse stdout for results
             lines = sim_result.stdout.strip().split('\n')
             results = []
             for line in lines:
@@ -421,9 +436,11 @@ endmodule
                     results.append(int(line, 16))
                 except ValueError:
                     continue
-            return results, end - start
+
+            # Return results and timing
+            return results[:num_tests], end_time - start_time  # only return the original test size
         finally:
-            # Cleanup
+            # Cleanup temp files
             if os.path.exists(tb_file):
                 os.remove(tb_file)
             if os.path.exists(out_file):
