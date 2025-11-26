@@ -1,4 +1,5 @@
 numpy
+pandas
 pyverilator
 cocotb
 cocotb-test
