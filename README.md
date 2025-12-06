@@ -49,3 +49,14 @@ Contains reproducible notebooks (after container setup) for speed an accuracy an
   - Compares runtime between LMUL matrix multiplication implemented in numpy/pytorch to native numpy/pytorch.
 - `sim/test_simple.ipynb`
   - Verifies simple verilog -> python pipeline for simulation outputs.
+ 
+### Neural Network Tests (`NNs/`)
+
+Contains reproducible notebooks (after container setup) for LMUL accuracy analyses within neural network classification related tasks.
+
+- `NNs/lmul_mlp.mnist.ipynb`
+  - Compares MLP accuracy performance on MNIST classification between LMUL and FP32 multiplication.
+- `NNs/LSTM_test.ipynb`
+  - Compares MLP accuracy performance on LSTM classification between LMUL and FP32 multiplication with numerous datasets, including FashionMNIST, MNIST, SeqMNIST, and KMNIST. Standardizes testing pipeline. 
+- `NNs/LSTM_LMUL_LLM.ipynb`
+  - Uses LMUL to generate characters regressively via LSTM.
