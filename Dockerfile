@@ -1,24 +1,38 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install essentials and Python
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential make git \
+    build-essential make git wget curl ca-certificates gnupg lsb-release software-properties-common \
     python3 python3-pip python3-venv python3-dev python3-tk \
     libffi-dev pkg-config \
-    iverilog \
-    openssh-client \
-    yosys \
-    opensta \
+    iverilog openssh-client yosys opensta \
  && rm -rf /var/lib/apt/lists/*
 
+# Create lib directory and download Nangate 45nm standard cell library
+RUN mkdir -p /workspace/lib && \
+    python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/raw/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib', '/workspace/lib/NangateOpenCellLibrary_typical.lib')"
+
+# Install CUDA 12.1 toolkit
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin \
+    && mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
+    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub \
+    && add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /" \
+    && apt-get update \
+    && apt-get -y install cuda-toolkit-12-1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3
+# Install PyTorch + CUDA 12.1 wheels
+RUN pip install \
+    torch==2.1.0+cu121 \
+    torchvision==0.16.0+cu121 \
+    torchaudio==2.1.0+cu121 \
+    --index-url https://download.pytorch.org/whl/cu121
+# Install any additional Python requirements
 WORKDIR /workspace
 COPY requirements.txt .
-
-RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Create lib directory and download Nangate 45nm standard cell library
-RUN mkdir -p lib && \
-    python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/raw/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib', 'lib/NangateOpenCellLibrary_typical.lib')"
 
 CMD ["/bin/bash"]
