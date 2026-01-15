@@ -3,7 +3,7 @@ Full definition of a GPT Language Model, all of it in this single file.
 This takes nanoGPT and adds the LMUL capability (but in return we lose FA)
 Notes:
 Modified to exclude FA (Flash Attention) and able to use LMUL. 
-
+Created a new nn.Linear replacement (LMULLinear) to use lmul (this is a y = xA^T + b operation)
 
 References:
 1) the official GPT-2 TensorFlow implementation released by OpenAI:
@@ -24,9 +24,53 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from lmul_nn_funcs import lmul_bits, lmul_matmul
+
+#just wrapping lmul bits
 def lmul(a, b, M=7):
     return lmul_bits(a, b)
+    
+class LMULLinear(nn.Module):
+    """
+    Drop-in replacement for nn.Linear using lmul_matmul.
+    Weight shape matches nn.Linear: (out_features, in_features)
+    """
+    def __init__(self, in_features, out_features, bias=True, use_lmul=True):
+        #use the nn.Module tools and autograd recognizes this
+        super().__init__()
+        #creating our dims via the dim of the input and dim of the output
+        self.in_features = in_features
+        self.out_features = out_features
+        self.use_lmul = use_lmul
+        #create Uninitialized Values in the shape of an out dim, in dim tensor (this is our weight matrix)
+        #nn.Parameter is needed for this to work; "This tensor is a workable model parameter, please take care of it like its your own child"
+        #NOTE THAT we CANNOT use the .empty values and assume they are 0, they might be some random numbers
+        #however, this will be overwritten in checkpointing. 
+        self.weight = nn.Parameter(
+            torch.empty(out_features, in_features),
+            #we aint doin gradients on this tensor; don't even try. Training is an entirely separate matter.  
+            requires_grad=False
+        )
+        if bias:
+            self.bias = nn.Parameter(torch.zeros(out_features))
+        else:
+            #no bias
+            self.register_parameter("bias", None)
 
+        #match nn.Linear init (important for GPT stability)
+        #weight initialization; see earlier comment on .empty()
+        #.kaiming_uniform is used usually for ReLU activations and helps solve the 'vanishing gradient' problem for training
+        #however, we here are paranoid and thus will preserve conventions. 
+        nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
+    def forward(self, x):
+        if self.use_lmul:
+            #LMUL matmul: x @ Wᵀ
+            y = lmul_matmul(x, self.weight.t())
+        else:
+            y = F.linear(x, self.weight, self.bias)
+
+        if self.bias is not None:
+            y = y + self.bias.view(*((1,) * (y.dim() - 1)), -1)
+        return y
     
 class LayerNorm(nn.Module):
     """ LayerNorm but with an optional bias. PyTorch doesn't support simply bias=False """
@@ -44,17 +88,23 @@ class CausalSelfAttention(nn.Module):
     def __init__(self, config, use_lmul = True):
         super().__init__()
         assert config.n_embd % config.n_head == 0
+        self.lmul = use_lmul
         # key, query, value projections for all heads, but in a batch
-        self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd, bias=config.bias)
-        # output projection
-        self.c_proj = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+        if self.lmul:
+            self.c_attn = LMULLinear(config.n_embd, 3 * config.n_embd, bias=config.bias)
+            # output projection
+            self.c_proj = LMULLinear(config.n_embd, config.n_embd, bias=config.bias)
+        else:
+            self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd, bias=config.bias)
+            # output projection
+            self.c_proj = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
         # regularization
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
         self.n_head = config.n_head
         self.n_embd = config.n_embd
         self.dropout = config.dropout
-        self.lmul = use_lmul
+
         # flash attention make GPU go brrrrr but support is only in PyTorch >= 2.0
         # we killin flash attention cuz; leave the line below uncommented instead of as false for training. 
         #self.flash = hasattr(torch.nn.functional, 'scaled_dot_product_attention')
@@ -130,7 +180,8 @@ class Block(nn.Module):
 
 @dataclass
 class GPTConfig:
-    block_size: int = 1024
+    #1024 block_size crashes on my laptop - Brendan
+    block_size: int = 128
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
     n_layer: int = 12
     n_head: int = 12

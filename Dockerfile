@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install essentials and Python
+#install essentials and python
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential make git wget curl ca-certificates gnupg lsb-release software-properties-common \
     python3 python3-pip python3-venv python3-dev python3-tk \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /workspace/lib && \
     python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/raw/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib', '/workspace/lib/NangateOpenCellLibrary_typical.lib')"
 
-# Install CUDA 12.1 toolkit
+#need the CUDA stuff
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin \
     && mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub \
@@ -22,15 +22,16 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86
     && apt-get -y install cuda-toolkit-12-1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
+#pip upgrade
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3
-# Install PyTorch + CUDA 12.1 wheels
+#PyTorch, CUDA 12.1 wheels
 RUN pip install \
     torch==2.1.0+cu121 \
     torchvision==0.16.0+cu121 \
     torchaudio==2.1.0+cu121 \
     --index-url https://download.pytorch.org/whl/cu121
-# Install any additional Python requirements
+
+#installing from requirements.txt for python dependencies
 WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
