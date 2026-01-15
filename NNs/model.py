@@ -180,8 +180,8 @@ class Block(nn.Module):
 
 @dataclass
 class GPTConfig:
-    #1024 block_size crashes on my laptop - Brendan
-    block_size: int = 128
+    #128 block_size crashes on my laptop - Brendan; If using non LMUL you can change it up to 1024
+    block_size: int = 16
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
     n_layer: int = 12
     n_head: int = 12

@@ -45,3 +45,6 @@ lib/*.lib
 synthesis/out/*
 !synthesis/out/.gitkeep
 !synthesis/out/README.md
+
+# .pt's (these exceed 100MB)
+*.pt
