@@ -1,0 +1,13 @@
+# SConscript for LMUL Accelerator
+
+Import('*')
+
+# Compile C++ source files
+Source('lmul_accelerator.cc')
+
+# Include Python configuration
+SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+
+# Debug flags for this device
+DebugFlag('LMulAccel', "LMUL Accelerator operations")
+DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")

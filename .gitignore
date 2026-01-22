@@ -45,3 +45,7 @@ lib/*.lib
 synthesis/out/*
 !synthesis/out/.gitkeep
 !synthesis/out/README.md
+
+# gem5 repository (large, should be cloned separately)
+gem5/
+!gem5/.gitignore

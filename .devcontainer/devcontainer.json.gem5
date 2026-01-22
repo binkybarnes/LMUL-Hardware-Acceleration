@@ -1,0 +1,28 @@
+// Dev container configuration with gem5 setup automation
+// Copy this to devcontainer.json if you want automatic gem5 setup
+
+{
+	"name": "lmul-dev-container",
+	"build": {
+	  "context": "..",
+	  "dockerfile": "../Dockerfile"
+	},
+  
+	"runArgs": [
+		"-v", "${env:HOME}/.ssh:/root/.ssh:ro"
+	],
+  
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter"
+			]
+		}
+	},
+	
+	// Automatically clone and build gem5 when container is created
+	// WARNING: This takes ~30-60 minutes on first container creation!
+	// Set to false if you want to build gem5 manually
+	"postCreateCommand": "if [ ! -d /workspace/gem5 ]; then echo 'Cloning gem5...' && cd /workspace && git clone --depth 1 --branch stable https://github.com/gem5/gem5.git && echo 'Building gem5 (this takes 30-60 min)...' && cd gem5 && scons build/ARM/gem5.opt -j1 && echo 'gem5 build complete!'; else echo 'gem5 already exists, skipping build'; fi"
+}

@@ -60,3 +60,35 @@ Contains reproducible notebooks (after container setup) for LMUL accuracy analys
   - Compares MLP accuracy performance on LSTM classification between LMUL and FP32 multiplication with numerous datasets, including FashionMNIST, MNIST, SeqMNIST, and KMNIST. Standardizes testing pipeline. 
 - `NNs/LSTM_LMUL_LLM.ipynb`
   - Uses LMUL to generate characters regressively via LSTM.
+
+### gem5 Full-System Simulation (`gem5/`)
+
+Complete gem5 integration for full-system simulation of LMUL accelerator in realistic system contexts.
+
+**Purpose**: Evaluate LMUL accelerator performance with:
+- Real CPU-accelerator interaction
+- Memory hierarchy modeling
+- System-level metrics (bandwidth, latency, cache effects)
+- End-to-end application performance
+
+**Key Components**:
+- `gem5/models/` - C++ device model for LMUL accelerator
+- `gem5/configs/` - System configurations (CPU + memory + accelerator)
+- `gem5/benchmarks/` - Test programs (matrix multiply, NN layers, etc.)
+- `gem5/scripts/` - Automation scripts for building and running
+
+**Quick Start**:
+```bash
+# See detailed guide
+cat gem5/GETTING_STARTED.md
+
+# Or quick start
+cat gem5/QUICKSTART.md
+```
+
+**Features**:
+- Memory-mapped accelerator device
+- Configurable PE array (4x4, 8x8, 16x16, etc.)
+- Cycle-accurate timing model
+- LMUL vs IEEE BF16 comparison
+- Comprehensive statistics collection

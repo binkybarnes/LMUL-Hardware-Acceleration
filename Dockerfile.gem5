@@ -1,3 +1,7 @@
+# Extended Dockerfile with gem5 pre-built
+# WARNING: This adds ~30 minutes to Docker build and ~2GB to image size
+# Use this if you want gem5 always available without rebuilding
+
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,5 +32,21 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Create lib directory and download Nangate 45nm standard cell library
 RUN mkdir -p lib && \
     python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/raw/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib', 'lib/NangateOpenCellLibrary_typical.lib')"
+
+# OPTIONAL: Pre-build gem5 (uncomment to enable)
+# WARNING: This takes ~30 minutes and adds ~2GB to image
+# RECOMMENDED: Keep commented - build gem5 manually in container instead
+# The build will persist in /workspace/gem5/ (mounted volume)
+#
+# RUN git clone --depth 1 --branch stable https://github.com/gem5/gem5.git /opt/gem5 && \
+#     cd /opt/gem5 && \
+#     scons build/ARM/gem5.opt -j4 && \
+#     # Clean up to reduce image size
+#     find build/ARM -name "*.o" -delete && \
+#     find build/ARM -name "*.a" -delete && \
+#     rm -rf .git
+#
+# ENV GEM5_ROOT=/opt/gem5
+# ENV PATH="/opt/gem5:${PATH}"
 
 CMD ["/bin/bash"]
