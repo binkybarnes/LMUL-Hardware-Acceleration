@@ -5,10 +5,11 @@
 
 set -e
 
-# Default configuration
-PROJECT_ROOT="/workspaces/LMUL-Hardware-Acceleration"
-GEM5_ROOT="${PROJECT_ROOT}/gem5"           # Actual gem5 repository
-LMUL_GEM5="${PROJECT_ROOT}/gem5-sim"       # Our LMUL project files
+# Default configuration (auto-detect paths)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LMUL_GEM5="$(cd "$SCRIPT_DIR/.." && pwd)"                    # gem5-sim/
+PROJECT_ROOT="$(dirname "$LMUL_GEM5")"                       # repo root
+GEM5_ROOT="${PROJECT_ROOT}/gem5"                             # gem5 repo
 
 # Default parameters
 PE_ROWS=4

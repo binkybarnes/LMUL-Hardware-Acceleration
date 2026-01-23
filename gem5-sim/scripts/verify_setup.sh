@@ -10,9 +10,11 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-PROJECT_ROOT="/workspaces/LMUL-Hardware-Acceleration"
-GEM5_ROOT="${PROJECT_ROOT}/gem5"           # Actual gem5 repository
-LMUL_GEM5="${PROJECT_ROOT}/gem5-sim"       # Our LMUL project files
+# Auto-detect paths (run from gem5-sim/ or repo root)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LMUL_GEM5="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(dirname "$LMUL_GEM5")"
+GEM5_ROOT="${PROJECT_ROOT}/gem5"
 
 echo -e "${GREEN}gem5 LMUL Accelerator Setup Verification${NC}"
 echo "=========================================="

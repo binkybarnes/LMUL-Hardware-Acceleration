@@ -15,10 +15,11 @@ echo -e "${GREEN}LMUL Accelerator gem5 Installation${NC}"
 echo "======================================"
 echo
 
-# Get project root
-PROJECT_ROOT="/workspaces/LMUL-Hardware-Acceleration"
-GEM5_ROOT="${PROJECT_ROOT}/gem5"           # Actual gem5 repository
-LMUL_GEM5="${PROJECT_ROOT}/gem5-sim"       # Our LMUL project files
+# Get paths (works from any location)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LMUL_GEM5="$(cd "$SCRIPT_DIR/.." && pwd)"                    # gem5-sim/
+PROJECT_ROOT="$(dirname "$LMUL_GEM5")"                       # repo root
+GEM5_ROOT="${PROJECT_ROOT}/gem5"                             # gem5 repo
 
 # Check if gem5 exists
 if [ ! -d "$GEM5_ROOT" ]; then
