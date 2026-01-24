@@ -1,0 +1,38 @@
+# Dockerfile for gem5 Testing Environment
+# Optimized container specifically for running gem5 simulations
+
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install gem5 dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    make \
+    git \
+    python3 \
+    python3-pip \
+    python3-dev \
+    m4 \
+    scons \
+    zlib1g \
+    zlib1g-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libprotoc-dev \
+    libgoogle-perftools-dev \
+    libboost-all-dev \
+    gcc-arm-linux-gnueabi \
+    binutils-gold \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Install Python packages for analysis
+RUN pip3 install --no-cache-dir \
+    numpy \
+    matplotlib \
+    pandas
+
+# Default command
+CMD ["/bin/bash"]
