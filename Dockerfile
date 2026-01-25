@@ -1,4 +1,6 @@
-FROM ubuntu:22.04
+#need the CUDA stuff
+FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 #install essentials and python
@@ -13,14 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /workspace/lib && \
     python3 -c "import urllib.request; urllib.request.urlretrieve('https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/raw/master/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib', '/workspace/lib/NangateOpenCellLibrary_typical.lib')"
 
-#need the CUDA stuff
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin \
-    && mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 \
-    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub \
-    && add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /" \
-    && apt-get update \
-    && apt-get -y install cuda-toolkit-12-1 \
-    && rm -rf /var/lib/apt/lists/*
+
+
 
 #pip upgrade
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3

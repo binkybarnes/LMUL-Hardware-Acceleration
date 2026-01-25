@@ -66,6 +66,7 @@ def lmul_bits(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     #Convert back to float32 by restoring 16 LSBs as zeros
     result_bits_f32 = result_bits_bf16 << 16
     result = result_bits_f32.view(torch.float32)
+    #--------------------------------
     #bias bitshift
     result = result + (result / (1 << 5)) + (result / (1 << 6))
     #Handle zeros

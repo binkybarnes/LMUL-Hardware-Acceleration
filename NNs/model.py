@@ -13,6 +13,8 @@ https://github.com/huggingface/transformers/blob/main/src/transformers/models/gp
 3) NanoGPT original implementation
 https://github.com/karpathy/nanoGPT
 
+We care about every multiplicationz except for scalar
+
 """
 
 import math
@@ -51,7 +53,10 @@ class LMULLinear(nn.Module):
             requires_grad=False
         )
         if bias:
-            self.bias = nn.Parameter(torch.zeros(out_features))
+            self.bias = nn.Parameter(
+                torch.zeros(out_features),
+                requires_grad=False
+            )
         else:
             #no bias
             self.register_parameter("bias", None)
@@ -59,14 +64,15 @@ class LMULLinear(nn.Module):
         #match nn.Linear init (important for GPT stability)
         #weight initialization; see earlier comment on .empty()
         #.kaiming_uniform is used usually for ReLU activations and helps solve the 'vanishing gradient' problem for training
-        #however, we here are paranoid and thus will preserve conventions. 
-        nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
+        #however, if we here are paranoid and thus will preserve conventions this line can be used
+        #nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
     def forward(self, x):
         if self.use_lmul:
             #LMUL matmul: x @ Wᵀ
             y = lmul_matmul(x, self.weight.t())
         else:
-            y = F.linear(x, self.weight, self.bias)
+            #note: we dont care about the bias for this .linear because we add it later
+            y = F.linear(x, self.weight, None)
 
         if self.bias is not None:
             y = y + self.bias.view(*((1,) * (y.dim() - 1)), -1)
@@ -91,9 +97,10 @@ class CausalSelfAttention(nn.Module):
         self.lmul = use_lmul
         # key, query, value projections for all heads, but in a batch
         if self.lmul:
-            self.c_attn = LMULLinear(config.n_embd, 3 * config.n_embd, bias=config.bias)
+            print("using LMUL in CasualSelfAttention Layer!")
+            self.c_attn = LMULLinear(config.n_embd, 3 * config.n_embd, bias=config.bias, use_lmul = True)
             # output projection
-            self.c_proj = LMULLinear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_proj = LMULLinear(config.n_embd, config.n_embd, bias=config.bias, use_lmul = True)
         else:
             self.c_attn = nn.Linear(config.n_embd, 3 * config.n_embd, bias=config.bias)
             # output projection
@@ -110,7 +117,7 @@ class CausalSelfAttention(nn.Module):
         #self.flash = hasattr(torch.nn.functional, 'scaled_dot_product_attention')
         self.flash = False
         if not self.flash:
-            print("WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0")
+            #print("WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0")
             # causal mask to ensure that attention is only applied to the left in the input sequence
             self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
                                         .view(1, 1, config.block_size, config.block_size))
@@ -150,11 +157,17 @@ class CausalSelfAttention(nn.Module):
 
 class MLP(nn.Module):
 
-    def __init__(self, config):
+    def __init__(self, config, use_lmul=True):
         super().__init__()
-        self.c_fc    = nn.Linear(config.n_embd, 4 * config.n_embd, bias=config.bias)
+        self.use_lmul = use_lmul
+        if self.use_lmul:
+            print("using LMUL in MLP!")
+            self.c_fc    = LMULLinear(config.n_embd, 4 * config.n_embd, bias=config.bias)
+            self.c_proj  = LMULLinear(4 * config.n_embd, config.n_embd, bias=config.bias)
+        else:
+            self.c_fc    = nn.Linear(config.n_embd, 4 * config.n_embd, bias=config.bias)
+            self.c_proj  = nn.Linear(4 * config.n_embd, config.n_embd, bias=config.bias)
         self.gelu    = nn.GELU()
-        self.c_proj  = nn.Linear(4 * config.n_embd, config.n_embd, bias=config.bias)
         self.dropout = nn.Dropout(config.dropout)
 
     def forward(self, x):
@@ -181,22 +194,22 @@ class Block(nn.Module):
 @dataclass
 class GPTConfig:
     #128 block_size crashes on my laptop - Brendan; If using non LMUL you can change it up to 1024
-    block_size: int = 16
+    block_size: int = 1
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
-    n_layer: int = 12
+    n_layer: int = 4
     n_head: int = 12
-    n_embd: int = 768
+    n_embd: int = 48
     dropout: float = 0.0
     bias: bool = True # True: bias in Linears and LayerNorms, like GPT-2. False: a bit better and faster
 
 class GPT(nn.Module):
 
-    def __init__(self, config):
+    def __init__(self, config, use_lmul=True):
         super().__init__()
         assert config.vocab_size is not None
         assert config.block_size is not None
         self.config = config
-
+        print("starting up!")
         self.transformer = nn.ModuleDict(dict(
             wte = nn.Embedding(config.vocab_size, config.n_embd),
             wpe = nn.Embedding(config.block_size, config.n_embd),
@@ -204,7 +217,12 @@ class GPT(nn.Module):
             h = nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
             ln_f = LayerNorm(config.n_embd, bias=config.bias),
         ))
-        self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
+        self.lmul = use_lmul
+        if self.lmul:
+            self.lm_head = LMULLinear(config.n_embd, config.vocab_size, bias=False)
+            print("using LMUL in GPT lm head!")
+        else:
+            self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         # with weight tying when using torch.compile() some warnings get generated:
         # "UserWarning: functional_call was passed multiple values for tied weights.
         # This behavior is deprecated and will be an error in future versions"
@@ -234,7 +252,7 @@ class GPT(nn.Module):
         return n_params
 
     def _init_weights(self, module):
-        if isinstance(module, nn.Linear):
+        if isinstance(module, (nn.Linear, LMULLinear)):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
                 torch.nn.init.zeros_(module.bias)
