@@ -197,9 +197,22 @@ fi
 # This helps avoid any cached Python state
 echo "  Starting fresh build (this may take 20-30 minutes)..."
 
+# Determine number of parallel jobs
+# Use fewer jobs in Codespaces to avoid memory issues
+# Check if we're in a Codespace environment
+if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
+    # Codespace detected - use fewer jobs to avoid OOM
+    JOBS=2
+    echo "  Detected Codespace environment - using ${JOBS} parallel jobs"
+else
+    # Use all available cores, but cap at 4 to avoid memory issues
+    JOBS=$(($(nproc) > 4 ? 4 : $(nproc)))
+    echo "  Using ${JOBS} parallel jobs"
+fi
+
 # Build gem5 - use explicit python3 to ensure fresh process
 # The -u flag ensures unbuffered output
-PYTHONUNBUFFERED=1 scons build/${ISA}/gem5.opt -j$(nproc) 2>&1 | tee /tmp/gem5_build.log
+PYTHONUNBUFFERED=1 scons build/${ISA}/gem5.opt -j${JOBS} 2>&1 | tee /tmp/gem5_build.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo
