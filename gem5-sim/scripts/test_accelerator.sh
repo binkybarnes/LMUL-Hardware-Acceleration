@@ -36,28 +36,27 @@ OUTPUT_DIR="${LMUL_GEM5}/test_output"
 mkdir -p "$OUTPUT_DIR"
 
 echo -e "${YELLOW}Test 1: Verify accelerator can be instantiated${NC}"
-# Run gem5 with a simple config that just instantiates the accelerator
-# This will fail if the accelerator isn't properly registered
+# Use gem5's Python environment to test the accelerator
 cd "$GEM5_ROOT"
 
-# Set up Python path for gem5
-export PYTHONPATH="${GEM5_ROOT}:${GEM5_ROOT}/configs:${PYTHONPATH}"
+# Create a simple Python test script
+cat > /tmp/test_lmul_accel.py << 'PYTEST'
+#!/usr/bin/env python3
+"""Test script to verify LMUL accelerator is registered"""
 
-python3 << EOF
 import sys
 import os
 
-# Add gem5 paths
-sys.path.insert(0, '${GEM5_ROOT}')
-sys.path.insert(0, '${GEM5_ROOT}/configs')
+# Add gem5 to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Import gem5 modules
+# Import gem5 (this sets up the Python environment)
 try:
+    import m5
     from m5.objects import LMulAccelerator
     print("✓ LMulAccelerator imported successfully")
 except ImportError as e:
-    print(f"✗ Failed to import LMulAccelerator: {e}")
-    print("  This might mean gem5 Python modules aren't set up correctly")
+    print(f"✗ Failed to import: {e}")
     sys.exit(1)
 
 # Try to instantiate the accelerator
@@ -70,12 +69,19 @@ try:
     print("✓ LMulAccelerator instantiated successfully")
     print(f"  PE Array: {accel.pe_array_rows}x{accel.pe_array_cols}")
     print(f"  PIO Address: 0x{accel.pio_addr:x}")
+    print(f"  Use LMUL: {accel.use_lmul}")
 except Exception as e:
     print(f"✗ Failed to instantiate accelerator: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
-EOF
+
+print("✓ All checks passed!")
+PYTEST
+
+# Run the test using gem5's Python
+# gem5's Python environment is set up when we import from the build directory
+PYTHONPATH="${GEM5_ROOT}/build/ARM:${GEM5_ROOT}" python3 /tmp/test_lmul_accel.py
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Test 1 passed${NC}"
