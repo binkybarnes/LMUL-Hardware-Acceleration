@@ -158,37 +158,35 @@ else
     echo "  ✓ Registration verified (1 occurrence)"
 fi
 
-# Clean any partial build artifacts that might have Python bindings
-# This is critical - Python bindings can have stale SimObject registrations
-echo "  Cleaning any partial build artifacts and Python bindings..."
-if [ -d "build" ]; then
-    # Remove Python binding artifacts that might have stale registrations
-    find build -name "*LMulAccelerator*" -type f -delete 2>/dev/null || true
-    find build -path "*/python/_m5/*lmul*" -type f -delete 2>/dev/null || true
-    find build -path "*/params/*LMulAccelerator*" -type f -delete 2>/dev/null || true
-    find build -path "*/python/_m5/param_LMulAccelerator*" -type f -delete 2>/dev/null || true
-    # Also clean Python module cache in build directory
-    find build -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-fi
-
 # Determine which ISA to build
 if [ -d "build/ARM" ]; then
     ISA="ARM"
-    echo "  Detected existing ARM build"
-    echo "  Cleaning build cache to remove stale registrations..."
-    rm -rf "build/${ISA}"
-    echo "  Build cache cleaned"
 elif [ -d "build/X86" ]; then
     ISA="X86"
-    echo "  Detected existing X86 build"
-    echo "  Cleaning build cache to remove stale registrations..."
-    rm -rf "build/${ISA}"
-    echo "  Build cache cleaned"
 else
     ISA="ARM"
-    echo "  No existing build found, defaulting to ARM"
-    echo "  (This is fine - we'll build gem5 with the model from scratch)"
 fi
+
+# CRITICAL: Remove entire build directory BEFORE building
+# Python bindings can have stale SimObject registrations that cause
+# "already found in importer" errors during binding generation
+echo "  Removing build directory to clear Python module registry..."
+if [ -d "build/${ISA}" ]; then
+    echo "  Removing build/${ISA} completely..."
+    rm -rf "build/${ISA}"
+    echo "  Build directory removed"
+fi
+
+# Also clean any partial artifacts that might exist
+if [ -d "build" ]; then
+    echo "  Cleaning any remaining build artifacts..."
+    find build -name "*LMulAccelerator*" -type f -delete 2>/dev/null || true
+    find build -path "*/python/_m5/*lmul*" -type f -delete 2>/dev/null || true
+    find build -path "*/params/*LMulAccelerator*" -type f -delete 2>/dev/null || true
+    find build -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+fi
+
+echo "  Build directory cleaned - ready for fresh build"
 
 echo
 echo -e "${YELLOW}Step 5: Rebuilding gem5...${NC}"
