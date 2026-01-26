@@ -40,11 +40,25 @@ echo -e "${YELLOW}Test 1: Verify accelerator can be instantiated${NC}"
 # This will fail if the accelerator isn't properly registered
 cd "$GEM5_ROOT"
 
+# Set up Python path for gem5
+export PYTHONPATH="${GEM5_ROOT}:${GEM5_ROOT}/configs:${PYTHONPATH}"
+
 python3 << EOF
 import sys
-sys.path.insert(0, 'configs')
+import os
 
-from m5.objects import LMulAccelerator
+# Add gem5 paths
+sys.path.insert(0, '${GEM5_ROOT}')
+sys.path.insert(0, '${GEM5_ROOT}/configs')
+
+# Import gem5 modules
+try:
+    from m5.objects import LMulAccelerator
+    print("✓ LMulAccelerator imported successfully")
+except ImportError as e:
+    print(f"✗ Failed to import LMulAccelerator: {e}")
+    print("  This might mean gem5 Python modules aren't set up correctly")
+    sys.exit(1)
 
 # Try to instantiate the accelerator
 try:
@@ -53,11 +67,13 @@ try:
         pe_array_rows=4,
         pe_array_cols=4
     )
-    print("✓ LMulAccelerator imported and instantiated successfully")
+    print("✓ LMulAccelerator instantiated successfully")
     print(f"  PE Array: {accel.pe_array_rows}x{accel.pe_array_cols}")
     print(f"  PIO Address: 0x{accel.pio_addr:x}")
 except Exception as e:
     print(f"✗ Failed to instantiate accelerator: {e}")
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
 EOF
 
