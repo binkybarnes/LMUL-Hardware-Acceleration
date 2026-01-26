@@ -9,5 +9,22 @@ Source('lmul_accelerator.cc')
 SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
 
 # Debug flags for this device
-DebugFlag('LMulAccel', "LMUL Accelerator operations")
-DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")
+# Use try/except to handle case where flag is already registered
+# This can happen if SConscript is processed multiple times
+try:
+    DebugFlag('LMulAccel', "LMUL Accelerator operations")
+except AttributeError as e:
+    if 'already specified' in str(e):
+        # Flag already registered, which is fine
+        pass
+    else:
+        raise
+
+try:
+    DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")
+except AttributeError as e:
+    if 'already specified' in str(e):
+        # Flag already registered, which is fine
+        pass
+    else:
+        raise
