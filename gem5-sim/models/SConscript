@@ -6,19 +6,9 @@ Import('*')
 Source('lmul_accelerator.cc')
 
 # Include Python configuration
-# Use try/except to handle case where SimObject is already registered
-# This can happen if SConscript is processed multiple times or bindings exist
-try:
-    SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
-except Exception as e:
-    # Catch any exception related to duplicate registration
-    error_msg = str(e).lower()
-    if 'already found' in error_msg or 'already registered' in error_msg or 'already exists' in error_msg:
-        # SimObject already registered, which is fine - skip registration
-        pass
-    else:
-        # Re-raise if it's a different error
-        raise
+# Note: If you get "already found in importer" error, it means the SimObject
+# was registered in a previous build. Run clean_gem5.sh to remove all traces.
+SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
 
 # Debug flags for this device
 # Use try/except to handle case where flag is already registered

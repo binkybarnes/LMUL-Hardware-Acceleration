@@ -158,35 +158,22 @@ else
     echo "  ✓ Registration verified (1 occurrence)"
 fi
 
-# Determine which ISA to build
-if [ -d "build/ARM" ]; then
-    ISA="ARM"
-elif [ -d "build/X86" ]; then
-    ISA="X86"
-else
-    ISA="ARM"
-fi
-
-# CRITICAL: Remove entire build directory BEFORE building
-# Python bindings can have stale SimObject registrations that cause
-# "already found in importer" errors during binding generation
-echo "  Removing build directory to clear Python module registry..."
-if [ -d "build/${ISA}" ]; then
-    echo "  Removing build/${ISA} completely..."
-    rm -rf "build/${ISA}"
-    echo "  Build directory removed"
-fi
-
-# Also clean any partial artifacts that might exist
+# CRITICAL: Remove ENTIRE build directory BEFORE building
+# The "already found in importer" error happens when Python bindings
+# find the SimObject already registered from a previous build attempt.
+# We must completely remove the build directory to clear Python's module registry.
+echo "  Removing entire build directory to prevent Python module conflicts..."
 if [ -d "build" ]; then
-    echo "  Cleaning any remaining build artifacts..."
-    find build -name "*LMulAccelerator*" -type f -delete 2>/dev/null || true
-    find build -path "*/python/_m5/*lmul*" -type f -delete 2>/dev/null || true
-    find build -path "*/params/*LMulAccelerator*" -type f -delete 2>/dev/null || true
-    find build -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    echo "  Removing build/ completely..."
+    rm -rf "build/"
+    echo "  ✓ Build directory completely removed"
+else
+    echo "  ✓ No build directory found (clean state)"
 fi
 
-echo "  Build directory cleaned - ready for fresh build"
+# Determine which ISA to build (default to ARM)
+ISA="ARM"
+echo "  Will build for ISA: ${ISA}"
 
 echo
 echo -e "${YELLOW}Step 5: Rebuilding gem5...${NC}"
