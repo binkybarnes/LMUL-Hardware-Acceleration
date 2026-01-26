@@ -6,20 +6,20 @@ Import('*')
 Source('lmul_accelerator.cc')
 
 # Include Python configuration
-# Use a guard to prevent duplicate registration if SConscript is processed multiple times
-# This is a workaround for gem5 build system quirks
-if 'lmul_accel_registered' not in globals():
+# Use a file-based guard to prevent duplicate registration
+# This works even if SConscript is executed in separate Python contexts
+import os
+guard_file = 'lmul_accel_registered.flag'
+if not os.path.exists(guard_file):
     SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
-    globals()['lmul_accel_registered'] = True
+    # Create guard file to prevent duplicate registration
+    open(guard_file, 'w').close()
 
 # Debug flags for this device
-# Use try/except to handle case where flag is already registered
-# This can happen if SConscript is processed multiple times
 try:
     DebugFlag('LMulAccel', "LMUL Accelerator operations")
 except AttributeError as e:
     if 'already specified' in str(e):
-        # Flag already registered, which is fine
         pass
     else:
         raise
@@ -28,7 +28,6 @@ try:
     DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")
 except AttributeError as e:
     if 'already specified' in str(e):
-        # Flag already registered, which is fine
         pass
     else:
         raise

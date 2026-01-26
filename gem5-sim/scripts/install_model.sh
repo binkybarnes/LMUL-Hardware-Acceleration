@@ -47,6 +47,9 @@ if [ -d "src/dev/lmul_accel" ]; then
     rm -rf "src/dev/lmul_accel"
 fi
 
+# Remove any guard files from previous builds
+find . -name "lmul_accel_registered.flag" -delete 2>/dev/null || true
+
 # Remove registration from src/dev/SConscript if it exists
 if grep -q "lmul_accel" "src/dev/SConscript" 2>/dev/null; then
     echo "  Removing previous registration from build system..."
