@@ -183,8 +183,23 @@ echo -e "${YELLOW}Step 5: Rebuilding gem5...${NC}"
 echo "This will take several minutes..."
 echo
 
-# Build gem5
-scons build/${ISA}/gem5.opt -j$(nproc) 2>&1 | tee /tmp/gem5_build.log
+# Final check: Ensure no duplicate registrations before building
+echo "  Final verification before build..."
+reg_count=$(grep -c "lmul_accel" "src/dev/SConscript" 2>/dev/null || echo "0")
+if [ "$reg_count" -ne 1 ]; then
+    echo -e "  ${RED}ERROR: Found $reg_count registrations before build (should be 1)${NC}"
+    echo "  Registrations:"
+    grep -n "lmul_accel" "src/dev/SConscript"
+    exit 1
+fi
+
+# Ensure we're using a fresh Python process by explicitly calling python3
+# This helps avoid any cached Python state
+echo "  Starting fresh build (this may take 20-30 minutes)..."
+
+# Build gem5 - use explicit python3 to ensure fresh process
+# The -u flag ensures unbuffered output
+PYTHONUNBUFFERED=1 scons build/${ISA}/gem5.opt -j$(nproc) 2>&1 | tee /tmp/gem5_build.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo
