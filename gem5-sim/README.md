@@ -53,18 +53,7 @@ gem5-sim/
    git checkout stable
    ```
 
-2. **Build gem5** (takes 20-30 minutes):
-   ```bash
-   # Install dependencies (if needed)
-   sudo apt install -y build-essential git m4 scons zlib1g-dev \
-       libprotobuf-dev protobuf-compiler libgoogle-perftools-dev \
-       python3-dev python-is-python3 libboost-all-dev pkg-config
-   
-   # Build gem5 (use -j2 in Codespaces to avoid OOM)
-   scons build/ARM/gem5.opt -j$(nproc)
-   ```
-
-3. **Install LMUL accelerator model**:
+2. **Install LMUL accelerator model**:
    ```bash
    cd /workspaces/LMUL-Hardware-Acceleration
    ./gem5-sim/scripts/install_model.sh
@@ -73,9 +62,11 @@ gem5-sim/
    This script will:
    - Copy accelerator model files into gem5
    - Register with gem5's build system
-   - Rebuild gem5 with the accelerator integrated
+   - Build gem5 with the accelerator integrated (takes 20-30 minutes)
+   
+   **Note**: If gem5 is already built, the script will remove the build directory and rebuild from scratch to ensure a clean integration.
 
-4. **Verify installation**:
+3. **Verify installation**:
    ```bash
    ./gem5-sim/scripts/test_accelerator.sh
    ```
