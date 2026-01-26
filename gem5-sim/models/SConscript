@@ -2,12 +2,15 @@
 
 Import('*')
 
-# Guard to ensure we only add sources once per SCons process
-# This prevents duplicate object files in the linker command
-if 'lmul_accel_sources_added' not in globals():
+# Guard to ensure we only add sources once
+# Use file-based guard (works even if SConscript executed in separate contexts)
+import os
+sources_guard_file = 'lmul_accel_sources_added.flag'
+if not os.path.exists(sources_guard_file):
     # Compile C++ source files
     Source('lmul_accelerator.cc')
-    lmul_accel_sources_added = True
+    # Create guard file to prevent duplicate Source() calls
+    open(sources_guard_file, 'w').close()
 
 # Include Python configuration
 # Use a file-based guard to prevent duplicate SimObject registration
