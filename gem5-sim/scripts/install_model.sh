@@ -206,7 +206,12 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Detected Codespace environment - using ${JOBS} parallel jobs"
 else
     # Use all available cores, but cap at 4 to avoid memory issues
-    JOBS=$(($(nproc) > 4 ? 4 : $(nproc)))
+    AVAILABLE_CORES=$(nproc)
+    if [ "$AVAILABLE_CORES" -gt 4 ]; then
+        JOBS=4
+    else
+        JOBS=$AVAILABLE_CORES
+    fi
     echo "  Using ${JOBS} parallel jobs"
 fi
 
