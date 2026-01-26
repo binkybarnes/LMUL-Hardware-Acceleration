@@ -158,17 +158,30 @@ else
     echo "  ✓ Registration verified (1 occurrence)"
 fi
 
+# Clean any partial build artifacts that might have Python bindings
+# This is critical - Python bindings can have stale SimObject registrations
+echo "  Cleaning any partial build artifacts and Python bindings..."
+if [ -d "build" ]; then
+    # Remove Python binding artifacts that might have stale registrations
+    find build -name "*LMulAccelerator*" -type f -delete 2>/dev/null || true
+    find build -path "*/python/_m5/*lmul*" -type f -delete 2>/dev/null || true
+    find build -path "*/params/*LMulAccelerator*" -type f -delete 2>/dev/null || true
+    find build -path "*/python/_m5/param_LMulAccelerator*" -type f -delete 2>/dev/null || true
+    # Also clean Python module cache in build directory
+    find build -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+fi
+
 # Determine which ISA to build
 if [ -d "build/ARM" ]; then
     ISA="ARM"
     echo "  Detected existing ARM build"
-    echo "  Cleaning build cache to remove stale flag registrations..."
+    echo "  Cleaning build cache to remove stale registrations..."
     rm -rf "build/${ISA}"
     echo "  Build cache cleaned"
 elif [ -d "build/X86" ]; then
     ISA="X86"
     echo "  Detected existing X86 build"
-    echo "  Cleaning build cache to remove stale flag registrations..."
+    echo "  Cleaning build cache to remove stale registrations..."
     rm -rf "build/${ISA}"
     echo "  Build cache cleaned"
 else
