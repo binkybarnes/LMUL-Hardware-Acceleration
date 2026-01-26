@@ -6,7 +6,16 @@ Import('*')
 Source('lmul_accelerator.cc')
 
 # Include Python configuration
-SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+# Use try/except to handle case where SimObject is already registered
+# This can happen if SConscript is processed multiple times
+try:
+    SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+except (AttributeError, KeyError) as e:
+    if 'already found' in str(e) or 'already registered' in str(e):
+        # SimObject already registered, which is fine
+        pass
+    else:
+        raise
 
 # Debug flags for this device
 # Use try/except to handle case where flag is already registered

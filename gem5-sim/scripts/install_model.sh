@@ -80,8 +80,7 @@ cp -v "$LMUL_GEM5/models/lmul_accelerator.hh" "$GEM5_ROOT/src/dev/lmul_accel/"
 cp -v "$LMUL_GEM5/models/lmul_accelerator.cc" "$GEM5_ROOT/src/dev/lmul_accel/"
 cp -v "$LMUL_GEM5/models/SConscript" "$GEM5_ROOT/src/dev/lmul_accel/"
 
-# Copy Python wrapper
-mkdir -p "$GEM5_ROOT/src/python/gem5/components/boards"
+# Copy Python wrapper (only to lmul_accel directory, not to boards/)
 cp -v "$LMUL_GEM5/models/LMulAccelerator.py" "$GEM5_ROOT/src/dev/lmul_accel/"
 
 echo "  Files copied successfully"
