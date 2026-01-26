@@ -114,7 +114,7 @@ LMulAccelerator::read(PacketPtr pkt)
             value = 0;
     }
 
-    pkt->setUintX(value);
+    pkt->setUintX(value, pkt->getByteOrder());
     stats.numReads++;
 
     DPRINTF(LMulAccel, "Read offset=0x%x, value=0x%x\n", offset, value);
@@ -128,7 +128,7 @@ LMulAccelerator::write(PacketPtr pkt)
     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
     
     Addr offset = pkt->getAddr() - pioAddr;
-    uint32_t value = pkt->getUintX();
+    uint32_t value = pkt->getUintX(pkt->getByteOrder());
 
     DPRINTF(LMulAccel, "Write offset=0x%x, value=0x%x\n", offset, value);
 
