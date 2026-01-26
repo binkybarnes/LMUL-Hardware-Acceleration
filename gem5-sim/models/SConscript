@@ -6,9 +6,11 @@ Import('*')
 Source('lmul_accelerator.cc')
 
 # Include Python configuration
-# Note: If you get "already found in importer" error, it means the SimObject
-# was registered in a previous build. Run clean_gem5.sh to remove all traces.
-SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+# Use a guard to prevent duplicate registration if SConscript is processed multiple times
+# This is a workaround for gem5 build system quirks
+if 'lmul_accel_registered' not in globals():
+    SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+    globals()['lmul_accel_registered'] = True
 
 # Debug flags for this device
 # Use try/except to handle case where flag is already registered
