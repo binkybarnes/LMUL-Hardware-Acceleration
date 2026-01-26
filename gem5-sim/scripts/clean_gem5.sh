@@ -5,17 +5,39 @@
 
 set -e
 
-GEM5_ROOT="${1:-../gem5}"
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Get paths (works from any location)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LMUL_GEM5="$(cd "$SCRIPT_DIR/.." && pwd)"                    # gem5-sim/
+PROJECT_ROOT="$(dirname "$LMUL_GEM5")"                       # repo root
+GEM5_ROOT="${PROJECT_ROOT}/gem5"                             # gem5 repo
+
+# Allow override via command line argument
+if [ -n "$1" ]; then
+    GEM5_ROOT="$1"
+fi
 
 if [ ! -d "$GEM5_ROOT" ]; then
-    echo "Error: gem5 directory not found at $GEM5_ROOT"
+    echo -e "${RED}Error: gem5 directory not found at $GEM5_ROOT${NC}"
+    echo "Expected structure:"
+    echo "  $PROJECT_ROOT/"
+    echo "  ├── gem5-sim/"
+    echo "  │   └── scripts/"
+    echo "  │       └── clean_gem5.sh"
+    echo "  └── gem5/  (should be here)"
     exit 1
 fi
 
 cd "$GEM5_ROOT"
 
-echo "=== Complete gem5 Cleanup ==="
+echo -e "${GREEN}=== Complete gem5 Cleanup ===${NC}"
 echo "Removing ALL traces of LMUL accelerator installation..."
+echo "Working directory: $GEM5_ROOT"
 echo
 
 # Step 1: Git cleanup
@@ -69,9 +91,9 @@ echo "  Build directory: $(test -d build && echo 'EXISTS ✗' || echo 'removed �
 echo "  Python caches: $(find . -name "__pycache__" -type d 2>/dev/null | wc -l) remaining"
 
 echo ""
-echo "=== Cleanup Complete ==="
+echo -e "${GREEN}=== Cleanup Complete ===${NC}"
 echo "gem5 is now in a clean state"
 echo ""
 echo "Next steps:"
-echo "1. Run install script: ./gem5-sim/scripts/install_model.sh"
+echo "1. Run install script: cd $PROJECT_ROOT && ./gem5-sim/scripts/install_model.sh"
 echo "2. Or build gem5 first, then install model"
