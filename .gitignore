@@ -49,3 +49,5 @@ synthesis/out/*
 # .pt's (these exceed 100MB)
 *.ptNNs/core
 NNs/core
+*.pt
+*.pth
