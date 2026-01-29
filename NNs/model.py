@@ -64,11 +64,9 @@ class LMULLinear(nn.Module):
         #match nn.Linear init (important for GPT stability)
         #weight initialization; see earlier comment on .empty()
         #.kaiming_uniform is used usually for ReLU activations and helps solve the 'vanishing gradient' problem for training
-        #however, if we here are paranoid and thus will preserve conventions this line can be used
-        #nn.init.kaiming_uniform_(self.weight, a=5 ** 0.5)
     def forward(self, x):
         if self.use_lmul:
-            #LMUL matmul: x @ Wᵀ
+            #LMUL matmul: x @ W^T
             y = lmul_matmul(x, self.weight.t())
         else:
             #note: we dont care about the bias for this .linear because we add it later
@@ -179,12 +177,12 @@ class MLP(nn.Module):
 
 class Block(nn.Module):
 
-    def __init__(self, config):
+    def __init__(self, config, use_lmul=True):
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
-        self.attn = CausalSelfAttention(config)
+        self.attn = CausalSelfAttention(config, use_lmul)
         self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
-        self.mlp = MLP(config)
+        self.mlp = MLP(config,use_lmul)
 
     def forward(self, x):
         x = x + self.attn(self.ln_1(x))
@@ -194,7 +192,7 @@ class Block(nn.Module):
 @dataclass
 class GPTConfig:
     #128 block_size crashes on my laptop - Brendan; If using non LMUL you can change it up to 1024
-    block_size: int = 1
+    block_size: int = 32
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
     n_layer: int = 4
     n_head: int = 12
@@ -214,7 +212,7 @@ class GPT(nn.Module):
             wte = nn.Embedding(config.vocab_size, config.n_embd),
             wpe = nn.Embedding(config.block_size, config.n_embd),
             drop = nn.Dropout(config.dropout),
-            h = nn.ModuleList([Block(config) for _ in range(config.n_layer)]),
+            h = nn.ModuleList([Block(config, use_lmul) for _ in range(config.n_layer)]),
             ln_f = LayerNorm(config.n_embd, bias=config.bias),
         ))
         self.lmul = use_lmul
@@ -222,6 +220,7 @@ class GPT(nn.Module):
             self.lm_head = LMULLinear(config.n_embd, config.vocab_size, bias=False)
             print("using LMUL in GPT lm head!")
         else:
+            print("LMUL HAS BEEN DISABLED")
             self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
         # with weight tying when using torch.compile() some warnings get generated:
         # "UserWarning: functional_call was passed multiple values for tied weights.

@@ -47,4 +47,5 @@ synthesis/out/*
 !synthesis/out/README.md
 
 # .pt's (these exceed 100MB)
-*.pt
+*.ptNNs/core
+NNs/core
