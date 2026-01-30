@@ -5,6 +5,11 @@ sim_build/
 *.fst
 *.out
 
+# Compiled binaries (architecture-specific)
+*.arm
+*.x86
+*.o
+
 # Simulation files
 sim_work/
 *.xml
