@@ -4,7 +4,8 @@
 # For ARM (matches gem5 ARM build)
 # Auto-detect available ARM compiler
 CC_ARM = $(shell which arm-linux-gnueabihf-gcc 2>/dev/null || which arm-linux-gnueabi-gcc 2>/dev/null || echo "arm-linux-gnueabihf-gcc")
-CFLAGS_ARM = -static -O2 -march=armv7-a
+# Use soft-float ABI to avoid FPU issues, or remove -march if using hard-float compiler
+CFLAGS_ARM = -static -O2 -march=armv7-a -mfloat-abi=softfp
 
 # Check if compiler exists
 ifeq ($(shell which $(CC_ARM) 2>/dev/null),)
