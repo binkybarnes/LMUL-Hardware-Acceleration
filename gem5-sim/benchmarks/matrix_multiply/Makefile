@@ -2,8 +2,14 @@
 
 # Cross-compiler settings (adjust for your target architecture)
 # For ARM (matches gem5 ARM build)
-CC_ARM = arm-linux-gnueabi-gcc
+# Auto-detect available ARM compiler
+CC_ARM = $(shell which arm-linux-gnueabihf-gcc 2>/dev/null || which arm-linux-gnueabi-gcc 2>/dev/null || echo "arm-linux-gnueabihf-gcc")
 CFLAGS_ARM = -static -O2 -march=armv7-a
+
+# Check if compiler exists
+ifeq ($(shell which $(CC_ARM) 2>/dev/null),)
+    $(error ARM cross-compiler not found. Install with: sudo apt-get install gcc-arm-linux-gnueabihf)
+endif
 
 # For X86 (if using gem5 X86 build)
 CC_X86 = gcc
