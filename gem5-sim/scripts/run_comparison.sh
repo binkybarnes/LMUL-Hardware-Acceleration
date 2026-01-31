@@ -1,12 +1,12 @@
 #!/bin/bash
 #
-# Run comparison test: LMUL Accelerator vs IEEE BF16
+# Run comparison test: LMUL Accelerator vs Python LMUL Reference
 #
 # This script:
-# 1. Runs simulation with LMUL accelerator
-# 2. Runs simulation with IEEE BF16 (CPU implementation)
-# 3. Checks accuracy of results
-# 4. Compares performance metrics
+# 1. Generates Python LMUL reference output
+# 2. Runs simulation with LMUL accelerator
+# 3. Checks accuracy of results (accelerator vs Python reference)
+# 4. Extracts performance metrics
 #
 # Usage:
 #   ./run_comparison.sh [--size N] [--pe-rows R] [--pe-cols C]
@@ -65,12 +65,11 @@ if [ ! -f "$GEM5_BINARY" ]; then
 fi
 
 # Create output directories
-LMUL_OUTPUT="${OUTPUT_DIR}/lmul"
-IEEE_OUTPUT="${OUTPUT_DIR}/ieee"
-mkdir -p "$LMUL_OUTPUT" "$IEEE_OUTPUT"
+ACCEL_OUTPUT="${OUTPUT_DIR}/accelerator"
+mkdir -p "$ACCEL_OUTPUT"
 
 echo "=========================================="
-echo "LMUL Accelerator vs IEEE BF16 Comparison"
+echo "LMUL Accelerator vs Python LMUL Reference"
 echo "=========================================="
 echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
@@ -78,8 +77,22 @@ echo "Output: ${OUTPUT_DIR}"
 echo "=========================================="
 echo
 
-# Step 1: Run LMUL accelerator simulation
-echo "Step 1: Running LMUL accelerator simulation..."
+# Step 1: Generate Python LMUL reference
+echo "Step 1: Generating Python LMUL reference..."
+python3 "$SCRIPT_DIR/generate_python_reference.py" \
+    "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" \
+    "$OUTPUT_DIR/python_reference.txt"
+
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to generate Python reference"
+    exit 1
+fi
+
+echo "✓ Python reference generated"
+
+# Step 2: Run LMUL accelerator simulation
+echo
+echo "Step 2: Running LMUL accelerator simulation..."
 "$GEM5_BINARY" \
     --outdir="$LMUL_OUTPUT" \
     "$CONFIG" \
@@ -165,8 +178,7 @@ echo "=========================================="
 echo "Comparison Complete!"
 echo "=========================================="
 echo "Results saved to: $OUTPUT_DIR/"
-echo "  - LMUL stats: $LMUL_OUTPUT/stats.txt"
-echo "  - IEEE stats: $IEEE_OUTPUT/stats.txt"
+echo "  - Python reference: $OUTPUT_DIR/python_reference.txt"
+echo "  - Accelerator stats: $ACCEL_OUTPUT/stats.txt"
 echo "  - Accuracy report: $OUTPUT_DIR/accuracy_report.txt"
-echo "  - Metrics comparison: $OUTPUT_DIR/metrics_comparison.txt"
 echo

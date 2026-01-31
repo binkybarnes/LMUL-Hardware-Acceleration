@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Accuracy checker for LMUL accelerator vs IEEE BF16 results
+Accuracy checker for LMUL accelerator vs Python LMUL reference
 
-Compares output matrices from LMUL accelerator and IEEE BF16 implementations
+Compares output matrices from LMUL accelerator and Python LMUL implementation
 to verify correctness before using performance metrics.
 
 Usage:
-    python3 check_accuracy.py <lmul_output.txt> <ieee_output.txt>
-    python3 check_accuracy.py results/lmul_4x4.txt results/ieee_4x4.txt
+    python3 check_accuracy.py <accelerator_output.txt> <python_reference.txt>
+    python3 check_accuracy.py results/accelerator_4x4.txt results/python_ref_4x4.txt
 """
 
 import sys
@@ -65,7 +65,7 @@ def calculate_accuracy_metrics(lmul_matrix, ieee_matrix):
 def print_accuracy_report(metrics):
     """Print formatted accuracy report"""
     print("\n" + "="*60)
-    print("Accuracy Comparison: LMUL Accelerator vs IEEE BF16")
+    print("Accuracy Comparison: LMUL Accelerator vs Python LMUL Reference")
     print("="*60)
     
     if 'error' in metrics:
@@ -111,28 +111,28 @@ def print_accuracy_report(metrics):
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python3 check_accuracy.py <lmul_output.txt> <ieee_output.txt>")
+        print("Usage: python3 check_accuracy.py <accelerator_output.txt> <python_reference.txt>")
         print("\nExample:")
-        print("  python3 check_accuracy.py results/lmul_4x4.txt results/ieee_4x4.txt")
+        print("  python3 check_accuracy.py results/accelerator_4x4.txt results/python_ref_4x4.txt")
         sys.exit(1)
     
-    lmul_file = sys.argv[1]
-    ieee_file = sys.argv[2]
+    accelerator_file = sys.argv[1]
+    python_file = sys.argv[2]
     
-    print(f"Loading LMUL results from: {lmul_file}")
-    lmul_matrix = parse_matrix_file(lmul_file)
+    print(f"Loading accelerator results from: {accelerator_file}")
+    accelerator_matrix = parse_matrix_file(accelerator_file)
     
-    print(f"Loading IEEE results from: {ieee_file}")
-    ieee_matrix = parse_matrix_file(ieee_file)
+    print(f"Loading Python LMUL reference from: {python_file}")
+    python_matrix = parse_matrix_file(python_file)
     
-    if lmul_matrix is None or ieee_matrix is None:
+    if accelerator_matrix is None or python_matrix is None:
         print("ERROR: Failed to parse one or both matrices")
         sys.exit(1)
     
-    print(f"LMUL matrix shape: {lmul_matrix.shape}")
-    print(f"IEEE matrix shape: {ieee_matrix.shape}")
+    print(f"Accelerator matrix shape: {accelerator_matrix.shape}")
+    print(f"Python reference shape: {python_matrix.shape}")
     
-    metrics = calculate_accuracy_metrics(lmul_matrix, ieee_matrix)
+    metrics = calculate_accuracy_metrics(accelerator_matrix, python_matrix)
     print_accuracy_report(metrics)
     
     # Exit with error code if accuracy is poor
