@@ -56,7 +56,7 @@ make
 #include <stdint.h>
 
 // LMUL register access
-#define LMUL_BASE_ADDR   0x10000000
+#define LMUL_BASE_ADDR   0x20000000
 #define LMUL_REG(offset) (*((volatile uint32_t*)(LMUL_BASE_ADDR + offset)))
 
 int main(int argc, char *argv[]) {
