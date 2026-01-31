@@ -89,9 +89,13 @@ def createSystem(args):
 
 
 def main():
+    print("DEBUG: main() called", file=sys.stderr, flush=True)
+    
     parser = argparse.ArgumentParser(
         description="gem5 simulation with LMUL accelerator"
     )
+    
+    print("DEBUG: Parser created", file=sys.stderr, flush=True)
     
     # System configuration
     parser.add_argument('--pe-rows', type=int, default=4,
@@ -113,7 +117,9 @@ def main():
     parser.add_argument('--output-dir', type=str, default='m5out',
                        help='Output directory (default: m5out)')
     
+    print("DEBUG: About to parse args", file=sys.stderr, flush=True)
     args = parser.parse_args()
+    print(f"DEBUG: Args parsed: cmd={args.cmd}, pe_rows={args.pe_rows}, pe_cols={args.pe_cols}", file=sys.stderr, flush=True)
     
     # Create system
     print("Creating system...")
