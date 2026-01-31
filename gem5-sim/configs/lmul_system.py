@@ -7,15 +7,21 @@ This creates a simple system with:
 - LMUL accelerator (memory-mapped)
 """
 
+import sys
+print(f"Config script starting... Python: {sys.version}", file=sys.stderr)
+
 import argparse
 import os
 
+print("Importing m5...", file=sys.stderr)
 import m5
 from m5.objects import *
 from m5.util import addToPath
 
+print("Adding config paths...", file=sys.stderr)
 # Add common config paths
 addToPath('../')
+print("Config script loaded successfully", file=sys.stderr)
 
 class LMulSystem(System):
     """
