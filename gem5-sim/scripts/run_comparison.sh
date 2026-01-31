@@ -93,6 +93,10 @@ echo "✓ Python reference generated"
 # Step 2: Run LMUL accelerator simulation
 echo
 echo "Step 2: Running LMUL accelerator simulation..."
+echo "  This may take a few minutes..."
+echo "  Command: $GEM5_BINARY --outdir=$ACCEL_OUTPUT $CONFIG ..."
+echo
+
 "$GEM5_BINARY" \
     --outdir="$ACCEL_OUTPUT" \
     "$CONFIG" \
@@ -102,8 +106,13 @@ echo "Step 2: Running LMUL accelerator simulation..."
     --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1" \
     > "$ACCEL_OUTPUT/simulation.log" 2>&1
 
-if [ $? -ne 0 ]; then
-    echo "ERROR: Accelerator simulation failed. Check $ACCEL_OUTPUT/simulation.log"
+SIM_EXIT_CODE=$?
+
+if [ $SIM_EXIT_CODE -ne 0 ]; then
+    echo "ERROR: Accelerator simulation failed (exit code: $SIM_EXIT_CODE)"
+    echo "  Check log: $ACCEL_OUTPUT/simulation.log"
+    echo "  Last 20 lines:"
+    tail -20 "$ACCEL_OUTPUT/simulation.log"
     exit 1
 fi
 
@@ -162,5 +171,24 @@ echo "=========================================="
 echo "Results saved to: $OUTPUT_DIR/"
 echo "  - Python reference: $OUTPUT_DIR/python_reference.txt"
 echo "  - Accelerator stats: $ACCEL_OUTPUT/stats.txt"
-echo "  - Accuracy report: $OUTPUT_DIR/accuracy_report.txt"
+if [ -f "$OUTPUT_DIR/accuracy_report.txt" ]; then
+    echo "  - Accuracy report: $OUTPUT_DIR/accuracy_report.txt"
+fi
+echo
+echo "Next Steps:"
+echo "==========="
+echo
+echo "1. View accuracy report (if generated):"
+echo "   cat $OUTPUT_DIR/accuracy_report.txt"
+echo
+echo "2. Extract detailed statistics:"
+echo "   python3 $SCRIPT_DIR/extract_stats.py $ACCEL_OUTPUT/stats.txt"
+echo
+echo "3. Compare results manually:"
+echo "   python3 $SCRIPT_DIR/check_accuracy.py <accelerator_output.txt> $OUTPUT_DIR/python_reference.txt"
+echo
+echo "4. View simulation log:"
+echo "   cat $ACCEL_OUTPUT/simulation.log"
+echo
+echo "=========================================="
 echo
