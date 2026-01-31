@@ -172,7 +172,11 @@ def main():
 # gem5 executes config scripts by setting __name__ to "__m5_main__"
 # However, when --help is used, argparse exits before we get here
 # So we check for both execution contexts
+# Debug: print what __name__ is set to
+print(f"DEBUG: __name__ = '{__name__}'", file=sys.stderr)
+
 if __name__ == "__m5_main__":
+    print("DEBUG: Entering __m5_main__ block", file=sys.stderr)
     try:
         main()
     except SystemExit:
@@ -185,4 +189,7 @@ if __name__ == "__m5_main__":
         sys.exit(1)
 elif __name__ == "__main__":
     # Allow direct execution for testing
+    print("DEBUG: Entering __main__ block", file=sys.stderr)
     main()
+else:
+    print(f"DEBUG: __name__ is '{__name__}', not executing main()", file=sys.stderr)
