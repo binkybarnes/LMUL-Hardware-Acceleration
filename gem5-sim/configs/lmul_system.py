@@ -80,6 +80,10 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
+        # Set workload first (required for SE mode)
+        system.workload = SEWorkload.init_compatible(args.cmd)
+        
+        # Create process
         process = Process()
         process.cmd = [args.cmd] + args.cmd_args
         system.cpu.workload = process
