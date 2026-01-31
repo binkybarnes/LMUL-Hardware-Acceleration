@@ -52,7 +52,7 @@ class LMulSystem(System):
         # Memory controller
         self.mem_ctrl = MemCtrl()
         self.mem_ctrl.dram = DDR3_1600_8x8()
-        self.mem_ctrl.dram.range = self.mem_range
+        # mem_ranges will be set in createSystem, so we'll set range later
         self.mem_ctrl.port = self.membus.mem_side_ports
         
         # System port
@@ -69,9 +69,14 @@ def createSystem(args):
         pe_rows=args.pe_rows,
         pe_cols=args.pe_cols,
         use_lmul=not args.use_ieee,
-        mem_mode='timing',
-        mem_range=AddrRange('512MB')
+        mem_mode='timing'
     )
+    
+    # Set memory ranges (must be set after creation, not in constructor)
+    system.mem_ranges = [AddrRange('512MB')]
+    
+    # Set memory controller range to match system memory range
+    system.mem_ctrl.dram.range = system.mem_ranges[0]
     
     # Set up process for SE mode
     if args.cmd:
