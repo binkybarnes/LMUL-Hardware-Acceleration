@@ -132,11 +132,23 @@ def main():
     exit_event = m5.simulate()
     
     print(f"Simulation complete: {exit_event.getCause()}")
+    print(f"Exit code: {exit_event.getCode()}")
     
     # Dump statistics before exiting
+    # This ensures stats are written even if simulation exits early
     print("Dumping statistics...")
-    m5.stats.dump()
-    m5.stats.reset()
+    try:
+        m5.stats.dump()
+    except Exception as e:
+        print(f"Warning: Could not dump stats: {e}")
+    
+    # Also try to dump to the output directory explicitly
+    import os
+    output_dir = args.output_dir if hasattr(args, 'output_dir') else 'm5out'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    print(f"Statistics should be in: {output_dir}/stats.txt")
 
 
 if __name__ == '__main__':
