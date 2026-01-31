@@ -170,12 +170,19 @@ def main():
 
 
 # gem5 executes config scripts by setting __name__ to "__m5_main__"
-# We need to check for both to handle different execution contexts
-if __name__ == "__m5_main__" or __name__ == "__main__":
+# However, when --help is used, argparse exits before we get here
+# So we check for both execution contexts
+if __name__ == "__m5_main__":
     try:
         main()
+    except SystemExit:
+        # argparse --help causes SystemExit, which is normal
+        raise
     except Exception as e:
         print(f"ERROR in main(): {e}", file=sys.stderr)
         import traceback
         traceback.print_exc()
         sys.exit(1)
+elif __name__ == "__main__":
+    # Allow direct execution for testing
+    main()
