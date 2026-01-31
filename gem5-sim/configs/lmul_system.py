@@ -115,13 +115,24 @@ def main():
     args = parser.parse_args()
     
     # Create system
+    print("Creating system...")
     system = createSystem(args)
+    print("System created")
     
     # Create root object
+    print("Creating root object...")
     root = Root(full_system=False, system=system)
     
     # Instantiate configuration
-    m5.instantiate()
+    print("Instantiating configuration...")
+    try:
+        m5.instantiate()
+        print("Configuration instantiated successfully")
+    except Exception as e:
+        print(f"ERROR: Failed to instantiate: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
     
     # Run simulation
     print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array")
@@ -129,6 +140,7 @@ def main():
     if args.cmd:
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     
+    print("Beginning simulation...")
     exit_event = m5.simulate()
     
     print(f"Simulation complete: {exit_event.getCause()}")
