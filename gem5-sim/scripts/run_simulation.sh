@@ -128,7 +128,11 @@ CONFIG_ARGS=(
     --pe-rows="$PE_ROWS"
     --pe-cols="$PE_COLS"
     --cmd="$BENCHMARK_BIN"
-    --cmd-args="$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1"
+    --cmd-args
+    "$MATRIX_SIZE"
+    "$MATRIX_SIZE"
+    "$MATRIX_SIZE"
+    "1"
 )
 
 if [ $USE_IEEE -eq 1 ]; then

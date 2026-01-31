@@ -110,8 +110,11 @@ def main():
     # Benchmark configuration
     parser.add_argument('--cmd', type=str, default=None,
                        help='Benchmark binary to run')
+    # Use nargs='+' to require at least one argument, or handle it as a list
+    # The issue is that --cmd-args="4" "4" "4" "1" gets parsed incorrectly
+    # So we'll accept it as a space-separated string or multiple arguments
     parser.add_argument('--cmd-args', nargs='*', default=[],
-                       help='Arguments for benchmark')
+                       help='Arguments for benchmark (can be space-separated or multiple args)')
     
     # Output configuration
     parser.add_argument('--output-dir', type=str, default='m5out',
