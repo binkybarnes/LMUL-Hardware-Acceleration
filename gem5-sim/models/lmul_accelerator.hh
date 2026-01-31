@@ -68,7 +68,9 @@ class LMulAccelerator : public BasicPioDevice
         REG_CYCLES      = 0x24,  // Cycle counter
         REG_OPS_COUNT   = 0x28,  // Operations counter
         REG_ERROR       = 0x2C,  // Error register
-        REG_SIZE        = 0x30   // Total register space
+        REG_RESULT_IDX  = 0x30,  // Result readback: element index
+        REG_RESULT_DATA = 0x34,  // Result readback: element data (BF16)
+        REG_SIZE        = 0x38   // Total register space
     };
 
     // Control register bits
@@ -100,6 +102,7 @@ class LMulAccelerator : public BasicPioDevice
         uint32_t cycles;
         uint32_t opsCount;
         uint32_t error;
+        uint32_t resultIdx;  // For result readback
     } state;
 
     // Statistics

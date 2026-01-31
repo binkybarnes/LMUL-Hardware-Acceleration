@@ -38,6 +38,7 @@ LMulAccelerator::LMulAccelerator(const Params &p)
     state.cycles = 0;
     state.opsCount = 0;
     state.error = 0;
+    state.resultIdx = 0;
 
     DPRINTF(LMulAccel, "LMulAccelerator created: PE=%dx%d, LMUL=%d\n",
             peArrayRows, peArrayCols, useLMul);
@@ -109,6 +110,23 @@ LMulAccelerator::read(PacketPtr pkt)
         case REG_ERROR:
             value = state.error;
             break;
+        case REG_RESULT_IDX:
+            value = state.resultIdx;
+            break;
+        case REG_RESULT_DATA:
+            // Read result element at current index
+            if (currentJob && currentJob->matrixC.size() > 0) {
+                if (state.resultIdx < currentJob->matrixC.size()) {
+                    value = currentJob->matrixC[state.resultIdx];
+                } else {
+                    value = 0;
+                    warn("LMulAccelerator: Result index %d out of range (max %d)\n",
+                         state.resultIdx, currentJob->matrixC.size() - 1);
+                }
+            } else {
+                value = 0;
+            }
+            break;
         default:
             warn("LMulAccelerator: Read from invalid offset 0x%x\n", offset);
             value = 0;
@@ -171,6 +189,10 @@ LMulAccelerator::write(PacketPtr pkt)
             
         case REG_P_SIZE:
             state.pSize = value;
+            break;
+            
+        case REG_RESULT_IDX:
+            state.resultIdx = value;
             break;
             
         default:
@@ -280,13 +302,31 @@ LMulAccelerator::processCompute()
     // B: N x P
     // C: M x P
 
-    // For functional simulation, assume data is already available
-    // In reality, we'd DMA this data
+    // TODO: Implement DMA to read actual data from aAddr, bAddr
+    // For now, we use a simple pattern for testing:
+    // - Matrix A: row-major pattern (i*N + j)
+    // - Matrix B: column-major pattern (k*P + j)
+    // This allows us to verify computation without full DMA
     
-    // For now, use dummy data (all 1.0 in BF16)
-    uint16_t one_bf16 = floatToBF16(1.0f);
-    std::fill(currentJob->matrixA.begin(), currentJob->matrixA.end(), one_bf16);
-    std::fill(currentJob->matrixB.begin(), currentJob->matrixB.end(), one_bf16);
+    // Generate test pattern instead of all 1.0s
+    // This creates a predictable result we can verify
+    for (uint32_t i = 0; i < currentJob->m; i++) {
+        for (uint32_t j = 0; j < currentJob->n; j++) {
+            // Pattern: value based on position
+            float val = (float)(i * currentJob->n + j + 1) / 10.0f;
+            currentJob->matrixA[i * currentJob->n + j] = floatToBF16(val);
+        }
+    }
+    
+    for (uint32_t i = 0; i < currentJob->n; i++) {
+        for (uint32_t j = 0; j < currentJob->p; j++) {
+            // Pattern: value based on position
+            float val = (float)(i * currentJob->p + j + 1) / 10.0f;
+            currentJob->matrixB[i * currentJob->p + j] = floatToBF16(val);
+        }
+    }
+    
+    DPRINTF(LMulAccel, "Using test pattern data (not reading from memory yet)\n");
 
     // Perform multiplication
     for (uint32_t i = 0; i < currentJob->m; i++) {
