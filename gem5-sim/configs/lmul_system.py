@@ -146,27 +146,32 @@ def main():
     if args.cmd:
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     
-    print("Beginning simulation...")
+    print("Beginning simulation...", flush=True)
     exit_event = m5.simulate()
     
-    print(f"Simulation complete: {exit_event.getCause()}")
-    print(f"Exit code: {exit_event.getCode()}")
+    print(f"Simulation complete: {exit_event.getCause()}", flush=True)
+    print(f"Exit code: {exit_event.getCode()}", flush=True)
     
-    # Dump statistics before exiting
-    # This ensures stats are written even if simulation exits early
-    print("Dumping statistics...")
-    try:
-        m5.stats.dump()
-    except Exception as e:
-        print(f"Warning: Could not dump stats: {e}")
+    # Dump statistics - this is critical!
+    # gem5 automatically dumps stats on exit, but we'll do it explicitly too
+    print("Dumping statistics...", flush=True)
     
-    # Also try to dump to the output directory explicitly
+    # Force stats dump - this should create stats.txt
+    m5.stats.dump()
+    
+    # Also ensure we're in the right directory
     import os
     output_dir = args.output_dir if hasattr(args, 'output_dir') else 'm5out'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    print(f"Output directory: {os.path.abspath(output_dir)}", flush=True)
+    print(f"Stats file should be at: {os.path.abspath(output_dir)}/stats.txt", flush=True)
     
-    print(f"Statistics should be in: {output_dir}/stats.txt")
+    # Verify stats file exists
+    stats_file = os.path.join(output_dir, 'stats.txt')
+    if os.path.exists(stats_file):
+        size = os.path.getsize(stats_file)
+        print(f"Stats file exists: {stats_file} ({size} bytes)", flush=True)
+    else:
+        print(f"WARNING: Stats file not found at {stats_file}", flush=True)
 
 
 if __name__ == '__main__':
