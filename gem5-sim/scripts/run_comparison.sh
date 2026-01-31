@@ -77,11 +77,12 @@ echo "Output: ${OUTPUT_DIR}"
 echo "=========================================="
 echo
 
-# Step 1: Generate Python LMUL reference
+# Step 1: Generate Python LMUL reference (using test pattern to match accelerator)
 echo "Step 1: Generating Python LMUL reference..."
 python3 "$SCRIPT_DIR/generate_python_reference.py" \
     "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" \
-    "$OUTPUT_DIR/python_reference.txt"
+    "$OUTPUT_DIR/python_reference.txt" \
+    --test-pattern
 
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to generate Python reference"

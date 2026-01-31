@@ -2,6 +2,7 @@
 # Static Timing Analysis for IEEE BF16 multiplier
 # IDENTICAL to L-Mul script, just different netlist
 
+# Paths are relative to workspace root (run from workspace root)
 read_liberty lib/NangateOpenCellLibrary_typical.lib
 read_verilog synthesis/out/bf16_synth.v
 

@@ -22,13 +22,32 @@ sys.path.insert(0, str(project_root))
 from rtl.numpy_lmul import lmul_numpy_matmul
 from utils.floats import float_to_bf16_array, bf16_to_float_array
 
-def generate_reference(M, N, P, output_file=None):
-    """Generate reference output using Python LMUL"""
+def generate_reference(M, N, P, output_file=None, use_test_pattern=False):
+    """Generate reference output using Python LMUL
     
-    # Generate test matrices (same as benchmark would use)
-    np.random.seed(42)  # Fixed seed for reproducibility
-    A_float = np.random.uniform(-10.0, 10.0, (M, N)).astype(np.float32)
-    B_float = np.random.uniform(-10.0, 10.0, (N, P)).astype(np.float32)
+    Args:
+        M, N, P: Matrix dimensions
+        output_file: Output file path (None = stdout)
+        use_test_pattern: If True, use same pattern as accelerator (for verification)
+    """
+    
+    if use_test_pattern:
+        # Use same test pattern as accelerator (row/column-major pattern)
+        A_float = np.zeros((M, N), dtype=np.float32)
+        B_float = np.zeros((N, P), dtype=np.float32)
+        
+        for i in range(M):
+            for j in range(N):
+                A_float[i, j] = (float(i * N + j + 1) / 10.0)
+        
+        for i in range(N):
+            for j in range(P):
+                B_float[i, j] = (float(i * P + j + 1) / 10.0)
+    else:
+        # Generate test matrices (same as benchmark would use)
+        np.random.seed(42)  # Fixed seed for reproducibility
+        A_float = np.random.uniform(-10.0, 10.0, (M, N)).astype(np.float32)
+        B_float = np.random.uniform(-10.0, 10.0, (N, P)).astype(np.float32)
     
     # Convert to BF16
     A_bf16 = float_to_bf16_array(A_float)
@@ -76,12 +95,15 @@ def main():
         N = int(sys.argv[2])
         P = int(sys.argv[3])
         output_file = sys.argv[4] if len(sys.argv) > 4 else None
+        use_pattern = '--pattern' in sys.argv or '--test-pattern' in sys.argv
     except ValueError:
         print("ERROR: M, N, P must be integers")
         sys.exit(1)
     
     print(f"Generating Python LMUL reference for {M}x{N} * {N}x{P} = {M}x{P}")
-    generate_reference(M, N, P, output_file)
+    if use_pattern:
+        print("  Using test pattern (matches accelerator)")
+    generate_reference(M, N, P, output_file, use_test_pattern=use_pattern)
     print("✓ Reference generated successfully")
 
 if __name__ == '__main__':
