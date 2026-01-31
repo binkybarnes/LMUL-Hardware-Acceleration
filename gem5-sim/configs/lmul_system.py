@@ -118,11 +118,18 @@ def main():
                        help='Output directory (default: m5out)')
     
     print("DEBUG: About to parse args", file=sys.stderr, flush=True)
-    args = parser.parse_args()
-    print(f"DEBUG: Args parsed: cmd={args.cmd}, pe_rows={args.pe_rows}, pe_cols={args.pe_cols}", file=sys.stderr, flush=True)
+    try:
+        args = parser.parse_args()
+        print(f"DEBUG: Args parsed successfully: cmd={args.cmd}, pe_rows={args.pe_rows}, pe_cols={args.pe_cols}", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"DEBUG: Error parsing args: {e}", file=sys.stderr, flush=True)
+        import traceback
+        traceback.print_exc()
+        raise
     
     # Create system
-    print("Creating system...")
+    print("DEBUG: About to create system", file=sys.stderr, flush=True)
+    print("Creating system...", flush=True)
     system = createSystem(args)
     print("System created")
     
