@@ -132,6 +132,11 @@ def main():
     exit_event = m5.simulate()
     
     print(f"Simulation complete: {exit_event.getCause()}")
+    
+    # Dump statistics before exiting
+    print("Dumping statistics...")
+    m5.stats.dump()
+    m5.stats.reset()
 
 
 if __name__ == '__main__':
