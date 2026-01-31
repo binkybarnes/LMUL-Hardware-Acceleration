@@ -51,6 +51,11 @@ synthesis/out/*
 !synthesis/out/.gitkeep
 !synthesis/out/README.md
 
+# Documentation files (ignore .md files except README.md)
+*.md
+!README.md
+!**/README.md
+
 # gem5 repository (large, should be cloned separately)
 gem5/
 !gem5/.gitignore
