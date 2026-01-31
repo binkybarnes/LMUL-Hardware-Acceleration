@@ -8,20 +8,15 @@ This creates a simple system with:
 """
 
 import sys
-print(f"Config script starting... Python: {sys.version}", file=sys.stderr)
-
 import argparse
 import os
 
-print("Importing m5...", file=sys.stderr)
 import m5
 from m5.objects import *
 from m5.util import addToPath
 
-print("Adding config paths...", file=sys.stderr)
 # Add common config paths
 addToPath('../')
-print("Config script loaded successfully", file=sys.stderr)
 
 class LMulSystem(System):
     """
@@ -174,5 +169,13 @@ def main():
         print(f"WARNING: Stats file not found at {stats_file}", flush=True)
 
 
-if __name__ == "__m5_main__":
-    main()
+# gem5 executes config scripts by setting __name__ to "__m5_main__"
+# We need to check for both to handle different execution contexts
+if __name__ == "__m5_main__" or __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        print(f"ERROR in main(): {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
