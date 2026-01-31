@@ -94,40 +94,20 @@ echo "✓ Python reference generated"
 echo
 echo "Step 2: Running LMUL accelerator simulation..."
 "$GEM5_BINARY" \
-    --outdir="$LMUL_OUTPUT" \
+    --outdir="$ACCEL_OUTPUT" \
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm" \
     --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1" \
-    > "$LMUL_OUTPUT/simulation.log" 2>&1
+    > "$ACCEL_OUTPUT/simulation.log" 2>&1
 
 if [ $? -ne 0 ]; then
-    echo "ERROR: LMUL simulation failed. Check $LMUL_OUTPUT/simulation.log"
+    echo "ERROR: Accelerator simulation failed. Check $ACCEL_OUTPUT/simulation.log"
     exit 1
 fi
 
-echo "✓ LMUL simulation complete"
-
-# Step 2: Run IEEE BF16 simulation (CPU implementation)
-echo
-echo "Step 2: Running IEEE BF16 simulation..."
-"$GEM5_BINARY" \
-    --outdir="$IEEE_OUTPUT" \
-    "$CONFIG" \
-    --pe-rows="$PE_ROWS" \
-    --pe-cols="$PE_COLS" \
-    --use-ieee \
-    --cmd="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm" \
-    --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "0" \
-    > "$IEEE_OUTPUT/simulation.log" 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "ERROR: IEEE simulation failed. Check $IEEE_OUTPUT/simulation.log"
-    exit 1
-fi
-
-echo "✓ IEEE simulation complete"
+echo "✓ Accelerator simulation complete"
 
 # Step 3: Extract output matrices (if available)
 echo
@@ -136,11 +116,11 @@ echo "Step 3: Extracting results..."
 # For now, we'll skip accuracy check if matrices aren't available
 
 # Step 4: Check accuracy (if output files exist)
-if [ -f "$LMUL_OUTPUT/output.txt" ] && [ -f "$IEEE_OUTPUT/output.txt" ]; then
-    echo "Step 4: Checking accuracy..."
+if [ -f "$ACCEL_OUTPUT/output.txt" ] && [ -f "$OUTPUT_DIR/python_reference.txt" ]; then
+    echo "Step 4: Checking accuracy (Accelerator vs Python LMUL)..."
     python3 "$SCRIPT_DIR/check_accuracy.py" \
-        "$LMUL_OUTPUT/output.txt" \
-        "$IEEE_OUTPUT/output.txt" \
+        "$ACCEL_OUTPUT/output.txt" \
+        "$OUTPUT_DIR/python_reference.txt" \
         > "$OUTPUT_DIR/accuracy_report.txt" 2>&1
     
     if [ $? -eq 0 ]; then
@@ -149,27 +129,29 @@ if [ -f "$LMUL_OUTPUT/output.txt" ] && [ -f "$IEEE_OUTPUT/output.txt" ]; then
     else
         echo "⚠ Accuracy check failed. See $OUTPUT_DIR/accuracy_report.txt"
         cat "$OUTPUT_DIR/accuracy_report.txt"
+        echo
+        echo "WARNING: Accuracy check failed. Performance metrics may not be valid."
     fi
 else
     echo "⚠ Step 4: Skipping accuracy check (output files not found)"
+    echo "  Accelerator output: $ACCEL_OUTPUT/output.txt"
+    echo "  Python reference: $OUTPUT_DIR/python_reference.txt"
     echo "  (This is expected if accelerator access isn't working yet)"
 fi
 
-# Step 5: Compare performance metrics
+# Step 5: Extract performance metrics
 echo
-echo "Step 5: Comparing performance metrics..."
-if [ -f "$LMUL_OUTPUT/stats.txt" ] && [ -f "$IEEE_OUTPUT/stats.txt" ]; then
-    python3 "$SCRIPT_DIR/compare_metrics.py" \
-        "$LMUL_OUTPUT/stats.txt" \
-        "$IEEE_OUTPUT/stats.txt" \
-        > "$OUTPUT_DIR/metrics_comparison.txt" 2>&1
-    
-    echo "✓ Metrics comparison complete"
-    cat "$OUTPUT_DIR/metrics_comparison.txt"
+echo "Step 5: Extracting performance metrics..."
+if [ -f "$ACCEL_OUTPUT/stats.txt" ]; then
+    echo "Accelerator statistics available at: $ACCEL_OUTPUT/stats.txt"
+    echo
+    echo "Key metrics:"
+    grep -E "simSeconds|simTicks|numCycles|simInsts|cpi|ipc" "$ACCEL_OUTPUT/stats.txt" | head -10
+    echo
+    echo "For detailed analysis, use:"
+    echo "  python3 $SCRIPT_DIR/../scripts/extract_stats.py $ACCEL_OUTPUT/stats.txt"
 else
-    echo "ERROR: Statistics files not found"
-    echo "  LMUL: $LMUL_OUTPUT/stats.txt"
-    echo "  IEEE: $IEEE_OUTPUT/stats.txt"
+    echo "ERROR: Statistics file not found: $ACCEL_OUTPUT/stats.txt"
     exit 1
 fi
 
