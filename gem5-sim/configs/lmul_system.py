@@ -36,7 +36,7 @@ class LMulSystem(System):
         
         # LMUL Accelerator
         self.lmul_accel = LMulAccelerator(
-            pio_addr=0x10000000,  # Memory-mapped at 256MB
+            pio_addr=0x20000000,  # Memory-mapped at 256MB
             pio_size=0x1000,
             pe_array_rows=pe_rows,
             pe_array_cols=pe_cols,
