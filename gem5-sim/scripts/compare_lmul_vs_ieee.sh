@@ -12,7 +12,9 @@
 #   ./compare_lmul_vs_ieee.sh [--size N] [--pe-rows R] [--pe-cols C]
 #
 
-set -e
+# Don't use set -e - we want to continue even if simulations fail
+# (they may fail due to syscall 403 but still generate stats)
+# set -e
 
 # Defaults
 MATRIX_SIZE=4
@@ -66,6 +68,17 @@ CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
 # Check prerequisites
 if [ ! -f "$GEM5_BINARY" ]; then
     echo "Error: gem5 not built. Run install_model.sh first."
+    echo "  Expected: $GEM5_BINARY"
+    exit 1
+fi
+
+# Check benchmark binary exists
+BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
+if [ ! -f "$BENCHMARK_BIN" ]; then
+    echo "Error: Benchmark binary not found: $BENCHMARK_BIN"
+    echo "Build it with:"
+    echo "  cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+    echo "  make"
     exit 1
 fi
 
@@ -73,6 +86,10 @@ fi
 LMUL_OUTPUT="${OUTPUT_DIR}/lmul"
 IEEE_OUTPUT="${OUTPUT_DIR}/ieee"
 mkdir -p "$LMUL_OUTPUT" "$IEEE_OUTPUT"
+
+echo "Debug: Output directories created"
+echo "  LMUL: $LMUL_OUTPUT"
+echo "  IEEE: $IEEE_OUTPUT"
 
 echo "=========================================="
 echo "LMUL Accelerator vs Native IEEE BF16 (CPU)"
@@ -86,18 +103,30 @@ echo
 # Step 1: Run LMUL accelerator simulation
 echo "Step 1: Running LMUL accelerator simulation..."
 echo "  This may take a few minutes..."
+echo "  Command: $GEM5_BINARY --outdir=$LMUL_OUTPUT $CONFIG ..."
 echo
 
-"$GEM5_BINARY" \
+if ! "$GEM5_BINARY" \
     --outdir="$LMUL_OUTPUT" \
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
-    --cmd="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm" \
+    --cmd="$BENCHMARK_BIN" \
     --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1" \
-    > "$LMUL_OUTPUT/simulation.log" 2>&1
-
-LMUL_EXIT_CODE=$?
+    > "$LMUL_OUTPUT/simulation.log" 2>&1; then
+    LMUL_EXIT_CODE=$?
+    echo "⚠ LMUL simulation failed (exit code: $LMUL_EXIT_CODE)"
+    echo "  Check log: $LMUL_OUTPUT/simulation.log"
+    if [ -f "$LMUL_OUTPUT/simulation.log" ]; then
+        echo "  Last 30 lines:"
+        tail -30 "$LMUL_OUTPUT/simulation.log"
+    fi
+    echo
+    echo "  This may be due to syscall 403. Consider using simple_test benchmark."
+    # Don't exit here - continue to check if stats were generated
+else
+    LMUL_EXIT_CODE=0
+fi
 
 # Check if stats were generated
 LMUL_STATS_OK=0
@@ -127,16 +156,27 @@ echo "  This uses CPU for standard IEEE multiplication (not accelerator)"
 echo "  This may take a few minutes..."
 echo
 
-"$GEM5_BINARY" \
+if ! "$GEM5_BINARY" \
     --outdir="$IEEE_OUTPUT" \
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
-    --cmd="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm" \
+    --cmd="$BENCHMARK_BIN" \
     --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "0" \
-    > "$IEEE_OUTPUT/simulation.log" 2>&1
-
-IEEE_EXIT_CODE=$?
+    > "$IEEE_OUTPUT/simulation.log" 2>&1; then
+    IEEE_EXIT_CODE=$?
+    echo "⚠ IEEE simulation failed (exit code: $IEEE_EXIT_CODE)"
+    echo "  Check log: $IEEE_OUTPUT/simulation.log"
+    if [ -f "$IEEE_OUTPUT/simulation.log" ]; then
+        echo "  Last 30 lines:"
+        tail -30 "$IEEE_OUTPUT/simulation.log"
+    fi
+    echo
+    echo "  This may be due to syscall 403. Consider using simple_test benchmark."
+    # Don't exit here - continue to check if stats were generated
+else
+    IEEE_EXIT_CODE=0
+fi
 
 # Check if stats were generated
 IEEE_STATS_OK=0
