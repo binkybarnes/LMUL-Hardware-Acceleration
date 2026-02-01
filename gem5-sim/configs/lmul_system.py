@@ -93,23 +93,23 @@ def createSystem(args):
         system.cpu.workload = process
         system.cpu.createThreads()
         
-        # Map accelerator MMIO region (0x40000000) into process address space
-        # In SE mode, user processes need MMIO addresses to be mapped
-        # Accelerator is at 0x40000000 (1GB), a common MMIO region
-        accel_addr = 0x40000000
-        accel_size = 0x1000  # 4KB
+        # Map accelerator MMIO region into process address space
+        # In SE mode, MMIO addresses must be explicitly mapped for user processes
+        # The accelerator is at 0x40000000 (1GB), which needs to be mapped
+        accel_addr = system.lmul_accel.pio_addr
+        accel_size = system.lmul_accel.pio_size
         
-        # For ARM SE workloads, we can add the MMIO region to the memory map
-        # This allows user-space access to the accelerator (unrealistic but needed for simulation)
-        if hasattr(system.workload, 'addr_check'):
-            # Some workloads have address checking - we may need to disable it for MMIO
-            pass
-        
-        # The actual mapping happens through the MMU when the access occurs
-        # But we need to ensure the address is valid. One approach is to extend
-        # the memory range or use a different address that's already mapped.
-        # For now, we'll rely on gem5's automatic MMIO handling, but this requires
-        # the address to be in a valid range.
+        # Explicitly map the MMIO region so the benchmark can access it
+        # This is necessary in SE mode - MMIO addresses aren't automatically mapped
+        # Note: In real systems, MMIO is kernel-space only, but for simulation
+        # we allow user-space access
+        try:
+            # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
+            process.map(accel_addr, accel_addr, accel_size, False)
+            print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
+        except Exception as e:
+            print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
+            # Continue anyway - gem5 might handle it automatically
     
     # Set clock
     system.clk_domain = SrcClockDomain()
