@@ -67,9 +67,16 @@ LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
 Tick
 LMulAccelerator::read(PacketPtr pkt)
 {
-    assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+    Addr pkt_addr = pkt->getAddr();
+    if (pkt_addr < pioAddr || pkt_addr >= pioAddr + pioSize) {
+        warn("LMulAccelerator::read: Address 0x%x out of range [0x%x, 0x%x)\n",
+             pkt_addr, pioAddr, pioAddr + pioSize);
+        pkt->makeResponse();
+        pkt->setUintX(0, ByteOrder::little);
+        return pioDelay;
+    }
     
-    Addr offset = pkt->getAddr() - pioAddr;
+    Addr offset = pkt_addr - pioAddr;
     uint32_t value = 0;
 
     // Read appropriate register
@@ -144,9 +151,15 @@ LMulAccelerator::read(PacketPtr pkt)
 Tick
 LMulAccelerator::write(PacketPtr pkt)
 {
-    assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+    Addr pkt_addr = pkt->getAddr();
+    if (pkt_addr < pioAddr || pkt_addr >= pioAddr + pioSize) {
+        warn("LMulAccelerator::write: Address 0x%x out of range [0x%x, 0x%x)\n",
+             pkt_addr, pioAddr, pioAddr + pioSize);
+        pkt->makeResponse();
+        return pioDelay;
+    }
     
-    Addr offset = pkt->getAddr() - pioAddr;
+    Addr offset = pkt_addr - pioAddr;
     // Read value from packet using little-endian byte order
     uint32_t value = pkt->getUintX(ByteOrder::little);
 
