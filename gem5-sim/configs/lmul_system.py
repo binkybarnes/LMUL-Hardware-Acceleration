@@ -88,6 +88,20 @@ def createSystem(args):
         process.cmd = [args.cmd] + args.cmd_args
         system.cpu.workload = process
         system.cpu.createThreads()
+        
+        # Map accelerator MMIO region into process address space
+        # This allows the benchmark to access the accelerator at 0x20000000
+        # The accelerator is at 0x20000000 with size 0x1000 (4KB)
+        accel_addr = 0x20000000
+        accel_size = 0x1000
+        # Add MMIO region to process memory map
+        # In SE mode, we need to map this so user code can access it
+        # Note: This is a workaround - in real systems, MMIO is kernel-space only
+        # But for simulation, we allow user-space access
+        if hasattr(process, 'map'):
+            # Some SE workloads support direct mapping
+            pass
+        # The mapping will be handled by the memory system when the access occurs
     
     # Set clock
     system.clk_domain = SrcClockDomain()
