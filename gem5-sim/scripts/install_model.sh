@@ -219,7 +219,21 @@ fi
 
 # Build gem5 - use explicit python3 to ensure fresh process
 # The -u flag ensures unbuffered output
-PYTHONUNBUFFERED=1 scons build/${ISA}/gem5.opt -j${JOBS} 2>&1 | tee /tmp/gem5_build.log
+# In Codespaces, try building debug first (smaller binary, less memory during linking)
+# If that works, we can rebuild as opt later
+if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
+    echo "  Codespace detected - checking memory before linking..."
+    echo "  Available memory:"
+    free -h | grep -E "Mem|Swap" || true
+    echo
+    echo "  Attempting build with debug binary (uses less memory)..."
+    echo "  Note: You can rebuild as 'opt' later if needed"
+    BUILD_TARGET="build/${ISA}/gem5.debug"
+else
+    BUILD_TARGET="build/${ISA}/gem5.opt"
+fi
+
+PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} -j${JOBS} 2>&1 | tee /tmp/gem5_build.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo
