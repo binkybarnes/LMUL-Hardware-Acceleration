@@ -196,8 +196,11 @@ rm -rf build/
 ```
 
 **Out of memory during build**:
-- Use fewer parallel jobs: `scons build/ARM/gem5.opt -j2`
-- The install script automatically uses 2 jobs in Codespaces
+- In Codespaces, use: `scons build/ARM/gem5.debug -j1 CXXFLAGS="-O0"`
+- This builds a debug binary with no optimization, reducing linker memory usage
+- The install script automatically uses this configuration in Codespaces
+- On systems with more memory, you can rebuild as opt: `scons build/ARM/gem5.opt -j1`
+- All scripts automatically detect and use either `gem5.opt` or `gem5.debug` if available
 
 ### Runtime Issues
 

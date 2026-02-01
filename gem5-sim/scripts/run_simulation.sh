@@ -83,9 +83,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check gem5 exists
-if [ ! -f "$GEM5_ROOT/build/ARM/gem5.opt" ]; then
-    echo "Error: gem5 not built. Run install_model.sh first."
+# Check gem5 exists - try opt first, fall back to debug (for Codespaces)
+if [ -f "${GEM5_ROOT}/build/ARM/gem5.opt" ]; then
+    GEM5_BINARY="${GEM5_ROOT}/build/ARM/gem5.opt"
+elif [ -f "${GEM5_ROOT}/build/ARM/gem5.debug" ]; then
+    GEM5_BINARY="${GEM5_ROOT}/build/ARM/gem5.debug"
+else
+    echo "Error: gem5 binary not found"
+    echo "  Expected: ${GEM5_ROOT}/build/ARM/gem5.opt or gem5.debug"
+    echo "  Run: ./gem5-sim/scripts/install_model.sh"
     exit 1
 fi
 
