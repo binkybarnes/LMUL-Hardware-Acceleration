@@ -178,7 +178,10 @@ def main():
                 else:
                     workload = system.cpu.workload
                 workload.map(accel_addr, accel_addr, accel_size, False)
-                print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
+                # Convert Addr to int for formatting
+                accel_addr_int = int(accel_addr)
+                accel_size_int = int(accel_size)
+                print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr_int:x} (size 0x{accel_size_int:x})", file=sys.stderr, flush=True)
             except Exception as e:
                 print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
     except Exception as e:
