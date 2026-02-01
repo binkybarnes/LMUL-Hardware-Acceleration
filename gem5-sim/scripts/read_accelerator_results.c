@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#define LMUL_BASE_ADDR   0x10000000  // Changed to 256MB (within 512MB memory range)
+#define LMUL_BASE_ADDR   0x40000000  // MMIO at 1GB (common MMIO region)
 
 #define REG_STATUS       0x04
 #define REG_RESULT_IDX   0x30

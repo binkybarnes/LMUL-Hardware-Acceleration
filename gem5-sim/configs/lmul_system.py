@@ -35,8 +35,10 @@ class LMulSystem(System):
         self.cpu.dcache_port = self.membus.cpu_side_ports
         
         # LMUL Accelerator
+        # Use a lower address to avoid page table issues in SE mode
+        # 0x40000000 (1GB) is a common MMIO region in many systems
         self.lmul_accel = LMulAccelerator(
-            pio_addr=0x10000000,  # Memory-mapped at 256MB (within 512MB range)
+            pio_addr=0x40000000,  # Memory-mapped at 1GB (common MMIO region)
             pio_size=0x1000,
             pe_array_rows=pe_rows,
             pe_array_cols=pe_cols,
@@ -73,7 +75,8 @@ def createSystem(args):
     )
     
     # Set memory ranges (must be set after creation, not in constructor)
-    # Accelerator is at 0x10000000 (256MB), which is within the 512MB range
+    # Accelerator is at 0x40000000 (1GB), which is outside normal memory
+    # This is fine - MMIO devices can be at any address
     system.mem_ranges = [AddrRange('512MB')]
     
     # Set memory controller range to match system memory range
@@ -90,10 +93,10 @@ def createSystem(args):
         system.cpu.workload = process
         system.cpu.createThreads()
         
-        # Map accelerator MMIO region (0x10000000) into process address space
+        # Map accelerator MMIO region (0x40000000) into process address space
         # In SE mode, user processes need MMIO addresses to be mapped
-        # Accelerator is at 0x10000000 (256MB), which should be accessible
-        accel_addr = 0x10000000
+        # Accelerator is at 0x40000000 (1GB), a common MMIO region
+        accel_addr = 0x40000000
         accel_size = 0x1000  # 4KB
         
         # For ARM SE workloads, we can add the MMIO region to the memory map
