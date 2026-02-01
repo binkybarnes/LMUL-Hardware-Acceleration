@@ -84,13 +84,18 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
-        # Set workload first (required for SE mode)
-        system.workload = SEWorkload.init_compatible(args.cmd)
-        
-        # Create process
+        # Create process first
         process = Process()
         process.cmd = [args.cmd] + args.cmd_args
+        
+        # Set workload (required for SE mode) - must be set before assigning to CPU
+        system.workload = SEWorkload.init_compatible(args.cmd)
+        
+        # Assign process to CPU workload
+        # This must be done after workload is set and before createThreads()
         system.cpu.workload = process
+        
+        # Create threads (this properly attaches the process to the system)
         system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
@@ -103,9 +108,10 @@ def createSystem(args):
         # This is necessary in SE mode - MMIO addresses aren't automatically mapped
         # Note: In real systems, MMIO is kernel-space only, but for simulation
         # we allow user-space access
+        # Use the process from the CPU workload (it's now properly attached)
         try:
             # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
-            process.map(accel_addr, accel_addr, accel_size, False)
+            system.cpu.workload.map(accel_addr, accel_addr, accel_size, False)
             print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
         except Exception as e:
             print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
