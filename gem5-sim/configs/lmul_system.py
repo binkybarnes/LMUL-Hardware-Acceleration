@@ -146,24 +146,17 @@ def main():
     print("System created")
     
     # Create Process AFTER system is created but BEFORE Root
-    # Following hmc_hello.py pattern exactly
+    # Following hmc_hello.py pattern exactly - must match the exact order
     if args.cmd:
-        # Create process (following hmc_hello.py pattern exactly)
+        # Step 1: Create process (following hmc_hello.py pattern exactly)
         process = Process()
+        # Step 2: Set cmd (following hmc_hello.py)
         process.cmd = [args.cmd] + args.cmd_args
-        
-        # Set system workload (required for SE mode)
-        # This must be done before assigning process to CPU
-        # Note: workload was already set in createSystem(), but we ensure it's set here too
-        if not hasattr(system, 'workload') or system.workload is None:
-            system.workload = SEWorkload.init_compatible(args.cmd)
-        
-        # Assign process to CPU workload
-        # This assignment properly attaches the process to the system hierarchy
+        # Step 3: Set system workload (following hmc_hello.py - must be before cpu.workload)
+        system.workload = SEWorkload.init_compatible(args.cmd)
+        # Step 4: Set cpu workload (following hmc_hello.py)
         system.cpu.workload = process
-        
-        # Create thread contexts (following hmc_hello.py)
-        # This must be done before creating Root
+        # Step 5: Create thread contexts (following hmc_hello.py)
         system.cpu.createThreads()
     
     # Create root object
