@@ -146,10 +146,9 @@ def main():
     print("System created")
     
     # Create Process AFTER system is created but BEFORE Root
-    # This ensures the Process is properly parented to the CPU
     # Following hmc_hello.py pattern exactly
     if args.cmd:
-        # Create process (following hmc_hello.py pattern)
+        # Create process (following hmc_hello.py pattern exactly)
         process = Process()
         process.cmd = [args.cmd] + args.cmd_args
         
@@ -157,10 +156,9 @@ def main():
         # This assignment properly attaches the process to the system hierarchy
         system.cpu.workload = process
         
-        # Map accelerator MMIO region into process address space
-        # In SE mode, MMIO addresses must be explicitly mapped for user processes
-        # Wait until after Root is created to map MMIO (process needs to be fully instantiated)
-        # We'll do this after m5.instantiate()
+        # Create thread contexts (following hmc_hello.py)
+        # This must be done before creating Root
+        system.cpu.createThreads()
     
     # Create root object
     print("Creating root object...")
