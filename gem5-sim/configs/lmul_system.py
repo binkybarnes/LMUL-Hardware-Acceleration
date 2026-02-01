@@ -87,37 +87,12 @@ def createSystem(args):
     system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
     
     # Set up process for SE mode
-    # Note: We'll create the Process in main() after Root is created
-    # This ensures the system hierarchy is fully established first
+    # Note: Process creation and MMIO mapping will be done in main()
+    # after the system is created but before Root is created
     if args.cmd:
         # Set workload (required for SE mode)
         # This must be done before creating the Process
         system.workload = SEWorkload.init_compatible(args.cmd)
-        
-        # Map accelerator MMIO region into process address space
-        # In SE mode, MMIO addresses must be explicitly mapped for user processes
-        # The accelerator is at 0x40000000 (1GB), which needs to be mapped
-        accel_addr = system.lmul_accel.pio_addr
-        accel_size = system.lmul_accel.pio_size
-        
-        # Explicitly map the MMIO region so the benchmark can access it
-        # This is necessary in SE mode - MMIO addresses aren't automatically mapped
-        # Note: In real systems, MMIO is kernel-space only, but for simulation
-        # we allow user-space access
-        # Use the process from the CPU workload (it's now properly attached)
-        # Note: workload is a SimObjectVector, so we need to access the first element
-        try:
-            # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
-            # workload is a vector, so access the first (and only) process
-            if hasattr(system.cpu.workload, '__getitem__'):
-                workload = system.cpu.workload[0]
-            else:
-                workload = system.cpu.workload
-            workload.map(accel_addr, accel_addr, accel_size, False)
-            print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
-        except Exception as e:
-            print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
-            # Continue anyway - gem5 might handle it automatically
     
     return system
 
@@ -172,13 +147,11 @@ def main():
     
     # Create Process AFTER system is created but BEFORE Root
     # This ensures the Process is properly parented to the CPU
+    # Following hmc_hello.py pattern exactly
     if args.cmd:
-        # Following ARM starter_se.py pattern: create Process with pid and other params
-        process = Process(
-            pid=100,  # Process ID (required for proper initialization)
-            executable=args.cmd,
-            cmd=[args.cmd] + args.cmd_args
-        )
+        # Create process (following hmc_hello.py pattern)
+        process = Process()
+        process.cmd = [args.cmd] + args.cmd_args
         
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
@@ -186,20 +159,8 @@ def main():
         
         # Map accelerator MMIO region into process address space
         # In SE mode, MMIO addresses must be explicitly mapped for user processes
-        accel_addr = system.lmul_accel.pio_addr
-        accel_size = system.lmul_accel.pio_size
-        
-        try:
-            # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
-            # workload is a vector, so access the first (and only) process
-            if hasattr(system.cpu.workload, '__getitem__'):
-                workload = system.cpu.workload[0]
-            else:
-                workload = system.cpu.workload
-            workload.map(accel_addr, accel_addr, accel_size, False)
-            print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
-        except Exception as e:
-            print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
+        # Wait until after Root is created to map MMIO (process needs to be fully instantiated)
+        # We'll do this after m5.instantiate()
     
     # Create root object
     print("Creating root object...")
