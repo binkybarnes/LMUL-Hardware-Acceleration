@@ -67,15 +67,18 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LMUL_GEM5="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROJECT_ROOT="$(dirname "$LMUL_GEM5")"
 GEM5_ROOT="${PROJECT_ROOT}/gem5"
-GEM5_BINARY="${GEM5_ROOT}/build/ARM/gem5.opt"
-CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
-
-# Check prerequisites
-if [ ! -f "$GEM5_BINARY" ]; then
+# Try opt first, fall back to debug (for Codespaces)
+if [ -f "${GEM5_ROOT}/build/ARM/gem5.opt" ]; then
+    GEM5_BINARY="${GEM5_ROOT}/build/ARM/gem5.opt"
+elif [ -f "${GEM5_ROOT}/build/ARM/gem5.debug" ]; then
+    GEM5_BINARY="${GEM5_ROOT}/build/ARM/gem5.debug"
+    echo "Note: Using gem5.debug (opt binary not found)"
+else
     echo "Error: gem5 not built. Run install_model.sh first."
-    echo "  Expected: $GEM5_BINARY"
+    echo "  Expected: ${GEM5_ROOT}/build/ARM/gem5.opt or gem5.debug"
     exit 1
 fi
+CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
 
 # Determine which benchmark to use
 if [ $USE_SIMPLE_TEST -eq 1 ]; then

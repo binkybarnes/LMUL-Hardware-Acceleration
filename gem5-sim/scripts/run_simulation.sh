@@ -144,7 +144,14 @@ echo "Running simulation..."
 echo "Command: $GEM5_CMD ${GEM5_ARGS[@]} $CONFIG ${CONFIG_ARGS[@]}"
 echo
 
-"$GEM5_CMD" "${GEM5_ARGS[@]}" "$CONFIG" "${CONFIG_ARGS[@]}"
+# Check if running in background mode (via nohup or similar)
+if [ -t 0 ] && [ -t 1 ]; then
+    # Interactive terminal - run normally
+    "$GEM5_CMD" "${GEM5_ARGS[@]}" "$CONFIG" "${CONFIG_ARGS[@]}"
+else
+    # Background/non-interactive - ensure output is flushed
+    "$GEM5_CMD" "${GEM5_ARGS[@]}" "$CONFIG" "${CONFIG_ARGS[@]}" 2>&1 | tee -a "$OUTPUT_DIR/simulation.log"
+fi
 
 # Check if simulation completed
 if [ $? -eq 0 ]; then

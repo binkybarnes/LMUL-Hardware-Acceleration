@@ -145,6 +145,11 @@ system.lmul_accel.pio = system.membus.mem_side_ports
 
 ```bash
 # Build gem5 (from gem5 directory)
+# In Codespaces or low-memory environments, use:
+cd gem5
+scons build/ARM/gem5.debug -j1 CXXFLAGS="-O0"
+
+# On systems with more memory, use optimized build:
 cd gem5
 scons build/ARM/gem5.opt -j$(nproc)
 
