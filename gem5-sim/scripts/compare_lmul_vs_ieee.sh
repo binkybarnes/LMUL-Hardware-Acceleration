@@ -83,9 +83,18 @@ if [ $USE_SIMPLE_TEST -eq 1 ]; then
     BENCHMARK_ARGS=()  # simple_test takes no arguments
     echo "Using simple_test benchmark (avoids syscall 403)"
 else
-    BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
-    BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-    echo "Using matrix_multiply benchmark (may hit syscall 403)"
+    # Try no-printf version first (avoids syscall 403)
+    NO_PRINTF_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm"
+    if [ -f "$NO_PRINTF_BIN" ]; then
+        BENCHMARK_BIN="$NO_PRINTF_BIN"
+        BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+        echo "Using matrix_multiply_no_printf benchmark (avoids syscall 403)"
+    else
+        BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
+        BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+        echo "Using matrix_multiply benchmark (may hit syscall 403)"
+        echo "  Build no-printf version: cd benchmarks/matrix_multiply && make both"
+    fi
 fi
 
 # Check benchmark binary exists

@@ -20,6 +20,7 @@ CFLAGS_X86 = -static -O2
 # Default target
 TARGET = matrix_multiply
 SOURCE = matrix_multiply.c
+SOURCE_NO_PRINTF = matrix_multiply_no_printf.c
 
 # Default to ARM (change to x86 if needed)
 ARCH ?= arm
@@ -28,17 +29,26 @@ ifeq ($(ARCH),arm)
     CC = $(CC_ARM)
     CFLAGS = $(CFLAGS_ARM)
     BINARY = $(TARGET).arm
+    ARCH_SUFFIX = arm
 else
     CC = $(CC_X86)
     CFLAGS = $(CFLAGS_X86)
     BINARY = $(TARGET).x86
+    ARCH_SUFFIX = x86
 endif
 
 all: $(BINARY)
 
+# Build both versions
+both: $(BINARY) $(TARGET)_no_printf.$(ARCH_SUFFIX)
+
 $(BINARY): $(SOURCE)
 	$(CC) $(CFLAGS) -o $@ $<
 	@echo "Built $@ for $(ARCH)"
+
+$(TARGET)_no_printf.$(ARCH_SUFFIX): $(SOURCE_NO_PRINTF)
+	$(CC) $(CFLAGS) -o $@ $<
+	@echo "Built $@ for $(ARCH) (no printf version)"
 
 arm:
 	$(MAKE) ARCH=arm
@@ -49,7 +59,7 @@ x86:
 both: arm x86
 
 clean:
-	rm -f $(TARGET).arm $(TARGET).x86 *.o
+	rm -f $(TARGET).arm $(TARGET).x86 $(TARGET)_no_printf.arm $(TARGET)_no_printf.x86 *.o
 
 test: $(BINARY)
 	@echo "Testing $(BINARY) with 4x4 matrices..."
