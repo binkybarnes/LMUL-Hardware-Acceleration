@@ -164,6 +164,23 @@ def main():
     try:
         m5.instantiate()
         print("Configuration instantiated successfully")
+        
+        # Map accelerator MMIO region AFTER instantiation (following apu_se.py pattern)
+        # The process is now fully instantiated and we can safely access it
+        if args.cmd:
+            accel_addr = system.lmul_accel.pio_addr
+            accel_size = system.lmul_accel.pio_size
+            try:
+                # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
+                # workload is a vector, so access the first (and only) process
+                if hasattr(system.cpu.workload, '__getitem__') and len(system.cpu.workload) > 0:
+                    workload = system.cpu.workload[0]
+                else:
+                    workload = system.cpu.workload
+                workload.map(accel_addr, accel_addr, accel_size, False)
+                print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
+            except Exception as e:
+                print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
     except Exception as e:
         print(f"ERROR: Failed to instantiate: {e}")
         import traceback
