@@ -92,8 +92,7 @@ def createSystem(args):
         system.workload = SEWorkload.init_compatible(args.cmd)
         
         # Create process with command and arguments
-        # Pass executable explicitly to ensure proper initialization
-        # Note: Don't assign directly - let the workload assignment handle it
+        # Following ARM starter_se.py pattern: create Process, then assign to CPU
         process = Process(
             executable=args.cmd,
             cmd=[args.cmd] + args.cmd_args
@@ -101,10 +100,12 @@ def createSystem(args):
         
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
+        # The process becomes a child of the CPU, which prevents the orphan error
         system.cpu.workload = process
         
-        # Create threads after workload is assigned
-        # This ensures the process is properly parented
+        # Note: createThreads() is called automatically when workload is assigned
+        # in some gem5 versions, but we call it explicitly to be safe
+        # However, calling it too early can cause issues, so we do it after assignment
         system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
