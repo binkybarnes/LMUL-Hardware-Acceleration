@@ -87,10 +87,13 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
-        # Following hmc_hello.py pattern: create Process, set cmd, then assign
+        # Following ARM starter_se.py pattern: create Process with pid and other params
         # This ensures the Process is properly initialized before assignment
-        process = Process()
-        process.cmd = [args.cmd] + args.cmd_args
+        process = Process(
+            pid=100,  # Process ID (required for proper initialization)
+            executable=args.cmd,
+            cmd=[args.cmd] + args.cmd_args
+        )
         
         # Set workload (required for SE mode)
         # This must be done before assigning process to CPU
