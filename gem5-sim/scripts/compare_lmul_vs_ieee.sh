@@ -21,6 +21,7 @@ MATRIX_SIZE=4
 PE_ROWS=4
 PE_COLS=4
 OUTPUT_DIR="lmul_vs_ieee_comparison"
+USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall 403
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -40,6 +41,10 @@ while [[ $# -gt 0 ]]; do
         --output-dir)
             OUTPUT_DIR="$2"
             shift 2
+            ;;
+        --simple-test)
+            USE_SIMPLE_TEST=1
+            shift
             ;;
         -h|--help)
             echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR]"
@@ -72,12 +77,26 @@ if [ ! -f "$GEM5_BINARY" ]; then
     exit 1
 fi
 
+# Determine which benchmark to use
+if [ $USE_SIMPLE_TEST -eq 1 ]; then
+    BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/simple_test/simple_test.arm"
+    BENCHMARK_ARGS=()  # simple_test takes no arguments
+    echo "Using simple_test benchmark (avoids syscall 403)"
+else
+    BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
+    BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+    echo "Using matrix_multiply benchmark (may hit syscall 403)"
+fi
+
 # Check benchmark binary exists
-BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
 if [ ! -f "$BENCHMARK_BIN" ]; then
     echo "Error: Benchmark binary not found: $BENCHMARK_BIN"
     echo "Build it with:"
-    echo "  cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+    if [ $USE_SIMPLE_TEST -eq 1 ]; then
+        echo "  cd ${LMUL_GEM5}/benchmarks/simple_test"
+    else
+        echo "  cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+    fi
     echo "  make"
     exit 1
 fi
@@ -112,7 +131,7 @@ if ! "$GEM5_BINARY" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
-    --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1" \
+    --cmd-args "${BENCHMARK_ARGS[@]}" "1" \
     > "$LMUL_OUTPUT/simulation.log" 2>&1; then
     LMUL_EXIT_CODE=$?
     echo "⚠ LMUL simulation failed (exit code: $LMUL_EXIT_CODE)"
@@ -162,7 +181,7 @@ if ! "$GEM5_BINARY" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
-    --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "0" \
+    --cmd-args "${BENCHMARK_ARGS[@]}" "0" \
     > "$IEEE_OUTPUT/simulation.log" 2>&1; then
     IEEE_EXIT_CODE=$?
     echo "⚠ IEEE simulation failed (exit code: $IEEE_EXIT_CODE)"

@@ -167,17 +167,25 @@ def main():
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     
     print("Beginning simulation...", flush=True)
-    exit_event = m5.simulate()
     
-    print(f"Simulation complete: {exit_event.getCause()}", flush=True)
-    print(f"Exit code: {exit_event.getCode()}", flush=True)
-    
-    # Dump statistics - this is critical!
-    # gem5 automatically dumps stats on exit, but we'll do it explicitly too
-    print("Dumping statistics...", flush=True)
-    
-    # Force stats dump - this should create stats.txt
-    m5.stats.dump()
+    # Wrap simulate in try/except to ensure stats are dumped even on fatal errors
+    exit_event = None
+    try:
+        exit_event = m5.simulate()
+        print(f"Simulation complete: {exit_event.getCause()}", flush=True)
+        print(f"Exit code: {exit_event.getCode()}", flush=True)
+    except Exception as e:
+        print(f"Simulation exited with exception: {e}", flush=True)
+        print("Attempting to dump statistics despite error...", flush=True)
+    finally:
+        # ALWAYS dump stats, even if simulation failed
+        # This is critical - we want stats even if there was a fatal error
+        try:
+            print("Dumping statistics...", flush=True)
+            m5.stats.dump()
+            print("Statistics dumped successfully", flush=True)
+        except Exception as e:
+            print(f"WARNING: Failed to dump statistics: {e}", flush=True)
     
     # Also ensure we're in the right directory
     import os
