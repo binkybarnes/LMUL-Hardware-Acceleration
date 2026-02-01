@@ -117,7 +117,7 @@ echo "========================================"
 echo
 
 # Build gem5 command
-GEM5_CMD="${GEM5_ROOT}/build/ARM/gem5.opt"
+GEM5_CMD="$GEM5_BINARY"
 CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
 
 GEM5_ARGS=(
