@@ -36,7 +36,7 @@ class LMulSystem(System):
         
         # LMUL Accelerator
         self.lmul_accel = LMulAccelerator(
-            pio_addr=0x20000000,  # Memory-mapped at 256MB
+            pio_addr=0x10000000,  # Memory-mapped at 256MB (within 512MB range)
             pio_size=0x1000,
             pe_array_rows=pe_rows,
             pe_array_cols=pe_cols,
@@ -73,9 +73,7 @@ def createSystem(args):
     )
     
     # Set memory ranges (must be set after creation, not in constructor)
-    # Include accelerator MMIO region in memory ranges so it's accessible
-    # Accelerator is at 0x20000000 (512MB), so we need memory up to at least 512MB + 4KB
-    # But we'll keep it at 512MB and map the accelerator separately
+    # Accelerator is at 0x10000000 (256MB), which is within the 512MB range
     system.mem_ranges = [AddrRange('512MB')]
     
     # Set memory controller range to match system memory range
@@ -92,10 +90,10 @@ def createSystem(args):
         system.cpu.workload = process
         system.cpu.createThreads()
         
-        # Map accelerator MMIO region (0x20000000) into process address space
+        # Map accelerator MMIO region (0x10000000) into process address space
         # In SE mode, user processes need MMIO addresses to be mapped
-        # We'll use the workload's memory map to add the accelerator region
-        accel_addr = 0x20000000
+        # Accelerator is at 0x10000000 (256MB), which should be accessible
+        accel_addr = 0x10000000
         accel_size = 0x1000  # 4KB
         
         # For ARM SE workloads, we can add the MMIO region to the memory map
