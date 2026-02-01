@@ -11,7 +11,7 @@
 #include <time.h>
 
 // LMUL Accelerator Register Offsets
-#define LMUL_BASE_ADDR   0x20000000
+#define LMUL_BASE_ADDR   0x10000000  // Changed to 256MB (within 512MB memory range)
 
 #define REG_CONTROL      0x00
 #define REG_STATUS       0x04

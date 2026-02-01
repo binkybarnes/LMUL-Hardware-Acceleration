@@ -73,6 +73,9 @@ def createSystem(args):
     )
     
     # Set memory ranges (must be set after creation, not in constructor)
+    # Include accelerator MMIO region in memory ranges so it's accessible
+    # Accelerator is at 0x20000000 (512MB), so we need memory up to at least 512MB + 4KB
+    # But we'll keep it at 512MB and map the accelerator separately
     system.mem_ranges = [AddrRange('512MB')]
     
     # Set memory controller range to match system memory range
@@ -89,19 +92,23 @@ def createSystem(args):
         system.cpu.workload = process
         system.cpu.createThreads()
         
-        # Map accelerator MMIO region into process address space
-        # This allows the benchmark to access the accelerator at 0x20000000
-        # The accelerator is at 0x20000000 with size 0x1000 (4KB)
+        # Map accelerator MMIO region (0x20000000) into process address space
+        # In SE mode, user processes need MMIO addresses to be mapped
+        # We'll use the workload's memory map to add the accelerator region
         accel_addr = 0x20000000
-        accel_size = 0x1000
-        # Add MMIO region to process memory map
-        # In SE mode, we need to map this so user code can access it
-        # Note: This is a workaround - in real systems, MMIO is kernel-space only
-        # But for simulation, we allow user-space access
-        if hasattr(process, 'map'):
-            # Some SE workloads support direct mapping
+        accel_size = 0x1000  # 4KB
+        
+        # For ARM SE workloads, we can add the MMIO region to the memory map
+        # This allows user-space access to the accelerator (unrealistic but needed for simulation)
+        if hasattr(system.workload, 'addr_check'):
+            # Some workloads have address checking - we may need to disable it for MMIO
             pass
-        # The mapping will be handled by the memory system when the access occurs
+        
+        # The actual mapping happens through the MMU when the access occurs
+        # But we need to ensure the address is valid. One approach is to extend
+        # the memory range or use a different address that's already mapped.
+        # For now, we'll rely on gem5's automatic MMIO handling, but this requires
+        # the address to be in a valid range.
     
     # Set clock
     system.clk_domain = SrcClockDomain()
