@@ -87,25 +87,21 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
-        # Set workload first (required for SE mode)
-        # This must be done before creating the process
-        system.workload = SEWorkload.init_compatible(args.cmd)
+        # Following hmc_hello.py pattern: create Process, set cmd, then assign
+        # This ensures the Process is properly initialized before assignment
+        process = Process()
+        process.cmd = [args.cmd] + args.cmd_args
         
-        # Create process with command and arguments
-        # Following ARM starter_se.py pattern: create Process, then assign to CPU
-        process = Process(
-            executable=args.cmd,
-            cmd=[args.cmd] + args.cmd_args
-        )
+        # Set workload (required for SE mode)
+        # This must be done before assigning process to CPU
+        system.workload = SEWorkload.init_compatible(args.cmd)
         
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
-        # The process becomes a child of the CPU, which prevents the orphan error
         system.cpu.workload = process
         
-        # Note: createThreads() is called automatically when workload is assigned
-        # in some gem5 versions, but we call it explicitly to be safe
-        # However, calling it too early can cause issues, so we do it after assignment
+        # Create threads after workload is assigned
+        # This ensures the process is properly parented
         system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
