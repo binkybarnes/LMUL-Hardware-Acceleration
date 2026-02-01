@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Compare LMUL Accelerator vs IEEE BF16 Accelerator
+# Compare LMUL Accelerator vs Native IEEE BF16 (CPU)
 #
 # This script:
 # 1. Runs simulation with LMUL accelerator
-# 2. Runs simulation with IEEE BF16 accelerator
+# 2. Runs simulation with native IEEE BF16 (CPU-based)
 # 3. Compares outputs (accuracy verification)
 # 4. Compares performance metrics
 #
@@ -75,7 +75,7 @@ IEEE_OUTPUT="${OUTPUT_DIR}/ieee"
 mkdir -p "$LMUL_OUTPUT" "$IEEE_OUTPUT"
 
 echo "=========================================="
-echo "LMUL Accelerator vs IEEE BF16 Accelerator"
+echo "LMUL Accelerator vs Native IEEE BF16 (CPU)"
 echo "=========================================="
 echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
@@ -120,9 +120,10 @@ else
     echo "⚠ LMUL simulation completed but no stats generated"
 fi
 
-# Step 2: Run IEEE BF16 accelerator simulation
+# Step 2: Run Native IEEE BF16 (CPU-based) simulation
 echo
-echo "Step 2: Running IEEE BF16 accelerator simulation..."
+echo "Step 2: Running Native IEEE BF16 (CPU) simulation..."
+echo "  This uses CPU for standard IEEE multiplication (not accelerator)"
 echo "  This may take a few minutes..."
 echo
 
@@ -131,9 +132,8 @@ echo
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
-    --use-ieee \
     --cmd="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm" \
-    --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "1" \
+    --cmd-args "$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE" "0" \
     > "$IEEE_OUTPUT/simulation.log" 2>&1
 
 IEEE_EXIT_CODE=$?

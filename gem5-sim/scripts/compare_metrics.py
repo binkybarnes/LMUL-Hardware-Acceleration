@@ -84,7 +84,7 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
 def print_comparison(lmul_metrics, ieee_metrics, speedup):
     """Print formatted comparison"""
     print("\n" + "="*70)
-    print("Performance Comparison: LMUL Accelerator vs IEEE BF16")
+    print("Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)")
     print("="*70)
     
     print(f"\n{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
