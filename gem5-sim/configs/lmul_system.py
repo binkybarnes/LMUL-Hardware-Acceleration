@@ -116,9 +116,15 @@ def createSystem(args):
         # Note: In real systems, MMIO is kernel-space only, but for simulation
         # we allow user-space access
         # Use the process from the CPU workload (it's now properly attached)
+        # Note: workload is a SimObjectVector, so we need to access the first element
         try:
             # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
-            system.cpu.workload.map(accel_addr, accel_addr, accel_size, False)
+            # workload is a vector, so access the first (and only) process
+            if hasattr(system.cpu.workload, '__getitem__'):
+                workload = system.cpu.workload[0]
+            else:
+                workload = system.cpu.workload
+            workload.map(accel_addr, accel_addr, accel_size, False)
             print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
         except Exception as e:
             print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
