@@ -86,13 +86,9 @@ def createSystem(args):
     # Set clock domain (must be set before creating processes)
     system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
     
-    # Set up process for SE mode
-    # Note: Process creation and MMIO mapping will be done in main()
+    # Note: Process creation and workload setup will be done in main()
     # after the system is created but before Root is created
-    if args.cmd:
-        # Set workload (required for SE mode)
-        # This must be done before creating the Process
-        system.workload = SEWorkload.init_compatible(args.cmd)
+    # This matches hmc_hello.py pattern exactly
     
     return system
 
