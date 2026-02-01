@@ -123,8 +123,6 @@ def createSystem(args):
         except Exception as e:
             print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
             # Continue anyway - gem5 might handle it automatically
-    system.clk_domain.clock = args.cpu_clock
-    system.clk_domain.voltage_domain = VoltageDomain()
     
     return system
 
