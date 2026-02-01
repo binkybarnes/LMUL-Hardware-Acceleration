@@ -82,6 +82,9 @@ def createSystem(args):
     # Set memory controller range to match system memory range
     system.mem_ctrl.dram.range = system.mem_ranges[0]
     
+    # Set clock domain (must be set before creating processes)
+    system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
+    
     # Set up process for SE mode
     if args.cmd:
         # Set workload first (required for SE mode)
@@ -89,8 +92,11 @@ def createSystem(args):
         system.workload = SEWorkload.init_compatible(args.cmd)
         
         # Create process with command and arguments
-        # The process will be properly attached when assigned to CPU
-        process = Process(cmd=[args.cmd] + args.cmd_args)
+        # Pass executable explicitly to ensure proper initialization
+        process = Process(
+            executable=args.cmd,
+            cmd=[args.cmd] + args.cmd_args
+        )
         
         # Assign process to CPU workload
         # This must be done before createThreads()
@@ -117,9 +123,6 @@ def createSystem(args):
         except Exception as e:
             print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
             # Continue anyway - gem5 might handle it automatically
-    
-    # Set clock
-    system.clk_domain = SrcClockDomain()
     system.clk_domain.clock = args.cpu_clock
     system.clk_domain.voltage_domain = VoltageDomain()
     
