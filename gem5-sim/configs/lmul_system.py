@@ -26,7 +26,8 @@ class LMulSystem(System):
     def __init__(self, pe_rows=4, pe_cols=4, use_lmul=True, **kwargs):
         super().__init__(**kwargs)
         
-        # CPU
+        # CPU - must be created as a child of System (not an attribute)
+        # This ensures proper parenting in the SimObject hierarchy
         self.cpu = TimingSimpleCPU()
         
         # Memory
@@ -87,20 +88,22 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
+        # Set workload FIRST (required for SE mode)
+        # This must be done before creating the Process
+        system.workload = SEWorkload.init_compatible(args.cmd)
+        
+        # Create Process AFTER workload is set
         # Following ARM starter_se.py pattern: create Process with pid and other params
-        # This ensures the Process is properly initialized before assignment
+        # The Process must be created after the system is fully configured
         process = Process(
             pid=100,  # Process ID (required for proper initialization)
             executable=args.cmd,
             cmd=[args.cmd] + args.cmd_args
         )
         
-        # Set workload (required for SE mode)
-        # This must be done before assigning process to CPU
-        system.workload = SEWorkload.init_compatible(args.cmd)
-        
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
+        # The Process becomes a child of the CPU, which is a child of the System
         # Note: Do NOT call createThreads() here - it may cause orphan errors
         # createThreads() will be called automatically during instantiation if needed
         system.cpu.workload = process
