@@ -201,9 +201,11 @@ echo "  Starting fresh build (this may take 20-30 minutes)..."
 # Use fewer jobs in Codespaces to avoid memory issues
 # Check if we're in a Codespace environment
 if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
-    # Codespace detected - use fewer jobs to avoid OOM
-    JOBS=2
-    echo "  Detected Codespace environment - using ${JOBS} parallel jobs"
+    # Codespace detected - use single job to avoid OOM during linking
+    # Linking phase is very memory-intensive
+    JOBS=1
+    echo "  Detected Codespace environment - using ${JOBS} parallel job (single-threaded)"
+    echo "  Note: This is slower but avoids out-of-memory errors during linking"
 else
     # Use all available cores, but cap at 4 to avoid memory issues
     AVAILABLE_CORES=$(nproc)
