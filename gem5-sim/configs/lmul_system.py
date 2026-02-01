@@ -170,6 +170,37 @@ def main():
     system = createSystem(args)
     print("System created")
     
+    # Create Process AFTER system is created but BEFORE Root
+    # This ensures the Process is properly parented to the CPU
+    if args.cmd:
+        # Following ARM starter_se.py pattern: create Process with pid and other params
+        process = Process(
+            pid=100,  # Process ID (required for proper initialization)
+            executable=args.cmd,
+            cmd=[args.cmd] + args.cmd_args
+        )
+        
+        # Assign process to CPU workload
+        # This assignment properly attaches the process to the system hierarchy
+        system.cpu.workload = process
+        
+        # Map accelerator MMIO region into process address space
+        # In SE mode, MMIO addresses must be explicitly mapped for user processes
+        accel_addr = system.lmul_accel.pio_addr
+        accel_size = system.lmul_accel.pio_size
+        
+        try:
+            # Map the MMIO region: virtual_addr, physical_addr, size, cacheable
+            # workload is a vector, so access the first (and only) process
+            if hasattr(system.cpu.workload, '__getitem__'):
+                workload = system.cpu.workload[0]
+            else:
+                workload = system.cpu.workload
+            workload.map(accel_addr, accel_addr, accel_size, False)
+            print(f"DEBUG: Mapped accelerator MMIO region 0x{accel_addr:x} (size 0x{accel_size:x})", file=sys.stderr, flush=True)
+        except Exception as e:
+            print(f"WARNING: Could not map MMIO region: {e}", file=sys.stderr, flush=True)
+    
     # Create root object
     print("Creating root object...")
     root = Root(full_system=False, system=system)
