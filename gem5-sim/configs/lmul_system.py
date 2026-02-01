@@ -101,11 +101,9 @@ def createSystem(args):
         
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
+        # Note: Do NOT call createThreads() here - it may cause orphan errors
+        # createThreads() will be called automatically during instantiation if needed
         system.cpu.workload = process
-        
-        # Create threads after workload is assigned
-        # This ensures the process is properly parented
-        system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
         # In SE mode, MMIO addresses must be explicitly mapped for user processes
