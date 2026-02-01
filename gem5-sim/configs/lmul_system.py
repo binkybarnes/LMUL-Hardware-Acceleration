@@ -93,16 +93,18 @@ def createSystem(args):
         
         # Create process with command and arguments
         # Pass executable explicitly to ensure proper initialization
+        # Note: Don't assign directly - let the workload assignment handle it
         process = Process(
             executable=args.cmd,
             cmd=[args.cmd] + args.cmd_args
         )
         
         # Assign process to CPU workload
-        # This must be done before createThreads()
+        # This assignment properly attaches the process to the system hierarchy
         system.cpu.workload = process
         
-        # Create threads (this properly attaches the process to the system hierarchy)
+        # Create threads after workload is assigned
+        # This ensures the process is properly parented
         system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
