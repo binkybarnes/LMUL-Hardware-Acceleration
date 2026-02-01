@@ -84,18 +84,19 @@ def createSystem(args):
     
     # Set up process for SE mode
     if args.cmd:
-        # Create process first
-        process = Process()
-        process.cmd = [args.cmd] + args.cmd_args
-        
-        # Set workload (required for SE mode) - must be set before assigning to CPU
+        # Set workload first (required for SE mode)
+        # This must be done before creating the process
         system.workload = SEWorkload.init_compatible(args.cmd)
         
+        # Create process with command and arguments
+        # The process will be properly attached when assigned to CPU
+        process = Process(cmd=[args.cmd] + args.cmd_args)
+        
         # Assign process to CPU workload
-        # This must be done after workload is set and before createThreads()
+        # This must be done before createThreads()
         system.cpu.workload = process
         
-        # Create threads (this properly attaches the process to the system)
+        # Create threads (this properly attaches the process to the system hierarchy)
         system.cpu.createThreads()
         
         # Map accelerator MMIO region into process address space
