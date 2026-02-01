@@ -152,6 +152,12 @@ def main():
         process = Process()
         process.cmd = [args.cmd] + args.cmd_args
         
+        # Set system workload (required for SE mode)
+        # This must be done before assigning process to CPU
+        # Note: workload was already set in createSystem(), but we ensure it's set here too
+        if not hasattr(system, 'workload') or system.workload is None:
+            system.workload = SEWorkload.init_compatible(args.cmd)
+        
         # Assign process to CPU workload
         # This assignment properly attaches the process to the system hierarchy
         system.cpu.workload = process
