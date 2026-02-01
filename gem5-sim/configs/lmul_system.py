@@ -87,26 +87,12 @@ def createSystem(args):
     system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
     
     # Set up process for SE mode
+    # Note: We'll create the Process in main() after Root is created
+    # This ensures the system hierarchy is fully established first
     if args.cmd:
-        # Set workload FIRST (required for SE mode)
+        # Set workload (required for SE mode)
         # This must be done before creating the Process
         system.workload = SEWorkload.init_compatible(args.cmd)
-        
-        # Create Process AFTER workload is set
-        # Following ARM starter_se.py pattern: create Process with pid and other params
-        # The Process must be created after the system is fully configured
-        process = Process(
-            pid=100,  # Process ID (required for proper initialization)
-            executable=args.cmd,
-            cmd=[args.cmd] + args.cmd_args
-        )
-        
-        # Assign process to CPU workload
-        # This assignment properly attaches the process to the system hierarchy
-        # The Process becomes a child of the CPU, which is a child of the System
-        # Note: Do NOT call createThreads() here - it may cause orphan errors
-        # createThreads() will be called automatically during instantiation if needed
-        system.cpu.workload = process
         
         # Map accelerator MMIO region into process address space
         # In SE mode, MMIO addresses must be explicitly mapped for user processes
