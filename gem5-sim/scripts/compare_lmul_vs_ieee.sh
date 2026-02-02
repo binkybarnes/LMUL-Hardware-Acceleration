@@ -79,10 +79,23 @@ else
     exit 1
 fi
 
-# Ensure binary is executable
+# Ensure binary is executable and valid
 if [ ! -x "$GEM5_BINARY" ]; then
     echo "Making gem5 binary executable: $GEM5_BINARY"
     chmod +x "$GEM5_BINARY"
+fi
+
+# Check if binary is valid (not corrupted from incomplete build)
+if ! file "$GEM5_BINARY" | grep -q "ELF.*executable"; then
+    echo "Error: $GEM5_BINARY is not a valid executable"
+    echo "  File type: $(file "$GEM5_BINARY")"
+    echo "  This usually means the build failed during linking"
+    echo "  The file exists but is corrupted/incomplete"
+    echo ""
+    echo "  Try rebuilding:"
+    echo "    cd gem5"
+    echo "    scons build/ARM/gem5.debug -j1 CXXFLAGS='-O0'"
+    exit 1
 fi
 
 CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
