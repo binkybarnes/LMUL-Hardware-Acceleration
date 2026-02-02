@@ -202,30 +202,45 @@ rm -rf build/
   - Binary exists but gives "Exec format error" (corrupted/incomplete)
   - Binary is 0 bytes or very small (incomplete build)
   
-- **Workaround: Skip Building gem5** (Recommended for Codespaces):
-  Since building gem5 from source in Codespaces is problematic, you have two options:
+- **Workaround: Skip Building gem5** (Recommended):
+  Since building gem5 from source requires 32GB+ RAM and compatible architecture, you have these options:
   
-  1. **Use Pre-built gem5** (if available):
+  1. **Use Pre-built gem5 Binary** (Best Option):
      - Download a pre-built gem5 binary with the accelerator already integrated
-     - Or build gem5 locally and copy the binary to Codespace
+     - Or have someone with a compatible 32GB+ machine build it for you
      - The accelerator files are already set up (copied and registered), you just need a working binary
+     - Once you have the binary, place it at `gem5/build/ARM/gem5.opt` or `gem5/build/ARM/gem5.debug`
   
-  2. **Build Only the Accelerator Model** (for testing/development):
+  2. **Verify Accelerator Compilation** (What You Can Do Now):
      ```bash
-     # The install script will copy files and register them
-     # You can then build just the accelerator object file:
+     # The install script has already:
+     # ✓ Copied accelerator files to gem5/src/dev/lmul_accel/
+     # ✓ Registered with gem5 build system
+     # ✓ Compiled accelerator object file (2.0MB)
+     
+     # You can verify the accelerator compiles correctly:
      cd gem5
-     scons build/ARM/dev/lmul_accel/lmul_accelerator.o -j1 CXXFLAGS='-O0'
+     ls -lh build/ARM/dev/lmul_accel/lmul_accelerator.o  # Should be ~2MB
+     
+     # The accelerator is ready - you just need a working gem5 binary
      ```
-     This allows you to verify the accelerator compiles without building all of gem5.
+  
+  3. **Build on Cloud/Remote Machine**:
+     - Use a cloud instance with 32GB+ RAM (AWS, GCP, Azure)
+     - Build gem5 there, then copy binary to Codespace
+     - Ensure architecture compatibility (x86_64 Linux)
   
 - **If You Must Build Full gem5**:
-  1. **Build Locally**: Use a machine with 32GB+ RAM
+  1. **Use Machine with 32GB+ RAM**: The linker needs 8-12GB+ for gem5
   2. **Try Shared Library**: `scons build/ARM/libgem5_debug.so -j1 CXXFLAGS='-O0'`
   3. **Use Gold Linker**: `sudo apt-get install binutils-gold` then build with `-fuse-ld=gold`
   
-- **Note**: The linker phase is the bottleneck - it needs to load thousands of object files simultaneously. Even with 16GB RAM, Codespaces may have process limits that prevent successful linking.
-- **Current Status**: Accelerator files are properly set up (✓ copied, ✓ registered, ✓ object file compiled). You just need a working gem5 binary.
+- **Note**: The linker phase is the bottleneck - it needs to load thousands of object files simultaneously. Even with 16GB RAM, the linker process hits per-process memory limits.
+- **Current Status**: 
+  - ✅ Accelerator files properly set up (copied, registered)
+  - ✅ Accelerator object file compiled successfully (2.0MB)
+  - ✅ All integration work complete
+  - ❌ Full gem5 binary build fails at linker (needs 32GB+ RAM or cloud instance)
 - All scripts automatically detect and use either `gem5.opt`, `gem5.debug`, or `libgem5_*.so` if available
 
 ### Runtime Issues
