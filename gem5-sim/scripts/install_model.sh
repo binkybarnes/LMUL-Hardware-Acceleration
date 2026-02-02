@@ -224,12 +224,25 @@ fi
 if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Codespace detected - using memory-efficient build settings"
     echo "  Building debug binary with -O0 (no optimization) to reduce linker memory usage"
-    echo "  WARNING: If linker still fails, you may need a larger Codespace instance (8GB+ RAM)"
     echo "  Check available memory:"
     free -h | grep -E "Mem|Swap" || true
     echo
+    echo "  Checking memory limits..."
+    ulimit -a | grep -E "virtual|data|stack" || true
+    echo
+    echo "  Attempting to increase memory limits for linker..."
+    # Remove virtual memory limit if set (ulimit -v unlimited)
+    # This allows the linker to use more memory
+    ulimit -v unlimited 2>/dev/null || true
+    ulimit -d unlimited 2>/dev/null || true
+    echo "  Memory limits after adjustment:"
+    ulimit -a | grep -E "virtual|data" || true
+    echo
     BUILD_TARGET="build/${ISA}/gem5.debug"
-    BUILD_FLAGS="-j${JOBS} CXXFLAGS=\"-O0\""
+    # Try to use incremental linking or reduce linker memory usage
+    # Use -Wl,--no-keep-memory to reduce linker memory usage
+    # Use -Wl,--reduce-memory-overheads if supported
+    BUILD_FLAGS="-j${JOBS} CXXFLAGS=\"-O0\" LINKFLAGS=\"-Wl,--no-keep-memory -Wl,--reduce-memory-overheads\""
 else
     BUILD_TARGET="build/${ISA}/gem5.opt"
     BUILD_FLAGS="-j${JOBS}"
