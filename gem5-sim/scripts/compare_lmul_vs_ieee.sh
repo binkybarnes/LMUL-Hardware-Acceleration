@@ -86,15 +86,33 @@ if [ ! -x "$GEM5_BINARY" ]; then
 fi
 
 # Check if binary is valid (not corrupted from incomplete build)
-if ! file "$GEM5_BINARY" | grep -q "ELF.*executable"; then
+BINARY_INFO=$(file "$GEM5_BINARY" 2>&1)
+if ! echo "$BINARY_INFO" | grep -q "ELF.*executable"; then
     echo "Error: $GEM5_BINARY is not a valid executable"
-    echo "  File type: $(file "$GEM5_BINARY")"
-    echo "  This usually means the build failed during linking"
-    echo "  The file exists but is corrupted/incomplete"
+    echo "  File type: $BINARY_INFO"
+    echo "  File size: $(ls -lh "$GEM5_BINARY" | awk '{print $5}')"
     echo ""
-    echo "  Try rebuilding:"
-    echo "    cd gem5"
-    echo "    scons build/ARM/gem5.debug -j1 CXXFLAGS='-O0'"
+    
+    # Check if file is empty or very small (corrupted)
+    FILE_SIZE=$(stat -f%z "$GEM5_BINARY" 2>/dev/null || stat -c%s "$GEM5_BINARY" 2>/dev/null || echo "0")
+    if [ "$FILE_SIZE" -eq 0 ]; then
+        echo "  File is empty (0 bytes) - build was killed during linking"
+    elif [ "$FILE_SIZE" -lt 1000000 ]; then
+        echo "  File is too small ($FILE_SIZE bytes) - likely corrupted/incomplete"
+    fi
+    
+    echo ""
+    echo "  This usually means the build failed during linking"
+    echo "  The linker was killed (signal 15) before completing"
+    echo ""
+    echo "  Solutions:"
+    echo "  1. Remove corrupted binary and rebuild:"
+    echo "     rm -f $GEM5_BINARY"
+    echo "     cd gem5 && scons build/ARM/gem5.debug -j1 CXXFLAGS='-O0'"
+    echo ""
+    echo "  2. Build locally on a machine with 32GB+ RAM"
+    echo ""
+    echo "  3. Use a pre-built gem5 binary with accelerator integrated"
     exit 1
 fi
 
