@@ -196,10 +196,17 @@ rm -rf build/
 ```
 
 **Out of memory during build**:
-- In Codespaces, use: `scons build/ARM/gem5.debug -j1 CXXFLAGS="-O0"`
-- This builds a debug binary with no optimization, reducing linker memory usage
-- The install script automatically uses this configuration in Codespaces
-- On systems with more memory, you can rebuild as opt: `scons build/ARM/gem5.opt -j1`
+- **Codespaces Memory Limitation**: The default Codespace (4GB RAM) may not have enough memory for the linker phase, even with debug builds
+- **Solutions**:
+  1. **Upgrade Codespace** (Recommended): Use a larger Codespace instance (8GB+ RAM)
+     - In GitHub, go to Codespace settings → Machine type → Select "8-core, 16GB RAM"
+  2. **Build Locally**: Build on a machine with 8GB+ RAM
+     ```bash
+     scons build/ARM/gem5.debug -j1 CXXFLAGS="-O0"
+     ```
+  3. **Use Pre-built Binary**: If available, use a pre-built gem5 binary
+  4. **Partial Build Workaround**: Build only essential components (advanced, requires gem5 knowledge)
+- **Note**: The linker phase requires loading all object files simultaneously, which is memory-intensive for large projects like gem5
 - All scripts automatically detect and use either `gem5.opt` or `gem5.debug` if available
 
 ### Runtime Issues

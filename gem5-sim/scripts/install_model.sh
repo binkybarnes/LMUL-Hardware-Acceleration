@@ -224,6 +224,10 @@ fi
 if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Codespace detected - using memory-efficient build settings"
     echo "  Building debug binary with -O0 (no optimization) to reduce linker memory usage"
+    echo "  WARNING: If linker still fails, you may need a larger Codespace instance (8GB+ RAM)"
+    echo "  Check available memory:"
+    free -h | grep -E "Mem|Swap" || true
+    echo
     BUILD_TARGET="build/${ISA}/gem5.debug"
     BUILD_FLAGS="-j${JOBS} CXXFLAGS=\"-O0\""
 else
@@ -232,6 +236,7 @@ else
 fi
 
 echo "  Build command: scons ${BUILD_TARGET} ${BUILD_FLAGS}"
+echo "  This may take 30-60 minutes..."
 PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee /tmp/gem5_build.log
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
