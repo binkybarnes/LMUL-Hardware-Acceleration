@@ -8,7 +8,7 @@ This directory contains a custom gem5 device model for the LMUL accelerator, all
 - Simulate end-to-end application performance
 - Evaluate memory bandwidth requirements and bottlenecks
 - Measure CPU-accelerator communication overhead
-- Compare LMUL vs IEEE BF16 accelerator performance
+- Compare LMUL accelerator vs native CPU IEEE BF16 performance
 - Analyze realistic workload behavior
 
 ## Directory Structure
@@ -119,7 +119,7 @@ system.lmul_accel = LMulAccelerator(
     pio_addr=0x10000000,      # Memory-mapped at 256MB
     pe_array_rows=4,          # 4x4 PE array
     pe_array_cols=4,
-    use_lmul=True             # Use LMUL (False for IEEE BF16)
+    # LMUL accelerator only does LMUL (no IEEE mode)
 )
 
 # Connect to memory bus

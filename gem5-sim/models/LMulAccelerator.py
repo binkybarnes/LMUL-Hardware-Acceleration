@@ -25,30 +25,14 @@ class LMulAccelerator(BasicPioDevice):
     compute_latency = Param.Cycles(1, "Cycles per PE operation")
     memory_latency = Param.Cycles(100, "Memory access latency")
     
-    # Operation mode
-    use_lmul = Param.Bool(True, "Use LMUL (True) or IEEE BF16 (False)")
-    
     @classmethod
     def makeDefault(cls, **kwargs):
-        """Create default LMUL accelerator (4x4 PE array, LMUL mode)"""
+        """Create default LMUL accelerator (4x4 PE array)"""
         return cls(
             pe_array_rows=4,
             pe_array_cols=4,
             compute_latency=1,
             memory_latency=100,
-            use_lmul=True,
-            **kwargs
-        )
-    
-    @classmethod
-    def makeIEEE(cls, **kwargs):
-        """Create IEEE BF16 accelerator for comparison"""
-        return cls(
-            pe_array_rows=4,
-            pe_array_cols=4,
-            compute_latency=3,  # IEEE BF16 is ~3x slower
-            memory_latency=100,
-            use_lmul=False,
             **kwargs
         )
     
@@ -60,6 +44,5 @@ class LMulAccelerator(BasicPioDevice):
             pe_array_cols=16,
             compute_latency=1,
             memory_latency=100,
-            use_lmul=True,
             **kwargs
         )

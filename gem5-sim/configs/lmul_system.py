@@ -23,7 +23,7 @@ class LMulSystem(System):
     Simple system with LMUL accelerator attached
     """
     
-    def __init__(self, pe_rows=4, pe_cols=4, use_lmul=True, **kwargs):
+    def __init__(self, pe_rows=4, pe_cols=4, use_accelerator=True, **kwargs):
         super().__init__(**kwargs)
         
         # CPU - must be created as a child of System (not an attribute)
@@ -35,19 +35,20 @@ class LMulSystem(System):
         self.cpu.icache_port = self.membus.cpu_side_ports
         self.cpu.dcache_port = self.membus.cpu_side_ports
         
-        # LMUL Accelerator
-        # Use a lower address to avoid page table issues in SE mode
-        # 0x40000000 (1GB) is a common MMIO region in many systems
-        self.lmul_accel = LMulAccelerator(
-            pio_addr=0x40000000,  # Memory-mapped at 1GB (common MMIO region)
-            pio_size=0x1000,
-            pe_array_rows=pe_rows,
-            pe_array_cols=pe_cols,
-            use_lmul=use_lmul
-        )
-        
-        # Connect accelerator to memory bus
-        self.lmul_accel.pio = self.membus.mem_side_ports
+        # LMUL Accelerator (only create if use_accelerator=True)
+        # For IEEE comparison, we don't create the accelerator - CPU does it natively
+        if use_accelerator:
+            # Use 0x40000000 (1GB) as MMIO region (common MMIO region)
+            self.lmul_accel = LMulAccelerator(
+                pio_addr=0x40000000,
+                pio_size=0x1000,
+                pe_array_rows=pe_rows,
+                pe_array_cols=pe_cols
+            )
+            # Connect accelerator to memory bus
+            self.lmul_accel.pio = self.membus.mem_side_ports
+        else:
+            self.lmul_accel = None
         
         # Interrupt controller
         self.cpu.createInterruptController()
@@ -68,10 +69,12 @@ def createSystem(args):
     """
     
     # Create system
+    # For IEEE, don't create accelerator (CPU does it natively)
+    # For LMUL, create accelerator
     system = LMulSystem(
         pe_rows=args.pe_rows,
         pe_cols=args.pe_cols,
-        use_lmul=not args.use_ieee,
+        use_accelerator=not args.use_ieee,
         mem_mode='timing'
     )
     
@@ -165,9 +168,9 @@ def main():
         m5.instantiate()
         print("Configuration instantiated successfully")
         
-        # Map accelerator MMIO region AFTER instantiation (following apu_se.py pattern)
+        # Map accelerator MMIO region AFTER instantiation (only if accelerator exists)
         # The process is now fully instantiated and we can safely access it
-        if args.cmd:
+        if args.cmd and system.lmul_accel is not None:
             accel_addr = system.lmul_accel.pio_addr
             accel_size = system.lmul_accel.pio_size
             try:
@@ -191,8 +194,10 @@ def main():
         return 1
     
     # Run simulation
-    print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array")
-    print(f"Mode: {'IEEE BF16' if args.use_ieee else 'LMUL'}")
+    if system.lmul_accel is not None:
+        print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array (LMUL Accelerator)")
+    else:
+        print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator)")
     if args.cmd:
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     

@@ -78,12 +78,12 @@ try:
         pio_addr=0x10000000,
         pe_array_rows=4,
         pe_array_cols=4,
-        use_lmul=True
+        # LMUL accelerator only does LMUL (no use_lmul parameter)
     )
     print("✓ LMulAccelerator instantiated successfully")
     print(f"  PE Array: {accel.pe_array_rows}x{accel.pe_array_cols}")
     print(f"  PIO Address: 0x{accel.pio_addr:x}")
-    print(f"  Use LMUL: {accel.use_lmul}")
+    print(f"  Accelerator type: LMUL (only)")
 except NameError as e:
     print(f"✗ LMulAccelerator not found: {e}")
     print("  This means the accelerator is not registered in gem5")

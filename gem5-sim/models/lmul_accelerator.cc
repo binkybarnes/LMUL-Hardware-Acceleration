@@ -21,7 +21,6 @@ LMulAccelerator::LMulAccelerator(const Params &p)
       peArrayCols(p.pe_array_cols),
       computeLatency(p.compute_latency),
       memoryLatency(p.memory_latency),
-      useLMul(p.use_lmul),
       stats(this),
       currentJob(nullptr),
       computeEvent([this]{ completeComputation(); }, name())
@@ -40,8 +39,8 @@ LMulAccelerator::LMulAccelerator(const Params &p)
     state.error = 0;
     state.resultIdx = 0;
 
-    DPRINTF(LMulAccel, "LMulAccelerator created: PE=%dx%d, LMUL=%d\n",
-            peArrayRows, peArrayCols, useLMul);
+    DPRINTF(LMulAccel, "LMulAccelerator created: PE=%dx%d\n",
+            peArrayRows, peArrayCols);
 }
 
 LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
@@ -350,11 +349,8 @@ LMulAccelerator::processCompute()
                 uint16_t b = currentJob->matrixB[k * currentJob->p + j];
                 uint16_t prod;
                 
-                if (useLMul) {
-                    prod = lmulBF16(a, b);
-                } else {
-                    prod = ieeeBF16(a, b);
-                }
+                // LMUL accelerator only does LMUL multiplication
+                prod = lmulBF16(a, b);
                 
                 sum += bf16ToFloat(prod);
             }
@@ -435,15 +431,6 @@ LMulAccelerator::lmulBF16(uint16_t a, uint16_t b)
     if (result_fld == 0) result_sign = 0;
     
     return (result_sign << 15) | result_fld;
-}
-
-uint16_t
-LMulAccelerator::ieeeBF16(uint16_t a, uint16_t b)
-{
-    // Convert to float, multiply, convert back
-    float fa = bf16ToFloat(a);
-    float fb = bf16ToFloat(b);
-    return floatToBF16(fa * fb);
 }
 
 float

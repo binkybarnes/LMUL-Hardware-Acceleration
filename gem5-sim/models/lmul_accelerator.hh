@@ -52,7 +52,6 @@ class LMulAccelerator : public BasicPioDevice
     const uint32_t peArrayCols;      // PE array cols (e.g., 4)
     const Tick computeLatency;       // Cycles per PE operation
     const Tick memoryLatency;        // Memory access latency
-    const bool useLMul;              // true=LMUL, false=IEEE BF16
     
     // Register map (memory-mapped I/O)
     enum Registers {
@@ -141,7 +140,6 @@ class LMulAccelerator : public BasicPioDevice
     
     // BF16 operations
     uint16_t lmulBF16(uint16_t a, uint16_t b);
-    uint16_t ieeeBF16(uint16_t a, uint16_t b);
     float bf16ToFloat(uint16_t bf16);
     uint16_t floatToBF16(float f);
     
