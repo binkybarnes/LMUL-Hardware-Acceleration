@@ -197,12 +197,18 @@ rm -rf build/
 
 **Out of memory during build** (Linker killed with signal 15):
 - **Root Cause**: The linker must load all object files simultaneously, which requires significant memory even with 16GB RAM. This is a known limitation when building gem5 in Codespaces.
+- **Symptoms**: 
+  - Linker killed with "signal 15 [Terminated]"
+  - Binary exists but gives "Exec format error" (corrupted/incomplete)
+  - Binary is 0 bytes or very small (incomplete build)
+  
 - **Workaround: Skip Building gem5** (Recommended for Codespaces):
   Since building gem5 from source in Codespaces is problematic, you have two options:
   
   1. **Use Pre-built gem5** (if available):
      - Download a pre-built gem5 binary with the accelerator already integrated
      - Or build gem5 locally and copy the binary to Codespace
+     - The accelerator files are already set up (copied and registered), you just need a working binary
   
   2. **Build Only the Accelerator Model** (for testing/development):
      ```bash
@@ -219,6 +225,7 @@ rm -rf build/
   3. **Use Gold Linker**: `sudo apt-get install binutils-gold` then build with `-fuse-ld=gold`
   
 - **Note**: The linker phase is the bottleneck - it needs to load thousands of object files simultaneously. Even with 16GB RAM, Codespaces may have process limits that prevent successful linking.
+- **Current Status**: Accelerator files are properly set up (✓ copied, ✓ registered, ✓ object file compiled). You just need a working gem5 binary.
 - All scripts automatically detect and use either `gem5.opt`, `gem5.debug`, or `libgem5_*.so` if available
 
 ### Runtime Issues
