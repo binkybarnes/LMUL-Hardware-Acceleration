@@ -67,13 +67,13 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
     """Calculate speedup metrics"""
     speedup = {}
     
-    if ieee_metrics['sim_seconds'] > 0:
+    if ieee_metrics['sim_seconds'] > 0 and lmul_metrics['sim_seconds'] > 0:
         speedup['time'] = ieee_metrics['sim_seconds'] / lmul_metrics['sim_seconds']
     
-    if ieee_metrics['cpu_cycles'] > 0:
+    if ieee_metrics['cpu_cycles'] > 0 and lmul_metrics['cpu_cycles'] > 0:
         speedup['cycles'] = ieee_metrics['cpu_cycles'] / lmul_metrics['cpu_cycles']
     
-    if ieee_metrics['cpi'] > 0:
+    if ieee_metrics['cpi'] > 0 and lmul_metrics['cpi'] > 0:
         speedup['cpi'] = ieee_metrics['cpi'] / lmul_metrics['cpi']
     
     if lmul_metrics['ipc'] > 0 and ieee_metrics['ipc'] > 0:

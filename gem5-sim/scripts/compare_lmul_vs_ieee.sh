@@ -78,6 +78,13 @@ else
     echo "  Expected: ${GEM5_ROOT}/build/ARM/gem5.opt or gem5.debug"
     exit 1
 fi
+
+# Ensure binary is executable
+if [ ! -x "$GEM5_BINARY" ]; then
+    echo "Making gem5 binary executable: $GEM5_BINARY"
+    chmod +x "$GEM5_BINARY"
+fi
+
 CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
 
 # Determine which benchmark to use
