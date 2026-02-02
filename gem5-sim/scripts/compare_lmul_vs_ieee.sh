@@ -87,20 +87,26 @@ fi
 
 # Check if binary is valid (not corrupted from incomplete build)
 BINARY_INFO=$(file "$GEM5_BINARY" 2>&1)
-if ! echo "$BINARY_INFO" | grep -q "ELF.*executable"; then
-    echo "Error: $GEM5_BINARY is not a valid executable"
+FILE_SIZE=$(stat -f%z "$GEM5_BINARY" 2>/dev/null || stat -c%s "$GEM5_BINARY" 2>/dev/null || echo "0")
+
+# Check if file is empty or very small (corrupted)
+if [ "$FILE_SIZE" -eq 0 ]; then
+    echo "Error: $GEM5_BINARY is empty (0 bytes)"
+    echo "  Build was killed during linking - file was created but never written"
+    echo "  Remove it and try a different build approach"
+    exit 1
+elif [ "$FILE_SIZE" -lt 1000000 ]; then
+    echo "Error: $GEM5_BINARY is too small ($FILE_SIZE bytes)"
+    echo "  File type: $BINARY_INFO"
+    echo "  Likely corrupted/incomplete from failed build"
+    exit 1
+fi
+
+# Check if it's a valid ELF executable
+if ! echo "$BINARY_INFO" | grep -qE "ELF.*executable|ELF.*shared"; then
+    echo "Error: $GEM5_BINARY is not a valid ELF executable"
     echo "  File type: $BINARY_INFO"
     echo "  File size: $(ls -lh "$GEM5_BINARY" | awk '{print $5}')"
-    echo ""
-    
-    # Check if file is empty or very small (corrupted)
-    FILE_SIZE=$(stat -f%z "$GEM5_BINARY" 2>/dev/null || stat -c%s "$GEM5_BINARY" 2>/dev/null || echo "0")
-    if [ "$FILE_SIZE" -eq 0 ]; then
-        echo "  File is empty (0 bytes) - build was killed during linking"
-    elif [ "$FILE_SIZE" -lt 1000000 ]; then
-        echo "  File is too small ($FILE_SIZE bytes) - likely corrupted/incomplete"
-    fi
-    
     echo ""
     echo "  This usually means the build failed during linking"
     echo "  The linker was killed (signal 15) before completing"
@@ -114,6 +120,14 @@ if ! echo "$BINARY_INFO" | grep -q "ELF.*executable"; then
     echo ""
     echo "  3. Use a pre-built gem5 binary with accelerator integrated"
     exit 1
+fi
+
+# Verify it's for the correct architecture (should be x86_64 for host)
+if echo "$BINARY_INFO" | grep -q "ARM"; then
+    echo "Warning: Binary appears to be ARM architecture"
+    echo "  gem5 binary should be x86_64 (host) to simulate ARM (target)"
+    echo "  File type: $BINARY_INFO"
+    echo "  This may cause 'Exec format error'"
 fi
 
 CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
