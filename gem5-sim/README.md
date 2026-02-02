@@ -196,36 +196,29 @@ rm -rf build/
 ```
 
 **Out of memory during build** (Linker killed with signal 15):
-- **Root Cause**: The linker must load all object files simultaneously, which requires significant memory even with 16GB RAM
-- **Solutions** (in order of preference):
-  1. **Build as Shared Library** (Recommended for Codespaces):
+- **Root Cause**: The linker must load all object files simultaneously, which requires significant memory even with 16GB RAM. This is a known limitation when building gem5 in Codespaces.
+- **Workaround: Skip Building gem5** (Recommended for Codespaces):
+  Since building gem5 from source in Codespaces is problematic, you have two options:
+  
+  1. **Use Pre-built gem5** (if available):
+     - Download a pre-built gem5 binary with the accelerator already integrated
+     - Or build gem5 locally and copy the binary to Codespace
+  
+  2. **Build Only the Accelerator Model** (for testing/development):
      ```bash
+     # The install script will copy files and register them
+     # You can then build just the accelerator object file:
      cd gem5
-     ulimit -v unlimited
-     scons build/ARM/libgem5_debug.so -j1 CXXFLAGS='-O0' LINKFLAGS='-Wl,--no-keep-memory'
+     scons build/ARM/dev/lmul_accel/lmul_accelerator.o -j1 CXXFLAGS='-O0'
      ```
-     Then use: `python3 -m gem5.binary build/ARM/libgem5_debug.so config.py`
+     This allows you to verify the accelerator compiles without building all of gem5.
   
-  2. **Use Gold Linker** (if available, more memory-efficient):
-     ```bash
-     # Install gold linker
-     sudo apt-get install binutils-gold
-     # Build with gold
-     scons build/ARM/gem5.debug -j1 CXXFLAGS='-O0' LINKFLAGS='-fuse-ld=gold -Wl,--no-keep-memory'
-     ```
+- **If You Must Build Full gem5**:
+  1. **Build Locally**: Use a machine with 32GB+ RAM
+  2. **Try Shared Library**: `scons build/ARM/libgem5_debug.so -j1 CXXFLAGS='-O0'`
+  3. **Use Gold Linker**: `sudo apt-get install binutils-gold` then build with `-fuse-ld=gold`
   
-  3. **Build Locally**: Build on a machine with 32GB+ RAM (linker needs large contiguous memory)
-  
-  4. **Use Pre-built Binary**: If available, use a pre-built gem5 binary
-  
-  5. **Check for Process Limits**:
-     ```bash
-     # Check cgroup limits
-     cat /sys/fs/cgroup/memory/memory.limit_in_bytes
-     # Check ulimit
-     ulimit -a
-     ```
-- **Note**: Even with 16GB RAM, the linker process may hit per-process memory limits or need large contiguous memory blocks
+- **Note**: The linker phase is the bottleneck - it needs to load thousands of object files simultaneously. Even with 16GB RAM, Codespaces may have process limits that prevent successful linking.
 - All scripts automatically detect and use either `gem5.opt`, `gem5.debug`, or `libgem5_*.so` if available
 
 ### Runtime Issues

@@ -182,6 +182,12 @@ echo
 echo -e "${YELLOW}Step 5: Rebuilding gem5...${NC}"
 echo "This will take several minutes..."
 echo
+echo -e "${YELLOW}WARNING: Building gem5 in Codespaces often fails due to linker memory limits.${NC}"
+echo -e "${YELLOW}If the build fails, you can:${NC}"
+echo -e "${YELLOW}  1. Build gem5 locally and copy the binary${NC}"
+echo -e "${YELLOW}  2. Use a pre-built gem5 binary${NC}"
+echo -e "${YELLOW}  3. Build only the accelerator model for testing${NC}"
+echo
 
 # Final check: Ensure no duplicate registrations before building
 echo "  Final verification before build..."
