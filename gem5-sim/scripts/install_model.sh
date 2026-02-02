@@ -242,7 +242,8 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     # Try to use incremental linking or reduce linker memory usage
     # Use -Wl,--no-keep-memory to reduce linker memory usage
     # Use -Wl,--reduce-memory-overheads if supported
-    BUILD_FLAGS="-j${JOBS} CXXFLAGS=\"-O0\" LINKFLAGS=\"-Wl,--no-keep-memory -Wl,--reduce-memory-overheads\""
+    # Note: BUILD_FLAGS will be expanded by eval, so we need proper quoting
+    BUILD_FLAGS="-j${JOBS} CXXFLAGS='-O0' LINKFLAGS='-Wl,--no-keep-memory -Wl,--reduce-memory-overheads'"
 else
     BUILD_TARGET="build/${ISA}/gem5.opt"
     BUILD_FLAGS="-j${JOBS}"
@@ -250,7 +251,10 @@ fi
 
 echo "  Build command: scons ${BUILD_TARGET} ${BUILD_FLAGS}"
 echo "  This may take 30-60 minutes..."
-PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee /tmp/gem5_build.log
+echo "  DEBUG: BUILD_TARGET=${BUILD_TARGET}"
+echo "  DEBUG: BUILD_FLAGS=${BUILD_FLAGS}"
+# Execute the build - expand variables properly
+eval "PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee /tmp/gem5_build.log"
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo
