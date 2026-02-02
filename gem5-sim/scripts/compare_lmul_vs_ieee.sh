@@ -86,7 +86,6 @@ if [ ! -x "$GEM5_BINARY" ]; then
 fi
 
 # Check if binary is valid (not corrupted from incomplete build)
-BINARY_INFO=$(file "$GEM5_BINARY" 2>&1)
 FILE_SIZE=$(stat -f%z "$GEM5_BINARY" 2>/dev/null || stat -c%s "$GEM5_BINARY" 2>/dev/null || echo "0")
 
 # Check if file is empty or very small (corrupted)
@@ -97,15 +96,16 @@ if [ "$FILE_SIZE" -eq 0 ]; then
     exit 1
 elif [ "$FILE_SIZE" -lt 1000000 ]; then
     echo "Error: $GEM5_BINARY is too small ($FILE_SIZE bytes)"
-    echo "  File type: $BINARY_INFO"
+    echo "  File size: $(ls -lh "$GEM5_BINARY" | awk '{print $5}')"
     echo "  Likely corrupted/incomplete from failed build"
     exit 1
 fi
 
-# Check if it's a valid ELF executable
-if ! echo "$BINARY_INFO" | grep -qE "ELF.*executable|ELF.*shared"; then
+# Check ELF magic number (7f 45 4c 46 = ELF)
+ELF_MAGIC=$(head -c 4 "$GEM5_BINARY" 2>/dev/null | od -An -tx1 2>/dev/null | tr -d ' \n' || echo "")
+if [ "$ELF_MAGIC" != "7f454c46" ]; then
     echo "Error: $GEM5_BINARY is not a valid ELF executable"
-    echo "  File type: $BINARY_INFO"
+    echo "  ELF magic: $ELF_MAGIC (expected: 7f454c46)"
     echo "  File size: $(ls -lh "$GEM5_BINARY" | awk '{print $5}')"
     echo ""
     echo "  This usually means the build failed during linking"
@@ -122,12 +122,12 @@ if ! echo "$BINARY_INFO" | grep -qE "ELF.*executable|ELF.*shared"; then
     exit 1
 fi
 
-# Verify it's for the correct architecture (should be x86_64 for host)
-if echo "$BINARY_INFO" | grep -q "ARM"; then
-    echo "Warning: Binary appears to be ARM architecture"
-    echo "  gem5 binary should be x86_64 (host) to simulate ARM (target)"
-    echo "  File type: $BINARY_INFO"
-    echo "  This may cause 'Exec format error'"
+# Try to verify it's executable by checking if we can read the ELF header
+# This is a basic sanity check
+if ! head -c 16 "$GEM5_BINARY" >/dev/null 2>&1; then
+    echo "Error: Cannot read $GEM5_BINARY"
+    echo "  File may be corrupted or inaccessible"
+    exit 1
 fi
 
 CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
