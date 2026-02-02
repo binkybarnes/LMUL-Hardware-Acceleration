@@ -238,12 +238,18 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Memory limits after adjustment:"
     ulimit -a | grep -E "virtual|data" || true
     echo
-    BUILD_TARGET="build/${ISA}/gem5.debug"
-    # Try to use incremental linking or reduce linker memory usage
-    # Use -Wl,--no-keep-memory to reduce linker memory usage
-    # Use -Wl,--reduce-memory-overheads if supported
-    # Note: BUILD_FLAGS will be expanded by eval, so we need proper quoting
-    BUILD_FLAGS="-j${JOBS} CXXFLAGS='-O0' LINKFLAGS='-Wl,--no-keep-memory -Wl,--reduce-memory-overheads'"
+    # Try building as shared library first (uses less memory during linking)
+    # If that fails, fall back to regular binary
+    if command -v ld.gold >/dev/null 2>&1; then
+        echo "  Gold linker available - using it for better memory efficiency"
+        BUILD_TARGET="build/${ISA}/gem5.debug"
+        BUILD_FLAGS="-j${JOBS} CXXFLAGS='-O0' LINKFLAGS='-fuse-ld=gold -Wl,--no-keep-memory'"
+    else
+        echo "  Attempting shared library build (less memory during linking)..."
+        echo "  If this fails, you may need to install gold linker or build locally"
+        BUILD_TARGET="build/${ISA}/libgem5_debug.so"
+        BUILD_FLAGS="-j${JOBS} CXXFLAGS='-O0' LINKFLAGS='-Wl,--no-keep-memory'"
+    fi
 else
     BUILD_TARGET="build/${ISA}/gem5.opt"
     BUILD_FLAGS="-j${JOBS}"

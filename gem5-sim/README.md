@@ -195,19 +195,38 @@ rm -rf build/
 ./gem5-sim/scripts/install_model.sh
 ```
 
-**Out of memory during build**:
-- **Codespaces Memory Limitation**: The default Codespace (4GB RAM) may not have enough memory for the linker phase, even with debug builds
-- **Solutions**:
-  1. **Upgrade Codespace** (Recommended): Use a larger Codespace instance (8GB+ RAM)
-     - In GitHub, go to Codespace settings → Machine type → Select "8-core, 16GB RAM"
-  2. **Build Locally**: Build on a machine with 8GB+ RAM
+**Out of memory during build** (Linker killed with signal 15):
+- **Root Cause**: The linker must load all object files simultaneously, which requires significant memory even with 16GB RAM
+- **Solutions** (in order of preference):
+  1. **Build as Shared Library** (Recommended for Codespaces):
      ```bash
-     scons build/ARM/gem5.debug -j1 CXXFLAGS="-O0"
+     cd gem5
+     ulimit -v unlimited
+     scons build/ARM/libgem5_debug.so -j1 CXXFLAGS='-O0' LINKFLAGS='-Wl,--no-keep-memory'
      ```
-  3. **Use Pre-built Binary**: If available, use a pre-built gem5 binary
-  4. **Partial Build Workaround**: Build only essential components (advanced, requires gem5 knowledge)
-- **Note**: The linker phase requires loading all object files simultaneously, which is memory-intensive for large projects like gem5
-- All scripts automatically detect and use either `gem5.opt` or `gem5.debug` if available
+     Then use: `python3 -m gem5.binary build/ARM/libgem5_debug.so config.py`
+  
+  2. **Use Gold Linker** (if available, more memory-efficient):
+     ```bash
+     # Install gold linker
+     sudo apt-get install binutils-gold
+     # Build with gold
+     scons build/ARM/gem5.debug -j1 CXXFLAGS='-O0' LINKFLAGS='-fuse-ld=gold -Wl,--no-keep-memory'
+     ```
+  
+  3. **Build Locally**: Build on a machine with 32GB+ RAM (linker needs large contiguous memory)
+  
+  4. **Use Pre-built Binary**: If available, use a pre-built gem5 binary
+  
+  5. **Check for Process Limits**:
+     ```bash
+     # Check cgroup limits
+     cat /sys/fs/cgroup/memory/memory.limit_in_bytes
+     # Check ulimit
+     ulimit -a
+     ```
+- **Note**: Even with 16GB RAM, the linker process may hit per-process memory limits or need large contiguous memory blocks
+- All scripts automatically detect and use either `gem5.opt`, `gem5.debug`, or `libgem5_*.so` if available
 
 ### Runtime Issues
 
