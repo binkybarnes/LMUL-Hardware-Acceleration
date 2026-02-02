@@ -233,6 +233,15 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Check available memory:"
     free -h | grep -E "Mem|Swap" || true
     echo
+    
+    # Check if swap is available (helps with memory pressure)
+    SWAP_AVAIL=$(free -h | grep Swap | awk '{print $2}' | sed 's/[^0-9]//g')
+    if [ "$SWAP_AVAIL" = "0" ] || [ -z "$SWAP_AVAIL" ]; then
+        echo "  WARNING: No swap space available"
+        echo "  Consider creating swap to help with linker memory usage"
+        echo "  (This requires root/sudo and may not be possible in Codespaces)"
+    fi
+    
     echo "  Checking memory limits..."
     ulimit -a | grep -E "virtual|data|stack" || true
     echo
@@ -243,6 +252,19 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     ulimit -d unlimited 2>/dev/null || true
     echo "  Memory limits after adjustment:"
     ulimit -a | grep -E "virtual|data" || true
+    echo
+    
+    # Try to free up memory before linking
+    echo "  Attempting to free memory before build..."
+    # Clear page cache (requires root, may not work in Codespaces)
+    sync 2>/dev/null || true
+    # Drop caches if possible (requires root)
+    if [ "$(id -u)" -eq 0 ]; then
+        echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || true
+        echo "  Dropped caches (if permitted)"
+    fi
+    echo "  Memory after cleanup:"
+    free -h | grep -E "Mem|Swap" || true
     echo
     # Try building as shared library first (uses less memory during linking)
     # If that fails, fall back to regular binary
