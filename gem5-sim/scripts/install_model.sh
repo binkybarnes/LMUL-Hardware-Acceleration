@@ -283,6 +283,29 @@ else
     BUILD_FLAGS="-j${JOBS}"
 fi
 
+# Add conda paths if they exist (for Python and zlib)
+if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+    echo "  Detected conda environment - adding conda paths to build"
+    # Set environment variables for scons (it uses these)
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/conda/lib"
+    # Clean up C_INCLUDE_PATH (remove leading/trailing colons)
+    if [ -n "$C_INCLUDE_PATH" ]; then
+        C_INCLUDE_PATH=$(echo "$C_INCLUDE_PATH" | sed 's/^:*//;s/:*$//')
+        export C_INCLUDE_PATH="${C_INCLUDE_PATH}:/opt/conda/include"
+    else
+        export C_INCLUDE_PATH="/opt/conda/include"
+    fi
+    if [ -n "$CPLUS_INCLUDE_PATH" ]; then
+        CPLUS_INCLUDE_PATH=$(echo "$CPLUS_INCLUDE_PATH" | sed 's/^:*//;s/:*$//')
+        export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:/opt/conda/include"
+    else
+        export CPLUS_INCLUDE_PATH="/opt/conda/include"
+    fi
+    # Add to compiler flags for scons
+    BUILD_FLAGS="${BUILD_FLAGS} CXXFLAGS='-I/opt/conda/include' LINKFLAGS='-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib'"
+    echo "  Added conda paths to compiler flags"
+fi
+
 echo "  Build command: scons ${BUILD_TARGET} ${BUILD_FLAGS}"
 echo "  This may take 30-60 minutes..."
 echo "  DEBUG: BUILD_TARGET=${BUILD_TARGET}"
@@ -309,6 +332,28 @@ if grep -q "Error: Can't find a working Python installation" "${BUILD_LOG}" 2>/d
     echo "     export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/path/to/python/lib"
     echo
     echo "  3. Check build log for details:"
+    echo "     tail -50 ${BUILD_LOG}"
+    exit 1
+elif grep -qi "Error.*zlib\|zlib.*not found\|zlib.h.*not found" "${BUILD_LOG}" 2>/dev/null; then
+    echo
+    echo -e "${RED}✗ gem5 build failed: zlib library missing${NC}"
+    echo
+    echo "The build system can't find zlib compression library."
+    echo
+    echo "Solution:"
+    echo "  1. Check if zlib is available via conda:"
+    echo "     find /opt/conda -name 'libz.so*' 2>/dev/null"
+    echo "     find /opt/conda -name 'zlib.h' 2>/dev/null"
+    echo
+    echo "  2. If found in conda, add to library/include paths:"
+    echo "     export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/conda/lib"
+    echo "     export C_INCLUDE_PATH=\$C_INCLUDE_PATH:/opt/conda/include"
+    echo "     export CPLUS_INCLUDE_PATH=\$CPLUS_INCLUDE_PATH:/opt/conda/include"
+    echo
+    echo "  3. Or contact your mentor to install:"
+    echo "     sudo apt-get install zlib1g-dev"
+    echo
+    echo "  4. Check build log for details:"
     echo "     tail -50 ${BUILD_LOG}"
     exit 1
 elif [ ${BUILD_EXIT_CODE} -ne 0 ]; then
