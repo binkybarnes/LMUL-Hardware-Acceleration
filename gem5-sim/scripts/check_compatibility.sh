@@ -255,4 +255,9 @@ if [ $TOTAL_MEM_GB -lt 32 ]; then
 fi
 echo "=========================================="
 
-exit $COMPATIBLE
+# Exit with 0 if compatible, 1 if not (bash convention: 0=success, 1=failure)
+if [ $COMPATIBLE -eq 1 ]; then
+    exit 0
+else
+    exit 1
+fi
