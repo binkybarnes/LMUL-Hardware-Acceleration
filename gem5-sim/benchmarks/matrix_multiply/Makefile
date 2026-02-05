@@ -9,8 +9,20 @@ CC_ARM = $(shell which arm-linux-gnueabihf-gcc 2>/dev/null || which arm-linux-gn
 CFLAGS_ARM = -static -O2
 
 # Check if compiler exists
-ifeq ($(shell which $(CC_ARM) 2>/dev/null),)
-    $(error ARM cross-compiler not found. Install with: sudo apt-get install gcc-arm-linux-gnueabihf)
+ARM_CC_AVAILABLE = $(shell which $(CC_ARM) 2>/dev/null)
+ifeq ($(ARM_CC_AVAILABLE),)
+    # ARM cross-compiler not found - provide helpful message
+    ifeq ($(ARCH),arm)
+        $(warning ================================================)
+        $(warning ARM cross-compiler not found!)
+        $(warning ================================================)
+        $(warning Options:)
+        $(warning   1. Request from mentor: sudo apt-get install gcc-arm-linux-gnueabihf)
+        $(warning   2. Build for x86 instead: make ARCH=x86)
+        $(warning   3. Check if available via modules: module avail)
+        $(warning ================================================)
+        $(error Cannot build ARM binary without cross-compiler. Use 'make ARCH=x86' or contact mentor.)
+    endif
 endif
 
 # For X86 (if using gem5 X86 build)
@@ -23,9 +35,13 @@ SOURCE = matrix_multiply.c
 SOURCE_NO_PRINTF = matrix_multiply_no_printf.c
 
 # Default to ARM (change to x86 if needed)
+# If ARM cross-compiler not available, will suggest using x86
 ARCH ?= arm
 
 ifeq ($(ARCH),arm)
+    ifeq ($(ARM_CC_AVAILABLE),)
+        $(error ARM cross-compiler not available. Use 'make ARCH=x86' or install cross-compiler.)
+    endif
     CC = $(CC_ARM)
     CFLAGS = $(CFLAGS_ARM)
     BINARY = $(TARGET).arm
@@ -56,7 +72,15 @@ arm:
 x86:
 	$(MAKE) ARCH=x86
 
-both: arm x86
+both:
+	@echo "Building both ARM and X86 versions..."
+	@if [ -n "$(ARM_CC_AVAILABLE)" ]; then \
+		$(MAKE) ARCH=arm; \
+	else \
+		echo "⚠ ARM cross-compiler not available, skipping ARM build"; \
+		echo "  Request from mentor: sudo apt-get install gcc-arm-linux-gnueabihf"; \
+	fi
+	@$(MAKE) ARCH=x86
 
 clean:
 	rm -f $(TARGET).arm $(TARGET).x86 $(TARGET)_no_printf.arm $(TARGET)_no_printf.x86 *.o
