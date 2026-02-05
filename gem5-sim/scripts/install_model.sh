@@ -288,17 +288,54 @@ echo "  This may take 30-60 minutes..."
 echo "  DEBUG: BUILD_TARGET=${BUILD_TARGET}"
 echo "  DEBUG: BUILD_FLAGS=${BUILD_FLAGS}"
 # Execute the build - expand variables properly
-eval "PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee /tmp/gem5_build.log"
+BUILD_LOG="/tmp/gem5_build.log"
+eval "PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+BUILD_EXIT_CODE=${PIPESTATUS[0]}
 
-if [ ${PIPESTATUS[0]} -eq 0 ]; then
+# Check for common error patterns in output
+if grep -q "Error: Can't find a working Python installation" "${BUILD_LOG}" 2>/dev/null; then
     echo
-    echo -e "${GREEN}✓ gem5 rebuild successful!${NC}"
-else
+    echo -e "${RED}✗ gem5 build failed: Python installation issue${NC}"
+    echo
+    echo "The build system can't find Python shared libraries."
+    echo "This usually means python3-dev is not installed."
+    echo
+    echo "Solution:"
+    echo "  1. Contact your mentor to install:"
+    echo "     sudo apt-get install python3-dev"
+    echo
+    echo "  2. Or check if Python library path needs to be set:"
+    echo "     find /usr -name 'libpython3.11.so*' 2>/dev/null"
+    echo "     export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/path/to/python/lib"
+    echo
+    echo "  3. Check build log for details:"
+    echo "     tail -50 ${BUILD_LOG}"
+    exit 1
+elif [ ${BUILD_EXIT_CODE} -ne 0 ]; then
     echo
     echo -e "${RED}✗ gem5 rebuild failed!${NC}"
-    echo "Check /tmp/gem5_build.log for details"
+    echo "Exit code: ${BUILD_EXIT_CODE}"
+    echo "Check ${BUILD_LOG} for details"
+    echo
+    echo "Common issues:"
+    echo "  - Missing dependencies (check error messages above)"
+    echo "  - Linker memory issues (need 32GB+ RAM)"
+    echo "  - Python library issues (install python3-dev)"
     exit 1
+elif grep -qi "error\|fatal\|failed" "${BUILD_LOG}" 2>/dev/null; then
+    # Check if there are errors even if exit code is 0
+    ERROR_COUNT=$(grep -ci "error\|fatal" "${BUILD_LOG}" 2>/dev/null || echo "0")
+    if [ "${ERROR_COUNT}" -gt 5 ]; then
+        echo
+        echo -e "${RED}✗ Build completed but contains errors!${NC}"
+        echo "Found ${ERROR_COUNT} error messages in build log"
+        echo "Check ${BUILD_LOG} for details"
+        exit 1
+    fi
 fi
+
+echo
+echo -e "${GREEN}✓ gem5 rebuild successful!${NC}"
 
 echo
 echo -e "${YELLOW}Step 6: Verifying installation...${NC}"
