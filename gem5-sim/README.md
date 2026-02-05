@@ -40,10 +40,33 @@ gem5-sim/
 ### Prerequisites
 
 - Linux system (Ubuntu 20.04+ recommended) or GitHub Codespaces
-- 8GB+ RAM, 20GB free disk space
+- **32GB+ RAM recommended** (16GB minimum, but linker may fail)
+- 20GB+ free disk space
 - For ARM benchmarks: `gcc-arm-linux-gnueabi` cross-compiler
 
-### Installation Steps
+### Setup on University Datahub Server
+
+If you're setting up on a university datahub server:
+
+```bash
+# 1. Check system compatibility
+./gem5-sim/scripts/check_compatibility.sh
+
+# 2. Run automated setup
+./gem5-sim/scripts/setup_datahub.sh
+```
+
+The compatibility check will:
+- Verify architecture, memory, disk space
+- Check dependencies
+- Generate a report for your mentor if resources are insufficient
+
+**If you need to request more resources from your mentor:**
+1. Run `./gem5-sim/scripts/check_compatibility.sh`
+2. Copy the "Report for Mentor" section at the end
+3. Include it in your request
+
+### Installation Steps (Manual)
 
 1. **Clone gem5 repository** (if not already done):
    ```bash
@@ -127,6 +150,19 @@ system.lmul_accel.pio = system.membus.mem_side_ports
 ```
 
 ## Key Commands
+
+### Check Readiness
+
+```bash
+# Quick check: Is everything ready to run?
+./gem5-sim/scripts/check_readiness.sh
+```
+
+This will verify:
+- ✓ gem5 binary exists and is valid
+- ✓ Accelerator model is installed and compiled
+- ✓ Benchmarks are built
+- ✓ Config files exist
 
 ### Installation & Setup
 
