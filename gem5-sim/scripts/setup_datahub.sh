@@ -78,17 +78,53 @@ done
 if [ ${#MISSING[@]} -gt 0 ]; then
     echo "Missing dependencies: ${MISSING[*]}"
     echo
-    echo "Install with:"
-    echo "  sudo apt-get update"
-    echo "  sudo apt-get install -y ${MISSING[*]}"
-    echo
-    read -p "Install now? (requires sudo) (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo apt-get update
-        sudo apt-get install -y "${MISSING[@]}"
+    
+    # Check if sudo is available
+    if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+        echo "Install with:"
+        echo "  sudo apt-get update"
+        echo "  sudo apt-get install -y ${MISSING[*]}"
+        echo
+        read -p "Install now? (requires sudo) (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sudo apt-get update
+            sudo apt-get install -y "${MISSING[@]}"
+        else
+            echo "Please install dependencies manually and run this script again."
+            exit 1
+        fi
     else
-        echo "Please install dependencies manually and run this script again."
+        echo -e "${YELLOW}⚠ No sudo access detected${NC}"
+        echo
+        echo "You'll need to install dependencies without sudo:"
+        echo
+        echo "1. For scons (Python package, no sudo needed):"
+        echo "   pip3 install --user scons"
+        echo
+        echo "2. For system packages (gcc, g++, make, git, etc.):"
+        echo "   Contact your mentor or system administrator"
+        echo "   Or check if they're already installed:"
+        for pkg in "${MISSING[@]}"; do
+            if [ "$pkg" != "scons" ]; then
+                echo "     - $pkg"
+            fi
+        done
+        echo
+        echo "3. Try installing scons now (no sudo needed):"
+        read -p "Install scons with pip3? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            pip3 install --user scons
+            # Add user bin to PATH if not already there
+            if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+                export PATH="$HOME/.local/bin:$PATH"
+                echo "Added ~/.local/bin to PATH for this session"
+                echo "Add to ~/.bashrc: export PATH=\"\$HOME/.local/bin:\$PATH\""
+            fi
+        fi
+        echo
+        echo "After installing dependencies, run this script again."
         exit 1
     fi
 else
@@ -100,10 +136,16 @@ if ! command -v arm-linux-gnueabihf-gcc &> /dev/null && \
    ! command -v arm-linux-gnueabi-gcc &> /dev/null; then
     echo
     echo "ARM cross-compiler not found (needed for benchmarks)"
-    read -p "Install? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo apt-get install -y gcc-arm-linux-gnueabihf
+    if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+        read -p "Install? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            sudo apt-get install -y gcc-arm-linux-gnueabihf
+        fi
+    else
+        echo -e "${YELLOW}⚠ No sudo access - cannot install cross-compiler${NC}"
+        echo "   Contact your mentor to install: gcc-arm-linux-gnueabihf"
+        echo "   Or check if it's already available in a different location"
     fi
 fi
 echo

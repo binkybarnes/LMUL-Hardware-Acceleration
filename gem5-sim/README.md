@@ -52,9 +52,18 @@ If you're setting up on a university datahub server:
 # 1. Check system compatibility
 ./gem5-sim/scripts/check_compatibility.sh
 
-# 2. Run automated setup
+# 2. Install dependencies (if no sudo access)
+./gem5-sim/scripts/install_dependencies_no_sudo.sh
+# Or manually: pip3 install --user scons
+
+# 3. Run automated setup
 ./gem5-sim/scripts/setup_datahub.sh
 ```
+
+**Note:** If you don't have sudo access (common on shared servers):
+- Python packages (scons) can be installed with `pip3 install --user scons`
+- System packages (gcc, g++, make) need to be installed by your mentor/admin
+- See `DATAHUB_SETUP.md` for detailed instructions
 
 The compatibility check will:
 - Verify architecture, memory, disk space
