@@ -267,11 +267,13 @@ echo "=========================================="
 echo "System Information:"
 echo "  Architecture: $ARCH"
 echo "  OS: $OS"
-if command -v free &> /dev/null; then
+if [ -n "$TOTAL_MEM_GB" ] && [ "$TOTAL_MEM_GB" != "0" ]; then
     echo "  Total RAM: ${TOTAL_MEM_GB}GB"
-    echo "  Available RAM: ${AVAIL_MEM_GB}GB"
+    if [ -n "$AVAIL_MEM_GB" ] && [ "$AVAIL_MEM_GB" != "$TOTAL_MEM_GB" ]; then
+        echo "  Available RAM: ${AVAIL_MEM_GB}GB"
+    fi
 fi
-if command -v df &> /dev/null; then
+if [ -n "$AVAIL_DISK" ] && [ "$AVAIL_DISK" != "" ]; then
     echo "  Available Disk: ${AVAIL_DISK}GB"
 fi
 echo
@@ -280,7 +282,7 @@ echo "  - RAM: 32GB+ recommended (16GB minimum, may fail at linker stage)"
 echo "  - Disk: 20GB+ free space"
 echo "  - Architecture: x86_64 (preferred) or ARM64"
 echo
-if [ $TOTAL_MEM_GB -lt 32 ]; then
+if [ -n "$TOTAL_MEM_GB" ] && [ "$TOTAL_MEM_GB" != "0" ] && [ "$TOTAL_MEM_GB" -lt 32 ] 2>/dev/null; then
     echo -e "${YELLOW}⚠ RECOMMENDATION: Request 32GB+ RAM${NC}"
     echo "   Current: ${TOTAL_MEM_GB}GB"
     echo "   Needed: 32GB+ (linker requires 8-12GB during final linking phase)"
