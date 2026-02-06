@@ -386,10 +386,15 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
 fi
 
 # Build with all environment variables available to scons
-# Use env to ensure all variables are passed to scons process
-# For conda zlib, we need to ensure the library can be found during config checks
-# The key is that scons' config checks compile test programs that need to find zlib
-if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+# Use the wrapper script to ensure zlib paths are set before scons runs
+# This is critical because scons' configuration checks happen before build flags are processed
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCONS_WRAPPER="${SCRIPT_DIR}/scons_with_zlib.sh"
+
+if [ -f "$SCONS_WRAPPER" ] && [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+    echo "  Using scons wrapper to ensure zlib paths are available..."
+    eval "PYTHONUNBUFFERED=1 \"${SCONS_WRAPPER}\" ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+elif [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
     echo "  Running scons with conda zlib paths..."
     # Explicitly pass all environment variables to scons
     # This ensures scons' configuration checks can find zlib
