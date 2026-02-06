@@ -330,18 +330,57 @@ BUILD_LOG="/tmp/gem5_build.log"
 # scons checks for libraries during config phase, so these must be set before scons runs
 if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
     echo "  Setting environment variables for scons configuration checks..."
-    export CPPFLAGS="-I/opt/conda/include ${CPPFLAGS}"
-    export LDFLAGS="-L/opt/conda/lib ${LDFLAGS}"
-    export PKG_CONFIG_PATH="/opt/conda/lib/pkgconfig:${PKG_CONFIG_PATH}"
-    # Also ensure library path is set
+    
+    # Ensure conda paths are in library path
     if ! echo "$LD_LIBRARY_PATH" | grep -q "/opt/conda/lib"; then
         export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/conda/lib"
     fi
-    echo "  CPPFLAGS: $CPPFLAGS"
-    echo "  LDFLAGS: $LDFLAGS"
+    
+    # Set include paths (scons uses these during config checks)
+    if [ -n "$C_INCLUDE_PATH" ]; then
+        C_INCLUDE_PATH=$(echo "$C_INCLUDE_PATH" | sed 's/^:*//;s/:*$//')
+        if ! echo "$C_INCLUDE_PATH" | grep -q "/opt/conda/include"; then
+            export C_INCLUDE_PATH="${C_INCLUDE_PATH}:/opt/conda/include"
+        fi
+    else
+        export C_INCLUDE_PATH="/opt/conda/include"
+    fi
+    
+    if [ -n "$CPLUS_INCLUDE_PATH" ]; then
+        CPLUS_INCLUDE_PATH=$(echo "$CPLUS_INCLUDE_PATH" | sed 's/^:*//;s/:*$//')
+        if ! echo "$CPLUS_INCLUDE_PATH" | grep -q "/opt/conda/include"; then
+            export CPLUS_INCLUDE_PATH="${CPLUS_INCLUDE_PATH}:/opt/conda/include"
+        fi
+    else
+        export CPLUS_INCLUDE_PATH="/opt/conda/include"
+    fi
+    
+    # Set compiler/linker flags (scons may use these)
+    export CPPFLAGS="-I/opt/conda/include ${CPPFLAGS}"
+    export LDFLAGS="-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib ${LDFLAGS}"
+    
+    # Set pkg-config path (scons may use pkg-config to find libraries)
+    if [ -n "$PKG_CONFIG_PATH" ]; then
+        if ! echo "$PKG_CONFIG_PATH" | grep -q "/opt/conda/lib/pkgconfig"; then
+            export PKG_CONFIG_PATH="/opt/conda/lib/pkgconfig:${PKG_CONFIG_PATH}"
+        fi
+    else
+        export PKG_CONFIG_PATH="/opt/conda/lib/pkgconfig"
+    fi
+    
+    echo "  Environment variables set:"
+    echo "    LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+    echo "    C_INCLUDE_PATH: $C_INCLUDE_PATH"
+    echo "    CPLUS_INCLUDE_PATH: $CPLUS_INCLUDE_PATH"
+    echo "    CPPFLAGS: $CPPFLAGS"
+    echo "    LDFLAGS: $LDFLAGS"
+    echo "    PKG_CONFIG_PATH: $PKG_CONFIG_PATH"
+    echo
 fi
 
-eval "PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+# Build with all environment variables available to scons
+# Use env to ensure all variables are passed to scons process
+eval "PYTHONUNBUFFERED=1 env scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
 BUILD_EXIT_CODE=${PIPESTATUS[0]}
 
 # Check for common error patterns in output
