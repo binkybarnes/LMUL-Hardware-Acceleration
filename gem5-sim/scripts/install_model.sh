@@ -387,7 +387,23 @@ fi
 
 # Build with all environment variables available to scons
 # Use env to ensure all variables are passed to scons process
-eval "PYTHONUNBUFFERED=1 env scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+# For conda zlib, we need to ensure the library can be found during config checks
+# The key is that scons' config checks compile test programs that need to find zlib
+if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+    echo "  Running scons with conda zlib paths..."
+    # Explicitly pass all environment variables to scons
+    # This ensures scons' configuration checks can find zlib
+    eval "PYTHONUNBUFFERED=1 env \
+        LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH}\" \
+        C_INCLUDE_PATH=\"${C_INCLUDE_PATH}\" \
+        CPLUS_INCLUDE_PATH=\"${CPLUS_INCLUDE_PATH}\" \
+        CPPFLAGS=\"${CPPFLAGS}\" \
+        LDFLAGS=\"${LDFLAGS}\" \
+        PKG_CONFIG_PATH=\"${PKG_CONFIG_PATH}\" \
+        scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+else
+    eval "PYTHONUNBUFFERED=1 env scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
+fi
 BUILD_EXIT_CODE=${PIPESTATUS[0]}
 
 # Check for common error patterns in output
