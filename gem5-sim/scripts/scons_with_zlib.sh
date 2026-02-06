@@ -10,6 +10,17 @@ set -e
 
 # If conda paths exist, set up environment for zlib
 if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+    # First, check if user has local symlinks (created by create_zlib_symlinks.sh)
+    # These are in standard locations that scons checks
+    if [ -d "$HOME/.local/lib" ] && [ -f "$HOME/.local/lib/libz.so" ]; then
+        # Add local lib to front of library path (checked first)
+        export LD_LIBRARY_PATH="$HOME/.local/lib:${LD_LIBRARY_PATH}"
+        if [ -d "$HOME/.local/include" ]; then
+            export C_INCLUDE_PATH="$HOME/.local/include:${C_INCLUDE_PATH}"
+            export CPLUS_INCLUDE_PATH="$HOME/.local/include:${CPLUS_INCLUDE_PATH}"
+        fi
+    fi
+    
     # Ensure conda lib is in library path
     if ! echo "$LD_LIBRARY_PATH" | grep -q "/opt/conda/lib"; then
         export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/conda/lib"
