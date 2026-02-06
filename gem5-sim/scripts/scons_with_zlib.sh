@@ -54,5 +54,25 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
     echo
 fi
 
+# Find scons - check common locations
+SCONS_CMD=""
+if command -v scons >/dev/null 2>&1; then
+    SCONS_CMD="scons"
+elif command -v scons3 >/dev/null 2>&1; then
+    SCONS_CMD="scons3"
+elif [ -f "/usr/bin/scons" ]; then
+    SCONS_CMD="/usr/bin/scons"
+elif [ -f "/usr/local/bin/scons" ]; then
+    SCONS_CMD="/usr/local/bin/scons"
+elif python3 -c "import scons" 2>/dev/null; then
+    # scons might be installed as a Python module
+    SCONS_CMD="python3 -m SCons"
+else
+    echo "Error: scons not found. Please install scons:" >&2
+    echo "  pip3 install --user scons" >&2
+    echo "  or contact your mentor to install it system-wide" >&2
+    exit 1
+fi
+
 # Run scons with all environment variables
-exec scons "$@"
+exec $SCONS_CMD "$@"
