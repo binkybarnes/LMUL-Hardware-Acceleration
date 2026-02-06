@@ -41,25 +41,9 @@ cat > "$WRAPPER" << 'EOF'
 # Git wrapper that excludes conda from LD_LIBRARY_PATH
 # This fixes OpenSSL version mismatch issues
 
-# Save original LD_LIBRARY_PATH
-ORIG_LD_PATH="$LD_LIBRARY_PATH"
-
-# Remove conda/anaconda paths
-CLEAN_LD_PATH=$(echo "$LD_LIBRARY_PATH" | tr ':' '\n' | grep -v -E "conda|anaconda" | tr '\n' ':' | sed 's/:$//')
-
-# Use system git with clean library path
-if [ -z "$CLEAN_LD_PATH" ]; then
-    LD_LIBRARY_PATH="" /usr/bin/git "$@"
-else
-    LD_LIBRARY_PATH="$CLEAN_LD_PATH" /usr/bin/git "$@"
-fi
-
-EXIT_CODE=$?
-
-# Restore original (though it won't affect parent shell)
-export LD_LIBRARY_PATH="$ORIG_LD_PATH"
-
-exit $EXIT_CODE
+# Completely unset LD_LIBRARY_PATH for git execution
+# This ensures git uses only system libraries it was compiled against
+env -u LD_LIBRARY_PATH /usr/bin/git "$@"
 EOF
 
 chmod +x "$WRAPPER"
