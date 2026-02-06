@@ -33,8 +33,26 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
     fi
     
     # Set compiler/linker flags
+    # These are critical for scons' Configure checks
     export CPPFLAGS="-I/opt/conda/include ${CPPFLAGS}"
+    export CFLAGS="-I/opt/conda/include ${CFLAGS}"
+    export CXXFLAGS="-I/opt/conda/include ${CXXFLAGS}"
     export LDFLAGS="-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib ${LDFLAGS}"
+    export LIBS="-L/opt/conda/lib -lz ${LIBS}"
+    
+    # Also set these for scons' Configure context
+    # scons might use these during library checks
+    export CC="${CC:-gcc}"
+    export CXX="${CXX:-g++}"
+    
+    # Ensure the compiler can find the library during linking
+    # This is critical for the zlibVersion() test
+    if [ -n "$CC" ]; then
+        export CC="${CC} -L/opt/conda/lib"
+    fi
+    if [ -n "$CXX" ]; then
+        export CXX="${CXX} -L/opt/conda/lib"
+    fi
     
     # Set pkg-config path
     if [ -n "$PKG_CONFIG_PATH" ]; then

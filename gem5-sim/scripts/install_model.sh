@@ -321,6 +321,9 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
     # Try passing zlib paths explicitly
     BUILD_FLAGS="${BUILD_FLAGS} ZLIB_CPPPATH=/opt/conda/include ZLIB_LIBPATH=/opt/conda/lib"
     
+    # Also try passing LIBS to help with linking during config checks
+    BUILD_FLAGS="${BUILD_FLAGS} LIBS='-L/opt/conda/lib -lz'"
+    
     echo "  Added conda paths to compiler flags and scons paths"
     echo "  DEBUG: Updated BUILD_FLAGS includes conda paths"
 fi
