@@ -109,15 +109,11 @@ class CausalSelfAttention(nn.Module):
         self.n_head = config.n_head
         self.n_embd = config.n_embd
         self.dropout = config.dropout
-
         # flash attention make GPU go brrrrr but support is only in PyTorch >= 2.0
         # we killin flash attention cuz; leave the line below uncommented instead of as false for training. 
         #self.flash = hasattr(torch.nn.functional, 'scaled_dot_product_attention')
         self.flash = False
-        if not self.flash:
-            #print("WARNING: using slow attention. Flash Attention requires PyTorch >= 2.0")
-            # causal mask to ensure that attention is only applied to the left in the input sequence
-            self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
+        self.register_buffer("bias", torch.tril(torch.ones(config.block_size, config.block_size))
                                         .view(1, 1, config.block_size, config.block_size))
 
     def forward(self, x):
@@ -177,12 +173,12 @@ class MLP(nn.Module):
 
 class Block(nn.Module):
 
-    def __init__(self, config, use_lmul=True):
+    def __init__(self, config, use_lmul_CSA=True, use_lmul_MLP=True):
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
-        self.attn = CausalSelfAttention(config, use_lmul)
+        self.attn = CausalSelfAttention(config, use_lmul_CSA)
         self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
-        self.mlp = MLP(config,use_lmul)
+        self.mlp = MLP(config,use_lmul_MLP)
 
     def forward(self, x):
         x = x + self.attn(self.ln_1(x))
@@ -194,6 +190,7 @@ class GPTConfig:
     #128 block_size crashes on my laptop - Brendan; If using non LMUL you can change it up to 1024
     block_size: int = 32
     vocab_size: int = 50304 # GPT-2 vocab_size of 50257, padded up to nearest multiple of 64 for efficiency
+    #n_layer is number of MLP/CSA blocks we make
     n_layer: int = 4
     n_head: int = 12
     n_embd: int = 48
@@ -202,26 +199,43 @@ class GPTConfig:
 
 class GPT(nn.Module):
 
-    def __init__(self, config, use_lmul=True):
+    def __init__(self, config, use_lmul=True,panel=None):
+        #Using a "panel" dict to control which layers get affected by LMUL.
+        #Layers in question: Block (MLP), Block (Self-Attention), and lm.head.
+        #panel Param should look like:
+        #{
+        #'CSA' : True/False
+        #'MLP': True/False
+        #'HEAD': True/False
+        #}
         super().__init__()
         assert config.vocab_size is not None
         assert config.block_size is not None
         self.config = config
         print("starting up!")
+        self.lmul = use_lmul
+        if panel:
+            self.CSAlmul = panel['CSA']
+            self.MLPlmul = panel['MLP']
+            self.HEADlmul = panel['HEAD']
+            print(f"USING CUSTOM LMUL CONFIG: \nCausal Attention: {self.CSAlmul}\nMLP: {self.MLPlmul}\nLM HEAD: {self.HEADlmul}\n")
+        else:
+            print(f"No custom configuration has been applied, LMUL HAS BEEN {('DISABLED', 'ENABLED')[self.lmul]} in ALL layers.")
+            self.CSAlmul = self.MLPlmul = self.HEADlmul = self.lmul
         self.transformer = nn.ModuleDict(dict(
             wte = nn.Embedding(config.vocab_size, config.n_embd),
             wpe = nn.Embedding(config.block_size, config.n_embd),
             drop = nn.Dropout(config.dropout),
-            h = nn.ModuleList([Block(config, use_lmul) for _ in range(config.n_layer)]),
+            h = nn.ModuleList([Block(config, self.CSAlmul, self.MLPlmul) for _ in range(config.n_layer)]),
             ln_f = LayerNorm(config.n_embd, bias=config.bias),
         ))
-        self.lmul = use_lmul
-        if self.lmul:
+        
+        if self.HEADlmul:
             self.lm_head = LMULLinear(config.n_embd, config.vocab_size, bias=False)
             print("using LMUL in GPT lm head!")
         else:
-            print("LMUL HAS BEEN DISABLED")
             self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
+        
         # with weight tying when using torch.compile() some warnings get generated:
         # "UserWarning: functional_call was passed multiple values for tied weights.
         # This behavior is deprecated and will be an error in future versions"

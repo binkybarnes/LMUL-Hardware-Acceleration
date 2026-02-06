@@ -7,6 +7,13 @@ from model import GPT, GPTConfig
 #e.g uses via CLI 
 #python3 eval_perplexity.py --out_dir=out-shakespeare-char
 #python3 eval_perplexity.py --out_dir=out-shakespeare-char --use_lmul
+def panel_type(s: str) -> str:
+    if len(s) != 3 or any(c not in "01" for c in s):
+        raise argparse.ArgumentTypeError(
+            "--panel must be a 3-bit binary string like '101'"
+        )
+    return s
+    
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--use_lmul",
@@ -19,10 +26,29 @@ parser.add_argument(
     default="out",
     help="Directory containing ckpt.pt"
 )
+parser.add_argument(
+    "--panel",
+    nargs="?",
+    const="111",
+    default=None,
+    type=panel_type,
+    help=(
+        "Chooses which GPT layers use LMUL. "
+        "Provide a 3-bit string like '101'. "
+        "If flag is present without a value, defaults to '111'. "
+        "Overrides --use_lmul."
+    )
+)
+
+    
 args = parser.parse_args()
 use_lmul = args.use_lmul
-
-
+LAYER_ORDER = ("CSA", "MLP", "HEAD")
+panel_dict = (
+    dict(zip(LAYER_ORDER, (c == "1" for c in args.panel)))
+    if args.panel is not None
+    else None
+)
 
 val_path = "data/shakespeare_char/val.bin"
 ckpt_path = f"{args.out_dir}/ckpt.pt" 
@@ -36,7 +62,7 @@ print(f"Using LMUL: {use_lmul}")
 print(f"Using | block_size: {block_size} | num_batches: {num_batches} | batch_size: {batch_size}\n ==> For a total of {num_batches * batch_size * block_size} tokens, or {block_size} tokens per sequence among {num_batches * batch_size} sequences")
 checkpoint = torch.load(ckpt_path, map_location=device)
 gptconf = GPTConfig(**checkpoint["model_args"])
-model = GPT(gptconf, use_lmul=use_lmul)
+model = GPT(gptconf, use_lmul=use_lmul,panel=panel_dict)
 model = torch.compile(model)
 model.load_state_dict(checkpoint["model"])
 model.to(device)
