@@ -313,7 +313,14 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
         BUILD_FLAGS="${BUILD_FLAGS} CXXFLAGS='-I/opt/conda/include' LINKFLAGS='-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib'"
     fi
     # Also set scons-specific paths
+    # CPPPATH and LIBPATH are scons variables for include and library paths
     BUILD_FLAGS="${BUILD_FLAGS} CPPPATH=/opt/conda/include LIBPATH=/opt/conda/lib"
+    
+    # For zlib specifically, we may need to pass it as a build variable
+    # Some scons configurations check for libraries using specific variable names
+    # Try passing zlib paths explicitly
+    BUILD_FLAGS="${BUILD_FLAGS} ZLIB_CPPPATH=/opt/conda/include ZLIB_LIBPATH=/opt/conda/lib"
+    
     echo "  Added conda paths to compiler flags and scons paths"
     echo "  DEBUG: Updated BUILD_FLAGS includes conda paths"
 fi
