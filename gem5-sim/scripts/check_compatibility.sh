@@ -64,27 +64,42 @@ echo
 
 # Check 2: Memory
 echo "2. Checking system memory..."
+TOTAL_MEM_GB=""
+AVAIL_MEM_GB=""
+
 if command -v free &> /dev/null; then
-    # Get total memory in GB
+    # Linux: Get total memory in GB
     TOTAL_MEM_KB=$(free | grep "^Mem:" | awk '{print $2}')
     TOTAL_MEM_GB=$((TOTAL_MEM_KB / 1024 / 1024))
     AVAIL_MEM_KB=$(free | grep "^Mem:" | awk '{print $7}')
     AVAIL_MEM_GB=$((AVAIL_MEM_KB / 1024 / 1024))
-    
+elif [ "$OS" = "Darwin" ]; then
+    # macOS: Use sysctl
+    TOTAL_MEM_BYTES=$(sysctl -n hw.memsize 2>/dev/null || echo "0")
+    if [ "$TOTAL_MEM_BYTES" != "0" ]; then
+        TOTAL_MEM_GB=$((TOTAL_MEM_BYTES / 1024 / 1024 / 1024))
+        # macOS doesn't have a simple "available" metric, use total
+        AVAIL_MEM_GB=$TOTAL_MEM_GB
+    fi
+fi
+
+if [ -n "$TOTAL_MEM_GB" ] && [ "$TOTAL_MEM_GB" != "0" ]; then
     echo "   Total RAM: ${TOTAL_MEM_GB} GB"
-    echo "   Available RAM: ${AVAIL_MEM_GB} GB"
+    if [ -n "$AVAIL_MEM_GB" ] && [ "$AVAIL_MEM_GB" != "$TOTAL_MEM_GB" ]; then
+        echo "   Available RAM: ${AVAIL_MEM_GB} GB"
+    fi
     
     if [ $TOTAL_MEM_GB -ge 32 ]; then
         check_pass "Sufficient RAM (32GB+ recommended for gem5 builds)"
     elif [ $TOTAL_MEM_GB -ge 16 ]; then
-        check_warn "Limited RAM (16GB) - linker may fail during gem5 build"
+        check_warn "Limited RAM (${TOTAL_MEM_GB}GB) - linker may fail during gem5 build"
         echo "   Recommendation: Request 32GB+ from your mentor"
         echo "   Current: ${TOTAL_MEM_GB}GB (need 32GB+)"
     else
         check_fail "Insufficient RAM (${TOTAL_MEM_GB}GB) - need at least 16GB, 32GB+ recommended"
     fi
     
-    # Check swap
+    # Check swap (Linux only)
     if command -v swapon &> /dev/null; then
         SWAP_KB=$(swapon --show=SIZE --noheadings --bytes 2>/dev/null | awk '{sum+=$1} END {print sum/1024}' || echo "0")
         SWAP_GB=$((SWAP_KB / 1024 / 1024))
@@ -93,24 +108,41 @@ if command -v free &> /dev/null; then
         else
             check_warn "No swap space - may help with linker memory issues"
         fi
+    elif [ "$OS" = "Darwin" ]; then
+        check_info "macOS: Swap is managed automatically by the system"
     fi
 else
-    check_warn "Cannot check memory (free command not available)"
+    check_warn "Cannot check memory (free/sysctl command not available)"
 fi
 echo
 
 # Check 3: Disk space
 echo "3. Checking disk space..."
+AVAIL_DISK=""
 if command -v df &> /dev/null; then
-    AVAIL_DISK=$(df -BG . | tail -1 | awk '{print $4}' | sed 's/G//')
-    echo "   Available disk space: ${AVAIL_DISK}GB"
-    
-    if [ $AVAIL_DISK -ge 50 ]; then
-        check_pass "Sufficient disk space (50GB+ recommended)"
-    elif [ $AVAIL_DISK -ge 20 ]; then
-        check_warn "Limited disk space (${AVAIL_DISK}GB) - need 20GB+ for gem5 build"
+    if [ "$OS" = "Darwin" ]; then
+        # macOS: df uses different format, use -g for GB blocks
+        AVAIL_DISK=$(df -g . | tail -1 | awk '{print $4}')
     else
-        check_fail "Insufficient disk space (${AVAIL_DISK}GB) - need at least 20GB"
+        # Linux: use -BG for GB
+        AVAIL_DISK=$(df -BG . 2>/dev/null | tail -1 | awk '{print $4}' | sed 's/G//' || df -h . | tail -1 | awk '{print $4}' | sed 's/G//')
+    fi
+    
+    if [ -n "$AVAIL_DISK" ] && [ "$AVAIL_DISK" != "" ]; then
+        echo "   Available disk space: ${AVAIL_DISK}GB"
+        
+        # Convert to integer for comparison (handle decimal values)
+        AVAIL_DISK_INT=$(echo "$AVAIL_DISK" | cut -d. -f1)
+        
+        if [ "$AVAIL_DISK_INT" -ge 50 ] 2>/dev/null; then
+            check_pass "Sufficient disk space (50GB+ recommended)"
+        elif [ "$AVAIL_DISK_INT" -ge 20 ] 2>/dev/null; then
+            check_warn "Limited disk space (${AVAIL_DISK}GB) - need 20GB+ for gem5 build"
+        else
+            check_fail "Insufficient disk space (${AVAIL_DISK}GB) - need at least 20GB"
+        fi
+    else
+        check_warn "Cannot parse disk space"
     fi
 else
     check_warn "Cannot check disk space (df command not available)"
