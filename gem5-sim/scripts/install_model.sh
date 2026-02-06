@@ -391,7 +391,7 @@ fi
 # Build with all environment variables available to scons
 # Use the wrapper script to ensure zlib paths are set before scons runs
 # This is critical because scons' configuration checks happen before build flags are processed
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# SCRIPT_DIR was already calculated at the top of the script, use it here
 SCONS_WRAPPER="${SCRIPT_DIR}/scons_with_zlib.sh"
 
 if [ -f "$SCONS_WRAPPER" ] && [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
