@@ -19,7 +19,8 @@ echo
 
 # First, check if zlib exists
 echo "1. Checking for zlib files..."
-./check_zlib.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"${SCRIPT_DIR}/check_zlib.sh"
 echo
 
 # Set up conda paths if they exist
