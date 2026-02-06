@@ -30,20 +30,41 @@ echo "1. Checking for Python shared library..."
 LIB_NAME="libpython${PYTHON_VERSION}.so.1.0"
 FOUND_LIB=""
 
-# Common locations
-for path in /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib; do
-    if [ -f "${path}/${LIB_NAME}" ]; then
-        FOUND_LIB="${path}/${LIB_NAME}"
-        echo -e "${GREEN}✓ Found: ${FOUND_LIB}${NC}"
-        break
+# Check conda first (since python3-config points to conda)
+CONDA_PREFIX=$(python3 -c "import sys; print(sys.prefix)" 2>/dev/null || echo "")
+if [ -n "$CONDA_PREFIX" ] && [ "$CONDA_PREFIX" != "/usr" ]; then
+    echo "   Detected conda Python at: $CONDA_PREFIX"
+    # Check conda lib directory
+    CONDA_LIB="${CONDA_PREFIX}/lib"
+    if [ -f "${CONDA_LIB}/${LIB_NAME}" ]; then
+        FOUND_LIB="${CONDA_LIB}/${LIB_NAME}"
+        echo -e "${GREEN}✓ Found in conda: ${FOUND_LIB}${NC}"
+    else
+        # Try alternative names
+        ALT_LIB=$(find "${CONDA_LIB}" -name "libpython${PYTHON_VERSION}*.so*" 2>/dev/null | head -1)
+        if [ -n "$ALT_LIB" ]; then
+            FOUND_LIB="$ALT_LIB"
+            echo -e "${YELLOW}⚠ Found similar in conda: ${FOUND_LIB}${NC}"
+        fi
     fi
-done
+fi
+
+# Common system locations
+if [ -z "$FOUND_LIB" ]; then
+    for path in /usr/lib /usr/lib/x86_64-linux-gnu /usr/local/lib; do
+        if [ -f "${path}/${LIB_NAME}" ]; then
+            FOUND_LIB="${path}/${LIB_NAME}"
+            echo -e "${GREEN}✓ Found in system: ${FOUND_LIB}${NC}"
+            break
+        fi
+    done
+fi
 
 if [ -z "$FOUND_LIB" ]; then
     echo -e "${RED}✗ ${LIB_NAME} not found in standard locations${NC}"
     echo
     echo "Searching system..."
-    FOUND_LIB=$(find /usr -name "${LIB_NAME}" 2>/dev/null | head -1)
+    FOUND_LIB=$(find /usr /opt -name "${LIB_NAME}" 2>/dev/null | head -1)
     if [ -n "$FOUND_LIB" ]; then
         echo -e "${YELLOW}⚠ Found at: ${FOUND_LIB}${NC}"
         echo "   (not in standard library path)"
@@ -101,27 +122,46 @@ echo
 
 # Summary
 echo "=========================================="
-if [ -n "$FOUND_LIB" ] && dpkg -l | grep -q "python3-dev"; then
-    echo -e "${GREEN}✓ Python setup looks good${NC}"
-    echo
-    echo "If build still fails, try:"
-    if [ -n "$FOUND_LIB" ]; then
-        LIB_DIR=$(dirname "$FOUND_LIB")
+if [ -n "$FOUND_LIB" ]; then
+    LIB_DIR=$(dirname "$FOUND_LIB")
+    if echo "$LD_LIBRARY_PATH" | grep -q "$LIB_DIR"; then
+        echo -e "${GREEN}✓ Python library found and in LD_LIBRARY_PATH${NC}"
+        echo "  Library: $FOUND_LIB"
+        echo
+        echo "Python setup should work. Try building gem5:"
+        echo "  ./gem5-sim/scripts/install_model.sh"
+    else
+        echo -e "${YELLOW}⚠ Python library found but not in LD_LIBRARY_PATH${NC}"
+        echo "  Library: $FOUND_LIB"
+        echo
+        echo "Add to library path:"
         echo "  export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${LIB_DIR}"
+        echo
+        echo "Or add to ~/.bashrc:"
+        echo "  echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${LIB_DIR}' >> ~/.bashrc"
+        echo "  source ~/.bashrc"
+        echo
+        echo "Then try building gem5:"
+        echo "  ./gem5-sim/scripts/install_model.sh"
     fi
-elif ! dpkg -l | grep -q "python3-dev"; then
-    echo -e "${RED}✗ python3-dev is missing${NC}"
+elif ! dpkg -l | grep -q "python3-dev" 2>/dev/null; then
+    echo -e "${RED}✗ python3-dev is missing and Python library not found${NC}"
     echo
     echo "Action required:"
-    echo "  Contact your mentor to install:"
+    if [ -n "$CONDA_PREFIX" ] && [ "$CONDA_PREFIX" != "/usr" ]; then
+        echo "  Option 1: Try using conda Python library (if available):"
+        echo "    find $CONDA_PREFIX/lib -name 'libpython*.so*'"
+        echo "    export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$CONDA_PREFIX/lib"
+        echo
+    fi
+    echo "  Option 2: Contact your mentor to install:"
     echo "    sudo apt-get install python3-dev"
 else
-    echo -e "${YELLOW}⚠ Python library found but may need configuration${NC}"
-    echo
-    if [ -n "$FOUND_LIB" ]; then
-        LIB_DIR=$(dirname "$FOUND_LIB")
-        echo "Try setting library path:"
-        echo "  export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:${LIB_DIR}"
+    echo -e "${YELLOW}⚠ Python library not found but python3-dev is installed${NC}"
+    echo "  This is unusual. Check if Python was installed via conda."
+    if [ -n "$CONDA_PREFIX" ] && [ "$CONDA_PREFIX" != "/usr" ]; then
+        echo "  Conda Python detected at: $CONDA_PREFIX"
+        echo "  Try: export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$CONDA_PREFIX/lib"
     fi
 fi
 echo "=========================================="

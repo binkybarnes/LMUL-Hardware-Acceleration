@@ -302,16 +302,45 @@ if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
         export CPLUS_INCLUDE_PATH="/opt/conda/include"
     fi
     # Add to compiler flags for scons
-    BUILD_FLAGS="${BUILD_FLAGS} CXXFLAGS='-I/opt/conda/include' LINKFLAGS='-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib'"
-    echo "  Added conda paths to compiler flags"
+    # Use CPPPATH and LIBPATH for scons (these are scons-specific variables)
+    # Also add to CXXFLAGS and LINKFLAGS for compiler
+    if echo "$BUILD_FLAGS" | grep -q "CXXFLAGS"; then
+        # If CXXFLAGS already exists, append to it
+        BUILD_FLAGS=$(echo "$BUILD_FLAGS" | sed "s/CXXFLAGS='\([^']*\)'/CXXFLAGS='\1 -I\/opt\/conda\/include'/")
+        BUILD_FLAGS=$(echo "$BUILD_FLAGS" | sed "s/LINKFLAGS='\([^']*\)'/LINKFLAGS='\1 -L\/opt\/conda\/lib -Wl,-rpath,\/opt\/conda\/lib'/")
+    else
+        # Add new flags
+        BUILD_FLAGS="${BUILD_FLAGS} CXXFLAGS='-I/opt/conda/include' LINKFLAGS='-L/opt/conda/lib -Wl,-rpath,/opt/conda/lib'"
+    fi
+    # Also set scons-specific paths
+    BUILD_FLAGS="${BUILD_FLAGS} CPPPATH=/opt/conda/include LIBPATH=/opt/conda/lib"
+    echo "  Added conda paths to compiler flags and scons paths"
+    echo "  DEBUG: Updated BUILD_FLAGS includes conda paths"
 fi
 
 echo "  Build command: scons ${BUILD_TARGET} ${BUILD_FLAGS}"
 echo "  This may take 30-60 minutes..."
 echo "  DEBUG: BUILD_TARGET=${BUILD_TARGET}"
 echo "  DEBUG: BUILD_FLAGS=${BUILD_FLAGS}"
+
 # Execute the build - expand variables properly
 BUILD_LOG="/tmp/gem5_build.log"
+
+# For conda environments, set environment variables that scons uses during configuration
+# scons checks for libraries during config phase, so these must be set before scons runs
+if [ -d "/opt/conda/lib" ] && [ -d "/opt/conda/include" ]; then
+    echo "  Setting environment variables for scons configuration checks..."
+    export CPPFLAGS="-I/opt/conda/include ${CPPFLAGS}"
+    export LDFLAGS="-L/opt/conda/lib ${LDFLAGS}"
+    export PKG_CONFIG_PATH="/opt/conda/lib/pkgconfig:${PKG_CONFIG_PATH}"
+    # Also ensure library path is set
+    if ! echo "$LD_LIBRARY_PATH" | grep -q "/opt/conda/lib"; then
+        export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/conda/lib"
+    fi
+    echo "  CPPFLAGS: $CPPFLAGS"
+    echo "  LDFLAGS: $LDFLAGS"
+fi
+
 eval "PYTHONUNBUFFERED=1 scons ${BUILD_TARGET} ${BUILD_FLAGS} 2>&1 | tee ${BUILD_LOG}"
 BUILD_EXIT_CODE=${PIPESTATUS[0]}
 
