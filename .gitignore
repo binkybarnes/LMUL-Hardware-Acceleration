@@ -51,3 +51,11 @@ synthesis/out/*
 NNs/core
 *.pt
 *.pth
+
+# Vivado files (Edgar's logs)
+Vivado/LMUL_Hardware/.Xil
+Vivado/LMUL_Hardware/LMUL_Hardware.cache
+Vivado/LMUL_Hardware/LMUL_Hardware.hw
+Vivado/LMUL_Hardware/LMUL_Hardware.ip_user_files
+Vivado/Xilinx.lic
+Vivado/Xilinx_2.lic
