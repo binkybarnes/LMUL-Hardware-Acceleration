@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_lmul_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_lmul" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="80.101 ns"></ZoomEndTime>
+      <Cursor1Time time="0.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="153"></NameColumnWidth>
+      <ValueColumnWidth column_width="77"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="34" />
+   <wvobject fp_name="/tb_lmul/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/rstn" type="logic">
+      <obj_property name="ElementShortName">rstn</obj_property>
+      <obj_property name="ObjectShortName">rstn</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/i_a" type="array">
+      <obj_property name="ElementShortName">i_a[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_a[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/i_b" type="array">
+      <obj_property name="ElementShortName">i_b[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_b[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/o_p" type="array">
+      <obj_property name="ElementShortName">o_p[15:0]</obj_property>
+      <obj_property name="ObjectShortName">o_p[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/i_valid" type="logic">
+      <obj_property name="ElementShortName">i_valid</obj_property>
+      <obj_property name="ObjectShortName">i_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/i_ready" type="logic">
+      <obj_property name="ElementShortName">i_ready</obj_property>
+      <obj_property name="ObjectShortName">i_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/o_valid" type="logic">
+      <obj_property name="ElementShortName">o_valid</obj_property>
+      <obj_property name="ObjectShortName">o_valid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/o_ready" type="logic">
+      <obj_property name="ElementShortName">o_ready</obj_property>
+      <obj_property name="ObjectShortName">o_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/sum_in_a" type="array">
+      <obj_property name="ElementShortName">sum_in_a[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sum_in_a[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/sum_in_b" type="array">
+      <obj_property name="ElementShortName">sum_in_b[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sum_in_b[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/sum_out" type="array">
+      <obj_property name="ElementShortName">sum_out[15:0]</obj_property>
+      <obj_property name="ObjectShortName">sum_out[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/fc2_weights" type="array">
+      <obj_property name="ElementShortName">fc2_weights[0:9][0:127][15:0]</obj_property>
+      <obj_property name="ObjectShortName">fc2_weights[0:9][0:127][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/fc1_bias" type="array">
+      <obj_property name="ElementShortName">fc1_bias[0:127][15:0]</obj_property>
+      <obj_property name="ObjectShortName">fc1_bias[0:127][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/fc2_bias" type="array">
+      <obj_property name="ElementShortName">fc2_bias[0:9][15:0]</obj_property>
+      <obj_property name="ObjectShortName">fc2_bias[0:9][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/fc1_acc" type="array">
+      <obj_property name="ElementShortName">fc1_acc[0:127][15:0]</obj_property>
+      <obj_property name="ObjectShortName">fc1_acc[0:127][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/relu_out" type="array">
+      <obj_property name="ElementShortName">relu_out[0:127][15:0]</obj_property>
+      <obj_property name="ObjectShortName">relu_out[0:127][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/fc2_acc" type="array">
+      <obj_property name="ElementShortName">fc2_acc[0:9][15:0]</obj_property>
+      <obj_property name="ObjectShortName">fc2_acc[0:9][15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/f_img" type="array">
+      <obj_property name="ElementShortName">f_img[31:0]</obj_property>
+      <obj_property name="ObjectShortName">f_img[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/f_fc1" type="array">
+      <obj_property name="ElementShortName">f_fc1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">f_fc1[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/f_fc2" type="array">
+      <obj_property name="ElementShortName">f_fc2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">f_fc2[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/f_out" type="array">
+      <obj_property name="ElementShortName">f_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">f_out[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/r" type="array">
+      <obj_property name="ElementShortName">r[31:0]</obj_property>
+      <obj_property name="ObjectShortName">r[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/i" type="array">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/k" type="array">
+      <obj_property name="ElementShortName">k[31:0]</obj_property>
+      <obj_property name="ObjectShortName">k[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/word_buf" type="array">
+      <obj_property name="ElementShortName">word_buf[15:0]</obj_property>
+      <obj_property name="ObjectShortName">word_buf[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/img" type="array">
+      <obj_property name="ElementShortName">img[31:0]</obj_property>
+      <obj_property name="ObjectShortName">img[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/img_base" type="array">
+      <obj_property name="ElementShortName">img_base[31:0]</obj_property>
+      <obj_property name="ObjectShortName">img_base[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/NUM_IMAGES" type="array">
+      <obj_property name="ElementShortName">NUM_IMAGES[31:0]</obj_property>
+      <obj_property name="ObjectShortName">NUM_IMAGES[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/N" type="array">
+      <obj_property name="ElementShortName">N[31:0]</obj_property>
+      <obj_property name="ObjectShortName">N[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/M" type="array">
+      <obj_property name="ElementShortName">M[31:0]</obj_property>
+      <obj_property name="ObjectShortName">M[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/IMG_SIZE" type="array">
+      <obj_property name="ElementShortName">IMG_SIZE[31:0]</obj_property>
+      <obj_property name="ObjectShortName">IMG_SIZE[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/OUT" type="array">
+      <obj_property name="ElementShortName">OUT[31:0]</obj_property>
+      <obj_property name="ObjectShortName">OUT[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_lmul/BF16_WIDTH" type="array">
+      <obj_property name="ElementShortName">BF16_WIDTH[31:0]</obj_property>
+      <obj_property name="ObjectShortName">BF16_WIDTH[31:0]</obj_property>
+   </wvobject>
+</wave_config>
