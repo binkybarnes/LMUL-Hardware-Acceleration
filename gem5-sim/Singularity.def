@@ -5,6 +5,8 @@ From: ubuntu:22.04
     export DEBIAN_FRONTEND=noninteractive
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
+    # Ensure pip-installed console scripts (e.g., jupyter) are on PATH
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
 
 %post
     # Update package lists and install system dependencies
@@ -39,13 +41,14 @@ From: ubuntu:22.04
     # Upgrade pip and install Python packages (including Jupyter)
     python3 -m pip install --upgrade pip setuptools wheel
     
-    # Install Python dependencies for gem5 and analysis
+    # Install Python dependencies for gem5, analysis, and Jupyter
     pip3 install --no-cache-dir \
         scons \
         numpy \
         matplotlib \
         pandas \
         scipy \
+        jupyter \
         jupyterlab \
         ipykernel
 

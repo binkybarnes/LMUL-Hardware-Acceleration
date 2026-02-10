@@ -19,7 +19,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GEM5_SIM_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 DEST_DIR="${1:-${FASHION_MNIST_DIR:-${GEM5_SIM_ROOT}/datasets/fashion-mnist}}"
-BASE_URL="${FASHION_MNIST_BASE_URL:-https://fashion-mnist.s3-website.eu-central-1.amazonaws.com}"
+# Use HTTP by default to avoid strict TLS / proxy issues on some HPC systems.
+# (Official README also uses http:// for these links.)
+BASE_URL="${FASHION_MNIST_BASE_URL:-http://fashion-mnist.s3-website.eu-central-1.amazonaws.com}"
 
 mkdir -p "${DEST_DIR}"
 
