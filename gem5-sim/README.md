@@ -121,6 +121,23 @@ cd ..
 
 ---
 
+## Datasets (Fashion-MNIST)
+
+Fashion-MNIST is **data** (not a library). On Expanse, download it **once** to a shared filesystem (e.g., `$PROJECT` or `$SCRATCH`) and reuse it across simulation runs.
+
+Download + prepare (creates decompressed IDX files and a `fashion-mnist.npz`):
+
+```bash
+./gem5-sim/scripts/fetch_fashion_mnist.sh "$SCRATCH/fashion-mnist"
+```
+
+Notes for gem5:
+
+- In **SE mode**, your benchmark can open files from that host path directly (pass the path in via argv/env).
+- For details on what gets generated, see `gem5-sim/datasets/README.md`.
+
+---
+
 ## Building gem5 with LMUL Accelerator
 
 ### Step 1: Install the LMUL Accelerator Model
