@@ -29,6 +29,21 @@ check_lib() {
     
     echo "Checking for $name..."
     
+    # If no lib/header specified, check for an executable (e.g. protoc)
+    if [ -z "$lib_file" ] && [ -z "$header_file" ]; then
+        if command -v "$name" >/dev/null 2>&1; then
+            echo -e "  ${GREEN}✓${NC} Found: $(command -v "$name")"
+        else
+            echo -e "  ${RED}✗${NC} Not found"
+            if [ -n "$pkg_name" ]; then
+                echo "    Install: sudo apt-get install $pkg_name"
+                MISSING+=("$pkg_name")
+            fi
+        fi
+        echo
+        return
+    fi
+    
     # Check library
     FOUND_LIB=""
     if [ -n "$lib_file" ]; then

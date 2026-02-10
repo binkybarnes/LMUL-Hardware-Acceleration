@@ -213,9 +213,16 @@ if [ -n "${CODESPACES}" ] || [ -d "/workspaces" ]; then
     echo "  Detected Codespace environment - using ${JOBS} parallel job (single-threaded)"
     echo "  Note: This is slower but avoids out-of-memory errors during linking"
 else
-    # Use all available cores, but cap at 4 to avoid memory issues
-    AVAILABLE_CORES=$(nproc)
-    if [ "$AVAILABLE_CORES" -gt 4 ]; then
+    # Use available cores; cap at 4 on low-RAM systems to avoid linker OOM
+    AVAILABLE_CORES=$(nproc 2>/dev/null || echo 4)
+    AVAIL_MEM_GB=""
+    if command -v free &>/dev/null; then
+        AVAIL_MEM_GB=$(free -g | awk '/^Mem:/{print $7}' 2>/dev/null)
+    fi
+    if [ -n "$AVAIL_MEM_GB" ] && [ "$AVAIL_MEM_GB" -ge 64 ] 2>/dev/null; then
+        # Plenty of RAM (e.g. Expanse node): use more parallelism for faster build
+        JOBS=$((AVAILABLE_CORES > 8 ? 8 : AVAILABLE_CORES))
+    elif [ "$AVAILABLE_CORES" -gt 4 ]; then
         JOBS=4
     else
         JOBS=$AVAILABLE_CORES
