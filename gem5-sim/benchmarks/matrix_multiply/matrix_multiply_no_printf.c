@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
         const char msg[] = "COMPLETE mode=";
         const char acc[] = "accel\n";
         const char cpu[] = "cpu\n";
-        write(1, msg, sizeof(msg) - 1);
-        write(1, use_accel ? acc : cpu, use_accel ? 6 : 4);
+        (void)write(1, msg, sizeof(msg) - 1);
+        (void)write(1, use_accel ? acc : cpu, use_accel ? 6 : 4);
     }
     
     // Cleanup

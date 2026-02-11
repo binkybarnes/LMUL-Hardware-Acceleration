@@ -44,6 +44,9 @@ usage() {
     echo "  $0 --test"
     echo "  $0 --size 16 --pe-rows 8 --pe-cols 8"
     echo "  $0 --size 32 --ieee"
+    echo
+    echo "Capture output to a file (e.g. on Expanse where clipboard is awkward):"
+    echo "  $0 2>&1 | tee simulation.log"
     exit 1
 }
 

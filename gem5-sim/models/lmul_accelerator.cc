@@ -138,7 +138,8 @@ LMulAccelerator::read(PacketPtr pkt)
             value = 0;
     }
 
-    // Write value to packet using little-endian byte order (matches gem5 devices)
+    // Convert request to response (required by PioPort)
+    pkt->makeResponse();
     pkt->setUintX(value, ByteOrder::little);
     stats.numReads++;
 
@@ -212,6 +213,8 @@ LMulAccelerator::write(PacketPtr pkt)
                  offset);
     }
 
+    // Convert request to response (required by PioPort)
+    pkt->makeResponse();
     stats.numWrites++;
     return pioDelay;
 }
