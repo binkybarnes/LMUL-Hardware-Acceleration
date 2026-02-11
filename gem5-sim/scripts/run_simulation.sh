@@ -18,6 +18,7 @@ USE_IEEE=0
 MATRIX_SIZE=8
 OUTPUT_DIR="${LMUL_GEM5}/m5out"
 BENCHMARK="matrix_multiply"
+USE_NO_PRINTF=1
 TEST_MODE=0
 
 # Usage function
@@ -31,6 +32,8 @@ usage() {
     echo "  --size N            Matrix size NxN (default: 8)"
     echo "  --ieee              Use IEEE BF16 instead of LMUL"
     echo "  --benchmark NAME    Benchmark to run (default: matrix_multiply)"
+    echo "  --no-printf         Use matrix_multiply_no_printf.arm (avoids syscall 403; default)"
+    echo "  --with-printf       Use matrix_multiply.arm (may hit syscall 403 in gem5)"
     echo "  --output-dir DIR    Output directory (default: m5out)"
     echo "  -h, --help          Show this help"
     echo
@@ -69,6 +72,14 @@ while [[ $# -gt 0 ]]; do
             BENCHMARK="$2"
             shift 2
             ;;
+        --no-printf)
+            USE_NO_PRINTF=1
+            shift
+            ;;
+        --with-printf)
+            USE_NO_PRINTF=0
+            shift
+            ;;
         --output-dir)
             OUTPUT_DIR="$2"
             shift 2
@@ -95,14 +106,18 @@ else
     exit 1
 fi
 
-# Determine benchmark binary
-BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/${BENCHMARK}/${BENCHMARK}.arm"
+# Determine benchmark binary (use no-printf by default to avoid syscall 403 in gem5 ARM SE)
+if [ "$BENCHMARK" = "matrix_multiply" ] && [ "$USE_NO_PRINTF" -eq 1 ]; then
+    BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm"
+else
+    BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/${BENCHMARK}/${BENCHMARK}.arm"
+fi
 
 if [ ! -f "$BENCHMARK_BIN" ]; then
     echo "Error: Benchmark binary not found: $BENCHMARK_BIN"
     echo "Build it with:"
-    echo "  cd ${LMUL_GEM5}/benchmarks/${BENCHMARK}"
-    echo "  make"
+    echo "  cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+    echo "  make   # or: make matrix_multiply_no_printf.arm"
     exit 1
 fi
 
@@ -117,7 +132,7 @@ echo "Configuration:"
 echo "  PE Array: ${PE_ROWS}x${PE_COLS}"
 echo "  Mode: $([ $USE_IEEE -eq 1 ] && echo 'IEEE BF16' || echo 'LMUL')"
 echo "  Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
-echo "  Benchmark: ${BENCHMARK}"
+echo "  Benchmark: $(basename "$BENCHMARK_BIN")"
 echo "  Output: ${OUTPUT_DIR}"
 echo "========================================"
 echo
