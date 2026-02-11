@@ -35,6 +35,7 @@ From: ubuntu:22.04
         libgoogle-perftools-dev \
         libboost-all-dev \
         gcc-arm-linux-gnueabihf \
+        libc6-dev-armhf-cross \
         binutils-gold && \
     rm -rf /var/lib/apt/lists/*
 
