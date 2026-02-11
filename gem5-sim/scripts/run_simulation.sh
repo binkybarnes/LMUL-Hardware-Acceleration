@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# Run gem5 simulation with LMUL accelerator
+# Run a single gem5 simulation: either LMUL (accelerator) or IEEE (CPU).
+# For comparing LMUL vs IEEE (two runs + metrics), use compare_lmul_vs_ieee.sh.
 #
 
 set -e
@@ -19,6 +20,7 @@ MATRIX_SIZE=8
 OUTPUT_DIR="${LMUL_GEM5}/m5out"
 BENCHMARK="matrix_multiply"
 USE_NO_PRINTF=1
+SHOW_OUTPUT=0
 TEST_MODE=0
 
 # Usage function
@@ -34,6 +36,7 @@ usage() {
     echo "  --benchmark NAME    Benchmark to run (default: matrix_multiply)"
     echo "  --no-printf         Use matrix_multiply_no_printf.arm (avoids syscall 403; default)"
     echo "  --with-printf       Use matrix_multiply.arm (may hit syscall 403 in gem5)"
+    echo "  --show-output       After run, print guest stdout/stderr (validate results)"
     echo "  --output-dir DIR    Output directory (default: m5out)"
     echo "  -h, --help          Show this help"
     echo
@@ -80,6 +83,10 @@ while [[ $# -gt 0 ]]; do
             USE_NO_PRINTF=0
             shift
             ;;
+        --show-output)
+            SHOW_OUTPUT=1
+            shift
+            ;;
         --output-dir)
             OUTPUT_DIR="$2"
             shift 2
@@ -112,12 +119,18 @@ if [ "$BENCHMARK" = "matrix_multiply" ] && [ "$USE_NO_PRINTF" -eq 1 ]; then
 else
     BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/${BENCHMARK}/${BENCHMARK}.arm"
 fi
+# Use absolute path so gem5 finds the binary regardless of cwd
+case "$BENCHMARK_BIN" in
+    /*) ;;
+    *)  BENCHMARK_BIN="$(cd "$PROJECT_ROOT" && cd "$(dirname "$BENCHMARK_BIN")" && pwd)/$(basename "$BENCHMARK_BIN")" ;;
+esac
 
 if [ ! -f "$BENCHMARK_BIN" ]; then
     echo "Error: Benchmark binary not found: $BENCHMARK_BIN"
     echo "Build it with:"
     echo "  cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
-    echo "  make   # or: make matrix_multiply_no_printf.arm"
+    echo "  make matrix_multiply_no_printf.arm   # for default (no-printf) run"
+    echo "  make   # for matrix_multiply.arm (requires --with-printf, may hit syscall 403)"
     exit 1
 fi
 
@@ -182,6 +195,15 @@ if [ $? -eq 0 ]; then
     echo "========================================"
     echo "Output files in: $OUTPUT_DIR"
     echo
+    
+    # Optionally show guest stdout/stderr (validate what was computed)
+    if [ "$SHOW_OUTPUT" -eq 1 ]; then
+        echo "--- Guest stdout (simout) ---"
+        [ -f "$OUTPUT_DIR/simout" ] && cat "$OUTPUT_DIR/simout" || echo "(none)"
+        echo "--- Guest stderr (simerr) ---"
+        [ -f "$OUTPUT_DIR/simerr" ] && cat "$OUTPUT_DIR/simerr" || echo "(none)"
+        echo
+    fi
     
     # Show key statistics
     if [ -f "$OUTPUT_DIR/stats.txt" ]; then

@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 // LMUL Accelerator Register Offsets
 #define LMUL_BASE_ADDR   0x40000000  // MMIO at 1GB (common MMIO region)
@@ -79,6 +80,15 @@ int main(int argc, char *argv[])
         lmul_matrix_multiply(A, B, C, M, N, P);
     } else {
         cpu_matrix_multiply(A, B, C, M, N, P);
+    }
+    
+    // Signal completion for validation (write() avoids printf/syscall 403 in gem5)
+    {
+        const char msg[] = "COMPLETE mode=";
+        const char acc[] = "accel\n";
+        const char cpu[] = "cpu\n";
+        write(1, msg, sizeof(msg) - 1);
+        write(1, use_accel ? acc : cpu, use_accel ? 6 : 4);
     }
     
     // Cleanup
