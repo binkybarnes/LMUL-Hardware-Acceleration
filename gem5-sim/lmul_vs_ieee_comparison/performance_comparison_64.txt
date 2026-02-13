@@ -7,54 +7,70 @@ Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
 
 Metric                         LMUL                 IEEE                
 ----------------------------------------------------------------------
-Simulation Time (s)            0.009952             0.202015            
-  → Speedup: 20.30x
-CPU Cycles                     19,904,553           404,030,405         
-  → Speedup: 20.30x
-Instructions                   141,480              2,821,087           
-CPI                            140.6811             143.2176            
+Simulation Time (s)            0.009958             0.202015            
+  → Speedup: 20.29x
+CPU Cycles                     19,916,565           404,030,405         
+  → Speedup: 20.29x
+Instructions                   141,543              2,821,087           
+CPI                            140.7034             143.2176            
   → Improvement: 1.02x
-IPC                            0.007108             0.006982            
+IPC                            0.007107             0.006982            
   → Improvement: 1.02x
+
+DRAM energy (µJ)               11615474.62          238721940.59        
+  → DRAM energy ratio (IEEE/LMUL): 20.55x (>1 = LMUL used less)
+DRAM avg power (mW)            1166.41              1181.70             
+  (CPU and accelerator energy require power models; not in default gem5 SE)
+
 
 Accelerator Metrics           
 ----------------------------------------------------------------------
-03162E+06                      0                    N/A                 
+02931E+06                      0                    N/A                 
 04858E+06                      0                    N/A                 
-09715E+06                      1                    N/A                 
-11411E+06                      0                    N/A                 
-17965E+06                      0                    N/A                 
-24518E+06                      0                    N/A                 
+07789E+06                      0                    N/A                 
+09715E+06                      0                    N/A                 
+12646E+06                      0                    N/A                 
+14573E+06                      0                    N/A                 
+1943E+06                       0                    N/A                 
+24288E+06                      0                    N/A                 
+29146E+06                      0                    N/A                 
 31072E+06                      0                    N/A                 
-37626E+06                      0                    N/A                 
-44179E+06                      0                    N/A                 
-50733E+06                      0                    N/A                 
+34003E+06                      0                    N/A                 
+3593E+06                       0                    N/A                 
+38861E+06                      1                    N/A                 
+40787E+06                      0                    N/A                 
+45645E+06                      0                    N/A                 
+50502E+06                      0                    N/A                 
+5536E+06                       0                    N/A                 
 57286E+06                      0                    N/A                 
-6384E+06                       0                    N/A                 
-70394E+06                      0                    N/A                 
-76947E+06                      0                    N/A                 
+60218E+06                      0                    N/A                 
+62144E+06                      0                    N/A                 
+67002E+06                      0                    N/A                 
+71859E+06                      0                    N/A                 
+76717E+06                      0                    N/A                 
+81574E+06                      0                    N/A                 
 83501E+06                      0                    N/A                 
-90054E+06                      0                    N/A                 
-96608E+06                      0                    N/A                 
+86432E+06                      0                    N/A                 
+88358E+06                      0                    N/A                 
+93216E+06                      0                    N/A                 
+98074E+06                      0                    N/A                 
 Numcompletions                 1                    0                   
-Numreads                       8                    0                   
+Numreads                       29                   0                   
 Numstarts                      1                    0                   
 Numwrites                      8                    0                   
 Oplatency::0                   N/A                  0                   
-Oplatency::0-65535             0                    N/A                 
+Oplatency::0-262143            0                    N/A                 
 Oplatency::1                   N/A                  0                   
 Oplatency::10                  N/A                  0                   
 Oplatency::11                  N/A                  0                   
 Oplatency::12                  N/A                  0                   
 Oplatency::13                  N/A                  0                   
-Oplatency::131072-196607       0                    N/A                 
 Oplatency::14                  N/A                  0                   
 Oplatency::15                  N/A                  0                   
 Oplatency::16                  N/A                  0                   
 Oplatency::17                  N/A                  0                   
 Oplatency::18                  N/A                  0                   
 Oplatency::19                  N/A                  0                   
-Oplatency::196608-262143       0                    N/A                 
 Oplatency::2                   N/A                  0                   
 Oplatency::20                  N/A                  0                   
 Oplatency::21                  N/A                  0                   
@@ -63,38 +79,28 @@ Oplatency::23                  N/A                  0
 Oplatency::24                  N/A                  0                   
 Oplatency::25                  N/A                  0                   
 Oplatency::26                  N/A                  0                   
-Oplatency::262144-327679       0                    N/A                 
+Oplatency::262144-524287       0                    N/A                 
 Oplatency::27                  N/A                  0                   
 Oplatency::28                  N/A                  0                   
 Oplatency::29                  N/A                  0                   
 Oplatency::3                   N/A                  0                   
 Oplatency::30                  N/A                  0                   
 Oplatency::31                  N/A                  0                   
-Oplatency::327680-393215       0                    N/A                 
-Oplatency::393216-458751       0                    N/A                 
 Oplatency::4                   N/A                  0                   
-Oplatency::458752-524287       0                    N/A                 
 Oplatency::5                   N/A                  0                   
-Oplatency::524288-589823       0                    N/A                 
-Oplatency::589824-655359       0                    N/A                 
+Oplatency::524288-786431       0                    N/A                 
 Oplatency::6                   N/A                  0                   
-Oplatency::65536-131071        0                    N/A                 
-Oplatency::655360-720895       0                    N/A                 
 Oplatency::7                   N/A                  0                   
-Oplatency::720896-786431       0                    N/A                 
-Oplatency::786432-851967       0                    N/A                 
 Oplatency::8                   N/A                  0                   
-Oplatency::851968-917503       0                    N/A                 
 Oplatency::9                   N/A                  0                   
-Oplatency::917504-983039       0                    N/A                 
-Oplatency::Gmean               2086400.0            nan                 
-Oplatency::Mean                2086400              nan                 
+Oplatency::Gmean               8230400.0            nan                 
+Oplatency::Mean                8230400              nan                 
 Oplatency::Samples             1                    0                   
 Oplatency::Stdev               nan                  nan                 
 Oplatency::Total               1                    0                   
-Pio                            64                   N/A                 
-Pwrstateresidencyticks::Undefined 9952276500           202015202500        
-Totalcycles                    4172                 0                   
+Pio                            148                  N/A                 
+Pwrstateresidencyticks::Undefined 9958282500           202015202500        
+Totalcycles                    16460                0                   
 Totalops                       262144               0                   
 ======================================================================
 
