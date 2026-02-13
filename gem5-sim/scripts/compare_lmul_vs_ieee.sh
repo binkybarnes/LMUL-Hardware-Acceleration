@@ -155,13 +155,19 @@ else
     if [ -f "$NO_PRINTF_BIN" ]; then
         BENCHMARK_BIN="$NO_PRINTF_BIN"
         BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+        RESULT_FILE_ARGS=("result.bin")   # for correctness validation (writes C to outdir)
         echo "Using matrix_multiply_no_printf benchmark (avoids syscall 403)"
     else
         BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
         BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+        RESULT_FILE_ARGS=("result.bin")
         echo "Using matrix_multiply benchmark (may hit syscall 403)"
         echo "  Build no-printf version: cd benchmarks/matrix_multiply && make both"
     fi
+fi
+# simple_test has no result file
+if [ "${USE_SIMPLE_TEST:-0}" -eq 1 ]; then
+    RESULT_FILE_ARGS=()
 fi
 
 # Check benchmark binary exists
@@ -208,7 +214,7 @@ if ! "$GEM5_BINARY" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
-    --cmd-args "${BENCHMARK_ARGS[@]}" "1" \
+    --cmd-args "${BENCHMARK_ARGS[@]}" "1" "${RESULT_FILE_ARGS[@]}" \
     > "$LMUL_OUTPUT/simulation.log" 2>&1; then
     LMUL_EXIT_CODE=$?
     echo "⚠ LMUL simulation failed (exit code: $LMUL_EXIT_CODE)"
@@ -258,7 +264,7 @@ if ! "$GEM5_BINARY" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
-    --cmd-args "${BENCHMARK_ARGS[@]}" "0" \
+    --cmd-args "${BENCHMARK_ARGS[@]}" "0" "${RESULT_FILE_ARGS[@]}" \
     > "$IEEE_OUTPUT/simulation.log" 2>&1; then
     IEEE_EXIT_CODE=$?
     echo "⚠ IEEE simulation failed (exit code: $IEEE_EXIT_CODE)"
@@ -295,15 +301,19 @@ else
     echo "⚠ IEEE simulation completed but no stats generated"
 fi
 
-# Step 3: Extract output matrices (if available via result readback)
+# Step 3: Correctness validation (compare result matrices if written)
 echo
-echo "Step 3: Extracting output matrices..."
-echo "  (Note: Currently using test pattern data in accelerator)"
-echo "  (DMA implementation needed for actual matrix data)"
-
-# TODO: Extract matrices using result readback registers
-# For now, we'll note that both use the same test pattern
-# so outputs should be comparable once DMA is implemented
+echo "Step 3: Correctness validation (LMUL vs IEEE result matrices)..."
+if [ -f "$LMUL_OUTPUT/result.bin" ] && [ -f "$IEEE_OUTPUT/result.bin" ]; then
+    if python3 "$SCRIPT_DIR/compare_result_binaries.py" "$LMUL_OUTPUT" "$IEEE_OUTPUT"; then
+        echo "✓ Correctness check passed"
+    else
+        echo "⚠ Correctness check reported differences (see above)"
+    fi
+else
+    echo "  Skipped (no result.bin in one or both runs)"
+    echo "  Result files are written when using matrix_multiply_no_printf with output filename."
+fi
 
 # Step 4: Compare performance metrics
 echo
@@ -342,6 +352,10 @@ echo "  - IEEE stats: $IEEE_OUTPUT/stats.txt"
 if [ -f "$PERF_COMPARISON_FILE" ]; then
     echo "  - Performance comparison: $PERF_COMPARISON_FILE"
 fi
+if [ -f "$LMUL_OUTPUT/result.bin" ] && [ -f "$IEEE_OUTPUT/result.bin" ]; then
+    echo "  - LMUL result matrix: $LMUL_OUTPUT/result.bin"
+    echo "  - IEEE result matrix: $IEEE_OUTPUT/result.bin"
+fi
 echo
 echo "Next Steps:"
 echo "==========="
@@ -349,14 +363,17 @@ echo
 echo "1. View performance comparison:"
 echo "   cat $PERF_COMPARISON_FILE"
 echo
-echo "2. Compare stats manually:"
+echo "2. Re-run correctness check (if result.bin present):"
+echo "   python3 $SCRIPT_DIR/compare_result_binaries.py $LMUL_OUTPUT $IEEE_OUTPUT"
+echo
+echo "3. Compare stats manually:"
 echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt"
 echo
-echo "3. View simulation logs:"
+echo "4. View simulation logs:"
 echo "   tail -50 $LMUL_OUTPUT/simulation.log"
 echo "   tail -50 $IEEE_OUTPUT/simulation.log"
 echo
-echo "4. Extract detailed metrics:"
+echo "5. Extract detailed metrics:"
 echo "   python3 $SCRIPT_DIR/extract_stats.py $LMUL_OUTPUT/stats.txt"
 echo "   python3 $SCRIPT_DIR/extract_stats.py $IEEE_OUTPUT/stats.txt"
 echo

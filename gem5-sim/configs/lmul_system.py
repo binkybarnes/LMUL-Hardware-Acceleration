@@ -151,6 +151,8 @@ def main():
         process = Process()
         # Step 2: Set cmd (following hmc_hello.py)
         process.cmd = [args.cmd] + args.cmd_args
+        # Step 2b: Set cwd to output_dir so benchmark can write result.bin into run directory
+        process.cwd = os.path.abspath(args.output_dir)
         # Step 3: Set system workload (following hmc_hello.py - must be before cpu.workload)
         system.workload = SEWorkload.init_compatible(args.cmd)
         # Step 4: Set cpu workload (following hmc_hello.py)

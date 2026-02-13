@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -80,6 +81,17 @@ int main(int argc, char *argv[])
         lmul_matrix_multiply(A, B, C, M, N, P);
     } else {
         cpu_matrix_multiply(A, B, C, M, N, P);
+    }
+    
+    // Optional: write result matrix C to file for correctness validation (argv[5] = filename)
+    if (argc >= 6 && argv[5] && argv[5][0] != '\0') {
+        FILE *fp = fopen(argv[5], "wb");
+        if (fp) {
+            (void)fwrite(&M, sizeof(M), 1, fp);
+            (void)fwrite(&P, sizeof(P), 1, fp);
+            (void)fwrite(C, sizeof(bf16_t), (size_t)M * P, fp);
+            fclose(fp);
+        }
     }
     
     // Signal completion for validation (write() avoids printf/syscall 403 in gem5)
