@@ -35,7 +35,7 @@ set -e
 # Submit dir = gem5-sim/ when you run "cd gem5-sim && sbatch scripts/..."
 GEM5_SIM_DIR="${SLURM_SUBMIT_DIR:-.}"
 REPO_ROOT="$(cd "$GEM5_SIM_DIR/.." && pwd)"
-SIF="${LMUL_ACCEL_SIF:-$REPO_ROOT/../../../../esolares/lmul_accel.sif}"
+SIF="${LMUL_ACCEL_SIF:-$REPO_ROOT/../../../esolares/lmul_accel.sif}"
 
 # Optional args for compare script (e.g. --size 8)
 EXTRA_ARGS="${COMPARE_EXTRA_ARGS:-}"
