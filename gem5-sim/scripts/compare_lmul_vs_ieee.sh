@@ -22,6 +22,7 @@ PE_ROWS=4
 PE_COLS=4
 OUTPUT_DIR="lmul_vs_ieee_comparison"
 USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall 403
+LOG_FILE=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -42,17 +43,22 @@ while [[ $# -gt 0 ]]; do
             OUTPUT_DIR="$2"
             shift 2
             ;;
+        --log-file)
+            LOG_FILE="$2"
+            shift 2
+            ;;
         --simple-test)
             USE_SIMPLE_TEST=1
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR]"
+            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE]"
             echo
             echo "Compares LMUL accelerator vs IEEE BF16 accelerator:"
             echo "  - Runs both simulations"
             echo "  - Verifies output accuracy"
             echo "  - Compares performance metrics"
+            echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
             exit 0
             ;;
         *)
@@ -61,6 +67,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Optionally tee all output to a log file
+if [ -n "$LOG_FILE" ]; then
+    exec > >(tee "$LOG_FILE") 2>&1
+    echo "Logging all output to: $LOG_FILE"
+fi
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

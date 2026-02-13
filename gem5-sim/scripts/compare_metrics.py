@@ -5,12 +5,13 @@ Compare performance metrics between LMUL accelerator and IEEE BF16 runs
 Extracts and compares key metrics from gem5 statistics files.
 
 Usage:
-    python3 compare_metrics.py <lmul_stats.txt> <ieee_stats.txt>
-    python3 compare_metrics.py m5out_lmul/stats.txt m5out_ieee/stats.txt
+    python3 compare_metrics.py <lmul_stats.txt> <ieee_stats.txt> [-o FILE]
+    python3 compare_metrics.py m5out_lmul/stats.txt m5out_ieee/stats.txt -o comparison.txt
 """
 
 import sys
 import re
+import argparse
 from collections import defaultdict
 
 def parse_stats(filename):
@@ -81,66 +82,63 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
     
     return speedup
 
-def print_comparison(lmul_metrics, ieee_metrics, speedup):
-    """Print formatted comparison"""
-    print("\n" + "="*70)
-    print("Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)")
-    print("="*70)
-    
-    print(f"\n{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
-    print("-"*70)
-    
-    # Simulation time
-    print(f"{'Simulation Time (s)':<30s} {lmul_metrics['sim_seconds']:<20.6f} {ieee_metrics['sim_seconds']:<20.6f}")
+def format_comparison(lmul_metrics, ieee_metrics, speedup):
+    """Return formatted comparison as a string."""
+    lines = []
+    lines.append("\n" + "="*70)
+    lines.append("Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)")
+    lines.append("="*70)
+    lines.append("")
+    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
+    lines.append("-"*70)
+    lines.append(f"{'Simulation Time (s)':<30s} {lmul_metrics['sim_seconds']:<20.6f} {ieee_metrics['sim_seconds']:<20.6f}")
     if 'time' in speedup:
-        print(f"  → Speedup: {speedup['time']:.2f}x")
-    
-    # CPU cycles
-    print(f"{'CPU Cycles':<30s} {lmul_metrics['cpu_cycles']:<20,} {ieee_metrics['cpu_cycles']:<20,}")
+        lines.append(f"  → Speedup: {speedup['time']:.2f}x")
+    lines.append(f"{'CPU Cycles':<30s} {lmul_metrics['cpu_cycles']:<20,} {ieee_metrics['cpu_cycles']:<20,}")
     if 'cycles' in speedup:
-        print(f"  → Speedup: {speedup['cycles']:.2f}x")
-    
-    # Instructions
-    print(f"{'Instructions':<30s} {lmul_metrics['instructions']:<20,} {ieee_metrics['instructions']:<20,}")
-    
-    # CPI
-    print(f"{'CPI':<30s} {lmul_metrics['cpi']:<20.4f} {ieee_metrics['cpi']:<20.4f}")
+        lines.append(f"  → Speedup: {speedup['cycles']:.2f}x")
+    lines.append(f"{'Instructions':<30s} {lmul_metrics['instructions']:<20,} {ieee_metrics['instructions']:<20,}")
+    lines.append(f"{'CPI':<30s} {lmul_metrics['cpi']:<20.4f} {ieee_metrics['cpi']:<20.4f}")
     if 'cpi' in speedup:
-        print(f"  → Improvement: {speedup['cpi']:.2f}x")
-    
-    # IPC
-    print(f"{'IPC':<30s} {lmul_metrics['ipc']:<20.6f} {ieee_metrics['ipc']:<20.6f}")
+        lines.append(f"  → Improvement: {speedup['cpi']:.2f}x")
+    lines.append(f"{'IPC':<30s} {lmul_metrics['ipc']:<20.6f} {ieee_metrics['ipc']:<20.6f}")
     if 'ipc' in speedup:
-        print(f"  → Improvement: {speedup['ipc']:.2f}x")
-    
-    # Accelerator-specific metrics
+        lines.append(f"  → Improvement: {speedup['ipc']:.2f}x")
     lmul_accel = {k: v for k, v in lmul_metrics.items() if k.startswith('accel_')}
     ieee_accel = {k: v for k, v in ieee_metrics.items() if k.startswith('accel_')}
-    
     if lmul_accel or ieee_accel:
-        print(f"\n{'Accelerator Metrics':<30s}")
-        print("-"*70)
+        lines.append(f"\n{'Accelerator Metrics':<30s}")
+        lines.append("-"*70)
         all_accel_keys = set(lmul_accel.keys()) | set(ieee_accel.keys())
         for key in sorted(all_accel_keys):
             name = key.replace('accel_', '').replace('_', ' ').title()
             lmul_val = lmul_accel.get(key, 'N/A')
             ieee_val = ieee_accel.get(key, 'N/A')
             if isinstance(lmul_val, (int, float)) and isinstance(ieee_val, (int, float)):
-                print(f"{name:<30s} {lmul_val:<20} {ieee_val:<20}")
+                lines.append(f"{name:<30s} {lmul_val:<20} {ieee_val:<20}")
             else:
-                print(f"{name:<30s} {str(lmul_val):<20s} {str(ieee_val):<20s}")
-    
-    print("="*70 + "\n")
+                lines.append(f"{name:<30s} {str(lmul_val):<20s} {str(ieee_val):<20s}")
+    lines.append("="*70 + "\n")
+    return "\n".join(lines)
+
+
+def print_comparison(lmul_metrics, ieee_metrics, speedup):
+    """Print formatted comparison to stdout."""
+    print(format_comparison(lmul_metrics, ieee_metrics, speedup))
 
 def main():
-    if len(sys.argv) < 3:
-        print("Usage: python3 compare_metrics.py <lmul_stats.txt> <ieee_stats.txt>")
-        print("\nExample:")
-        print("  python3 compare_metrics.py m5out_lmul/stats.txt m5out_ieee/stats.txt")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Compare LMUL vs IEEE gem5 stats",
+        epilog="Example: python3 compare_metrics.py lmul/stats.txt ieee/stats.txt -o comparison.txt"
+    )
+    parser.add_argument("lmul_file", help="Path to LMUL run stats.txt")
+    parser.add_argument("ieee_file", help="Path to IEEE run stats.txt")
+    parser.add_argument("-o", "--output", metavar="FILE",
+                        help="Also write comparison to FILE")
+    args = parser.parse_args()
     
-    lmul_file = sys.argv[1]
-    ieee_file = sys.argv[2]
+    lmul_file = args.lmul_file
+    ieee_file = args.ieee_file
     
     print(f"Loading LMUL stats from: {lmul_file}")
     lmul_stats = parse_stats(lmul_file)
@@ -151,7 +149,13 @@ def main():
     ieee_metrics = extract_key_metrics(ieee_stats)
     
     speedup = calculate_speedup(lmul_metrics, ieee_metrics)
-    print_comparison(lmul_metrics, ieee_metrics, speedup)
+    out_text = format_comparison(lmul_metrics, ieee_metrics, speedup)
+    print(out_text)
+    
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(out_text)
+        print(f"Comparison written to: {args.output}")
 
 if __name__ == '__main__':
     main()
