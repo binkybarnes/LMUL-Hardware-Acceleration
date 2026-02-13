@@ -190,6 +190,7 @@ echo "=========================================="
 echo "LMUL Accelerator vs Native IEEE BF16 (CPU)"
 echo "=========================================="
 echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
+PERF_COMPARISON_FILE="$OUTPUT_DIR/performance_comparison_${MATRIX_SIZE}.txt"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
 echo "Output: ${OUTPUT_DIR}"
 echo "=========================================="
@@ -312,15 +313,15 @@ if [ $LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
     python3 "$SCRIPT_DIR/compare_metrics.py" \
         "$LMUL_OUTPUT/stats.txt" \
         "$IEEE_OUTPUT/stats.txt" \
-        > "$OUTPUT_DIR/performance_comparison.txt" 2>&1
+        > "$PERF_COMPARISON_FILE" 2>&1
     
     if [ $? -eq 0 ]; then
         echo "✓ Performance comparison complete"
         echo
-        cat "$OUTPUT_DIR/performance_comparison.txt"
+        cat "$PERF_COMPARISON_FILE"
     else
         echo "⚠ Performance comparison failed"
-        cat "$OUTPUT_DIR/performance_comparison.txt"
+        cat "$PERF_COMPARISON_FILE"
     fi
 else
     echo "⚠ Cannot compare metrics - missing stats files"
@@ -338,15 +339,15 @@ echo
 echo "Files:"
 echo "  - LMUL stats: $LMUL_OUTPUT/stats.txt"
 echo "  - IEEE stats: $IEEE_OUTPUT/stats.txt"
-if [ -f "$OUTPUT_DIR/performance_comparison.txt" ]; then
-    echo "  - Performance comparison: $OUTPUT_DIR/performance_comparison.txt"
+if [ -f "$PERF_COMPARISON_FILE" ]; then
+    echo "  - Performance comparison: $PERF_COMPARISON_FILE"
 fi
 echo
 echo "Next Steps:"
 echo "==========="
 echo
 echo "1. View performance comparison:"
-echo "   cat $OUTPUT_DIR/performance_comparison.txt"
+echo "   cat $PERF_COMPARISON_FILE"
 echo
 echo "2. Compare stats manually:"
 echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt"

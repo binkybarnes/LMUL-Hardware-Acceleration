@@ -62,6 +62,16 @@ def extract_key_metrics(stats):
     # Memory metrics
     metrics['host_memory'] = stats.get('hostMemory', 0)
     
+    # DRAM energy (gem5 DRAM controller reports per-rank energy in pJ)
+    dram_rank0_energy = stats.get('system.mem_ctrl.dram.rank0.totalEnergy', 0)
+    dram_rank1_energy = stats.get('system.mem_ctrl.dram.rank1.totalEnergy', 0)
+    metrics['dram_energy_pJ'] = dram_rank0_energy + dram_rank1_energy
+    metrics['dram_energy_uJ'] = metrics['dram_energy_pJ'] / 1000.0
+    metrics['dram_power_mW'] = (
+        stats.get('system.mem_ctrl.dram.rank0.averagePower', 0) +
+        stats.get('system.mem_ctrl.dram.rank1.averagePower', 0)
+    )
+    
     return metrics
 
 def calculate_speedup(lmul_metrics, ieee_metrics):
@@ -70,6 +80,11 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
     
     if ieee_metrics['sim_seconds'] > 0 and lmul_metrics['sim_seconds'] > 0:
         speedup['time'] = ieee_metrics['sim_seconds'] / lmul_metrics['sim_seconds']
+    
+    if (lmul_metrics.get('dram_energy_pJ', 0) > 0 and
+            ieee_metrics.get('dram_energy_pJ', 0) > 0):
+        speedup['dram_energy'] = (ieee_metrics['dram_energy_pJ'] /
+                                  lmul_metrics['dram_energy_pJ'])
     
     if ieee_metrics['cpu_cycles'] > 0 and lmul_metrics['cpu_cycles'] > 0:
         speedup['cycles'] = ieee_metrics['cpu_cycles'] / lmul_metrics['cpu_cycles']
@@ -104,6 +119,14 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     lines.append(f"{'IPC':<30s} {lmul_metrics['ipc']:<20.6f} {ieee_metrics['ipc']:<20.6f}")
     if 'ipc' in speedup:
         lines.append(f"  → Improvement: {speedup['ipc']:.2f}x")
+    # Energy (from gem5 DRAM model; CPU/accelerator need power models for full picture)
+    lines.append("")
+    lines.append(f"{'DRAM energy (µJ)':<30s} {lmul_metrics.get('dram_energy_uJ', 0):<20.2f} {ieee_metrics.get('dram_energy_uJ', 0):<20.2f}")
+    if 'dram_energy' in speedup:
+        lines.append(f"  → DRAM energy ratio (IEEE/LMUL): {speedup['dram_energy']:.2f}x (>1 = LMUL used less)")
+    lines.append(f"{'DRAM avg power (mW)':<30s} {lmul_metrics.get('dram_power_mW', 0):<20.2f} {ieee_metrics.get('dram_power_mW', 0):<20.2f}")
+    lines.append("  (CPU and accelerator energy require power models; not in default gem5 SE)")
+    lines.append("")
     lmul_accel = {k: v for k, v in lmul_metrics.items() if k.startswith('accel_')}
     ieee_accel = {k: v for k, v in ieee_metrics.items() if k.startswith('accel_')}
     if lmul_accel or ieee_accel:
