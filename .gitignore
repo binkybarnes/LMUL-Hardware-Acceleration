@@ -51,3 +51,4 @@ synthesis/out/*
 NNs/core
 *.pt
 *.pth
+*.bin

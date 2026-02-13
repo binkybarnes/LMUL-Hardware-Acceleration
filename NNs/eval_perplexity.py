@@ -39,7 +39,13 @@ parser.add_argument(
         "Overrides --use_lmul."
     )
 )
-
+parser.add_argument(
+    "--OWT",
+    action="store_true",
+    help=(
+        "Decides whether to use the open web text val.bin"
+    )
+)
     
 args = parser.parse_args()
 use_lmul = args.use_lmul
@@ -49,8 +55,10 @@ panel_dict = (
     if args.panel is not None
     else None
 )
-
 val_path = "data/shakespeare_char/val.bin"
+
+if args.OWT:
+    val_path = "data/openwebtext/val.bin"    
 ckpt_path = f"{args.out_dir}/ckpt.pt" 
 #we are stuffing it into CPU because DSMLP has no GPU :(
 device = "cpu"
@@ -64,7 +72,7 @@ checkpoint = torch.load(ckpt_path, map_location=device)
 gptconf = GPTConfig(**checkpoint["model_args"])
 model = GPT(gptconf, use_lmul=use_lmul,panel=panel_dict)
 model = torch.compile(model)
-model.load_state_dict(checkpoint["model"])
+model.load_state_dict(checkpoint["model"], strict=False)
 model.to(device)
 model.eval()
 

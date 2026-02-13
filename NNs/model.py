@@ -199,7 +199,7 @@ class GPTConfig:
 
 class GPT(nn.Module):
 
-    def __init__(self, config, use_lmul=True,panel=None):
+    def __init__(self, config, use_lmul=False,panel=None):
         #Using a "panel" dict to control which layers get affected by LMUL.
         #Layers in question: Block (MLP), Block (Self-Attention), and lm.head.
         #panel Param should look like:
