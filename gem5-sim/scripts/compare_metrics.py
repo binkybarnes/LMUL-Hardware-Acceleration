@@ -127,13 +127,27 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     lines.append(f"{'DRAM avg power (mW)':<30s} {lmul_metrics.get('dram_power_mW', 0):<20.2f} {ieee_metrics.get('dram_power_mW', 0):<20.2f}")
     lines.append("  (CPU and accelerator energy require power models; not in default gem5 SE)")
     lines.append("")
+    # Prefer only key accelerator stats for a readable report (skip opLatency buckets / power_state)
+    ACCEL_SUMMARY_KEYS = (
+        'accel_numCompletions', 'accel_numStarts', 'accel_numReads', 'accel_numWrites',
+        'accel_totalCycles', 'accel_totalOps',
+        'accel_opLatency::mean', 'accel_opLatency::gmean', 'accel_opLatency::samples',
+    )
     lmul_accel = {k: v for k, v in lmul_metrics.items() if k.startswith('accel_')}
     ieee_accel = {k: v for k, v in ieee_metrics.items() if k.startswith('accel_')}
     if lmul_accel or ieee_accel:
-        lines.append(f"\n{'Accelerator Metrics':<30s}")
+        lines.append(f"\n{'Accelerator Metrics (summary)':<30s}")
         lines.append("-"*70)
         all_accel_keys = set(lmul_accel.keys()) | set(ieee_accel.keys())
-        for key in sorted(all_accel_keys):
+        summary_keys = [k for k in ACCEL_SUMMARY_KEYS if k in all_accel_keys]
+        remaining = sorted(all_accel_keys - set(ACCEL_SUMMARY_KEYS))
+        def skip_accel_key(k):
+            if 'opLatency::' in k and k not in ACCEL_SUMMARY_KEYS:
+                return True
+            if 'pwrStateResidencyTicks' in k or k.lower().endswith('pio'):
+                return True
+            return False
+        for key in summary_keys + [k for k in remaining if not skip_accel_key(k)]:
             name = key.replace('accel_', '').replace('_', ' ').title()
             lmul_val = lmul_accel.get(key, 'N/A')
             ieee_val = ieee_accel.get(key, 'N/A')

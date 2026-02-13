@@ -17,6 +17,9 @@
 # Optional: pass args to the compare script via env before submitting:
 #   COMPARE_EXTRA_ARGS="--size 8" sbatch scripts/sbatch_compare_lmul_vs_ieee.slurm
 #
+# For 512x512 (recommended: 8x8 PE, 3h, 32G):
+#   COMPARE_EXTRA_ARGS="--size 512 --pe-rows 8 --pe-cols 8" sbatch --time=03:00:00 --mem=32G scripts/sbatch_compare_lmul_vs_ieee.slurm
+#
 # The job runs the comparison inside the Singularity container (same as interactive).
 # You can disconnect; check results with:
 #   cat compare_lmul_vs_ieee_<JOBID>.out
