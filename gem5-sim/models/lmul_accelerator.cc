@@ -121,13 +121,21 @@ LMulAccelerator::read(PacketPtr pkt)
             break;
         case REG_RESULT_DATA:
             // Read result element at current index
-            if (currentJob && currentJob->matrixC.size() > 0) {
+            if (currentJob && !currentJob->matrixC.empty()) {
                 if (state.resultIdx < currentJob->matrixC.size()) {
                     value = currentJob->matrixC[state.resultIdx];
                 } else {
                     value = 0;
                     warn("LMulAccelerator: Result index %d out of range (max %d)\n",
                          state.resultIdx, currentJob->matrixC.size() - 1);
+                }
+            } else if (!lastResult.empty()) {
+                if (state.resultIdx < lastResult.size()) {
+                    value = lastResult[state.resultIdx];
+                } else {
+                    value = 0;
+                    warn("LMulAccelerator: Result index %d out of range (max %d)\n",
+                         state.resultIdx, lastResult.size() - 1);
                 }
             } else {
                 value = 0;
@@ -177,6 +185,10 @@ LMulAccelerator::write(PacketPtr pkt)
                 state.cycles = 0;
                 state.opsCount = 0;
                 state.error = 0;
+                state.resultIdx = 0;
+                lastResult.clear();
+                stagedA.clear();
+                stagedB.clear();
             }
             break;
             
@@ -194,19 +206,55 @@ LMulAccelerator::write(PacketPtr pkt)
             
         case REG_M_SIZE:
             state.mSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
             
         case REG_N_SIZE:
             state.nSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
             
         case REG_P_SIZE:
             state.pSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
             
         case REG_RESULT_IDX:
             state.resultIdx = value;
             break;
+
+        case REG_A_STREAM: {
+            const uint64_t expected = static_cast<uint64_t>(state.mSize) * state.nSize;
+            if (expected == 0) {
+                warn("LMulAccelerator: A stream write before dimensions configured\n");
+            } else if (stagedA.size() >= expected) {
+                warn("LMulAccelerator: A stream overflow (%llu >= %llu)\n",
+                     static_cast<unsigned long long>(stagedA.size()),
+                     static_cast<unsigned long long>(expected));
+                state.error = 3;
+            } else {
+                stagedA.push_back(static_cast<uint16_t>(value & 0xFFFFu));
+            }
+            break;
+        }
+
+        case REG_B_STREAM: {
+            const uint64_t expected = static_cast<uint64_t>(state.nSize) * state.pSize;
+            if (expected == 0) {
+                warn("LMulAccelerator: B stream write before dimensions configured\n");
+            } else if (stagedB.size() >= expected) {
+                warn("LMulAccelerator: B stream overflow (%llu >= %llu)\n",
+                     static_cast<unsigned long long>(stagedB.size()),
+                     static_cast<unsigned long long>(expected));
+                state.error = 4;
+            } else {
+                stagedB.push_back(static_cast<uint16_t>(value & 0xFFFFu));
+            }
+            break;
+        }
             
         default:
             warn("LMulAccelerator: Write to read-only or invalid offset 0x%x\n",
@@ -254,9 +302,32 @@ LMulAccelerator::startComputation()
     currentJob->matrixB.resize(state.nSize * state.pSize);
     currentJob->matrixC.resize(state.mSize * state.pSize, 0);
 
+    // If benchmark streamed inputs over MMIO, use them directly.
+    const uint64_t expectedA = static_cast<uint64_t>(state.mSize) * state.nSize;
+    const uint64_t expectedB = static_cast<uint64_t>(state.nSize) * state.pSize;
+    if (stagedA.size() == expectedA && stagedB.size() == expectedB) {
+        currentJob->matrixA = stagedA;
+        currentJob->matrixB = stagedB;
+        currentJob->useStreamedInputs = true;
+        DPRINTF(LMulAccel, "Using streamed inputs (A=%llu, B=%llu)\n",
+                static_cast<unsigned long long>(stagedA.size()),
+                static_cast<unsigned long long>(stagedB.size()));
+    } else {
+        currentJob->useStreamedInputs = false;
+        DPRINTF(LMulAccel,
+                "No full streamed inputs (A=%llu/%llu, B=%llu/%llu), using fallback pattern\n",
+                static_cast<unsigned long long>(stagedA.size()),
+                static_cast<unsigned long long>(expectedA),
+                static_cast<unsigned long long>(stagedB.size()),
+                static_cast<unsigned long long>(expectedB));
+    }
+
     // Update state
     state.status = STAT_BUSY;
     state.cycles = 0;
+    lastResult.clear();
+    stagedA.clear();
+    stagedB.clear();
     stats.numStarts++;
 
     // Schedule computation completion
@@ -298,6 +369,9 @@ LMulAccelerator::completeComputation()
             totalOps, state.cycles, 
             (double)totalOps / state.cycles);
 
+    // Keep completed results available for MMIO readback after job teardown.
+    lastResult = currentJob->matrixC;
+
     // Clean up
     delete currentJob;
     currentJob = nullptr;
@@ -317,31 +391,27 @@ LMulAccelerator::processCompute()
     // B: N x P
     // C: M x P
 
-    // TODO: Implement DMA to read actual data from aAddr, bAddr
-    // For now, we use a simple pattern for testing:
-    // - Matrix A: row-major pattern (i*N + j)
-    // - Matrix B: column-major pattern (k*P + j)
-    // This allows us to verify computation without full DMA
-    
-    // Generate test pattern instead of all 1.0s
-    // This creates a predictable result we can verify
-    for (uint32_t i = 0; i < currentJob->m; i++) {
-        for (uint32_t j = 0; j < currentJob->n; j++) {
-            // Pattern: value based on position
-            float val = (float)(i * currentJob->n + j + 1) / 10.0f;
-            currentJob->matrixA[i * currentJob->n + j] = floatToBF16(val);
+    if (!currentJob->useStreamedInputs) {
+        // TODO: Implement true DMA path from aAddr/bAddr/cAddr.
+        // Fallback for compatibility when no streamed inputs are provided.
+        for (uint32_t i = 0; i < currentJob->m; i++) {
+            for (uint32_t j = 0; j < currentJob->n; j++) {
+                uint32_t idx = i * currentJob->n + j;
+                float val = ((float)(idx % 10) / 10.0f) + 0.5f;
+                currentJob->matrixA[i * currentJob->n + j] = floatToBF16(val);
+            }
         }
-    }
-    
-    for (uint32_t i = 0; i < currentJob->n; i++) {
-        for (uint32_t j = 0; j < currentJob->p; j++) {
-            // Pattern: value based on position
-            float val = (float)(i * currentJob->p + j + 1) / 10.0f;
-            currentJob->matrixB[i * currentJob->p + j] = floatToBF16(val);
+
+        for (uint32_t i = 0; i < currentJob->n; i++) {
+            for (uint32_t j = 0; j < currentJob->p; j++) {
+                uint32_t idx = i * currentJob->p + j;
+                float val = ((float)(idx % 10) / 10.0f) + 0.5f;
+                currentJob->matrixB[i * currentJob->p + j] = floatToBF16(val);
+            }
         }
+
+        DPRINTF(LMulAccel, "Using fallback test pattern (no streamed inputs)\n");
     }
-    
-    DPRINTF(LMulAccel, "Using test pattern data (not reading from memory yet)\n");
 
     // Perform multiplication
     for (uint32_t i = 0; i < currentJob->m; i++) {

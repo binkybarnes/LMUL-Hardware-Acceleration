@@ -24,6 +24,10 @@
 #define REG_PE_CONFIG    0x20
 #define REG_CYCLES       0x24
 #define REG_OPS_COUNT    0x28
+#define REG_RESULT_IDX   0x30
+#define REG_RESULT_DATA  0x34
+#define REG_A_STREAM     0x38
+#define REG_B_STREAM     0x3C
 
 // Control bits
 #define CTRL_START       0x01
@@ -153,6 +157,14 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
     LMUL_REG(REG_M_SIZE) = M;
     LMUL_REG(REG_N_SIZE) = N;
     LMUL_REG(REG_P_SIZE) = P;
+
+    // Stream real benchmark inputs into accelerator staging buffers.
+    for (uint32_t idx = 0; idx < M * N; idx++) {
+        LMUL_REG(REG_A_STREAM) = A[idx];
+    }
+    for (uint32_t idx = 0; idx < N * P; idx++) {
+        LMUL_REG(REG_B_STREAM) = B[idx];
+    }
     
     // Start computation
     LMUL_REG(REG_CONTROL) = CTRL_START;
@@ -167,6 +179,12 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
         printf("Error: Accelerator reported error\n");
     } else if (status == STAT_DONE) {
         printf("Accelerator computation complete\n");
+        // Read back accelerator results so C matches CPU path semantics.
+        uint32_t total = M * P;
+        for (uint32_t idx = 0; idx < total; idx++) {
+            LMUL_REG(REG_RESULT_IDX) = idx;
+            C[idx] = (bf16_t)(LMUL_REG(REG_RESULT_DATA) & 0xFFFFu);
+        }
     }
 }
 

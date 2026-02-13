@@ -69,7 +69,9 @@ class LMulAccelerator : public BasicPioDevice
         REG_ERROR       = 0x2C,  // Error register
         REG_RESULT_IDX  = 0x30,  // Result readback: element index
         REG_RESULT_DATA = 0x34,  // Result readback: element data (BF16)
-        REG_SIZE        = 0x38   // Total register space
+        REG_A_STREAM    = 0x38,  // Stream input A element (lower 16b)
+        REG_B_STREAM    = 0x3C,  // Stream input B element (lower 16b)
+        REG_SIZE        = 0x40   // Total register space
     };
 
     // Control register bits
@@ -123,12 +125,16 @@ class LMulAccelerator : public BasicPioDevice
         Tick startTick;
         uint32_t m, n, p;
         Addr aAddr, bAddr, cAddr;
+        bool useStreamedInputs = false;
         std::vector<uint16_t> matrixA;
         std::vector<uint16_t> matrixB;
         std::vector<uint16_t> matrixC;
     };
     
     ComputeJob *currentJob;
+    std::vector<uint16_t> lastResult;  // Completed result buffer for MMIO readback
+    std::vector<uint16_t> stagedA;      // Input A streamed over MMIO
+    std::vector<uint16_t> stagedB;      // Input B streamed over MMIO
 
     // Event for async computation completion
     EventFunctionWrapper computeEvent;
