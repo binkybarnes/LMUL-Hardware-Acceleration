@@ -19,11 +19,14 @@ num_proc_load_dataset = num_proc
 enc = tiktoken.get_encoding("gpt2")
 
 if __name__ == '__main__':
+    print("Using only 5% of the OpenWebText Dataset! Your disk space might not be able to handle the entire thing teehee")
     # takes 54GB in huggingface .cache dir, about 8M documents (8,013,769)
-    dataset = load_dataset("openwebtext", num_proc=num_proc_load_dataset)
+    dataset = load_dataset("openwebtext", num_proc=num_proc_load_dataset,split="train[:5%]")
 
     # owt by default only contains the 'train' split, so create a test split
-    split_dataset = dataset["train"].train_test_split(test_size=0.0005, seed=2357, shuffle=True)
+    #remove the dataset['train'] key index because we already specified the train index above. If using full dataset make sure to use dataset['train']
+    #validation size can be 20 times lower if we use the full set
+    split_dataset = dataset.train_test_split(test_size=0.01, seed=2357, shuffle=True)
     split_dataset['val'] = split_dataset.pop('test') # rename the test split to val
 
     # this results in:

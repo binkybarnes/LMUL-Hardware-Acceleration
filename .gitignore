@@ -51,6 +51,7 @@ synthesis/out/*
 NNs/core
 *.pt
 *.pth
+*.bin
 
 # Vivado files (Edgar's logs)
 Vivado/lmul_rtl/.Xil
