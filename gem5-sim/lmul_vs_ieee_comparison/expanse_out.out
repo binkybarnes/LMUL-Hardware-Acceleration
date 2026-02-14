@@ -1,0 +1,85 @@
+==========================================
+Compare LMUL vs IEEE (batch job)
+==========================================
+Started: Fri Feb 13 18:43:53 PST 2026
+Node: exp-2-01
+gem5-sim dir: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim
+Repo root: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration
+Container: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/../../../esolares/lmul_accel.sif
+==========================================
+Using matrix_multiply benchmark (may hit syscall 403)
+  Build no-printf version: cd benchmarks/matrix_multiply && make both
+Debug: Output directories created
+  LMUL: lmul_vs_ieee_comparison/lmul
+  IEEE: lmul_vs_ieee_comparison/ieee
+==========================================
+LMUL Accelerator vs Native IEEE BF16 (CPU)
+==========================================
+Matrix Size: 64x64
+PE Array: 4x4
+Output: lmul_vs_ieee_comparison
+==========================================
+
+Step 1: Running LMUL accelerator simulation...
+  This may take a few minutes...
+  Command: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py ...
+
+⚠ LMUL simulation failed (exit code: 1)
+  Check log: lmul_vs_ieee_comparison/lmul/simulation.log
+  Last 30 lines:
+gem5 compiled Feb 13 2026 18:37:34
+gem5 started Feb 13 2026 18:43:57
+gem5 executing on exp-2-01, pid 2356708
+command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm --cmd-args 64 64 64 1 result.bin
+
+info: Standard input is not a terminal, disabling listeners.
+Creating system...
+warn: Base 10 memory/cache size 512MB will be cast to base 2 size 512MiB.
+Global frequency set at 1000000000000 ticks per second
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+src/mem/dram_interface.cc:690: warn: DRAM device capacity (8192 Mbytes) does not match the address range assigned (512 Mbytes)
+src/base/statistics.hh:279: warn: One of the stats is a legacy stat. Legacy stat is a stat that does not belong to any statistics::Group. Legacy stat is deprecated.
+src/base/remote_gdb.cc:418: warn: Sockets disabled, not accepting gdb connections
+DEBUG: Mapped accelerator MMIO region 0x40000000 (size 0x1000)
+System created
+Creating root object...
+Instantiating configuration...
+Configuration instantiated successfully
+Starting simulation with 4x4 PE array (LMUL Accelerator)
+Running: /LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm 64 64 64 1 result.bin
+Beginning simulation...
+src/sim/syscall_emul.cc:86: warn: ignoring syscall set_robust_list(...)
+src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_rseq(...)
+src/sim/mem_state.cc:443: info: Increasing stack size by one page.
+src/sim/syscall_emul.hh:1127: warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
+      Returning '/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm'
+src/sim/syscall_emul.cc:86: warn: ignoring syscall mprotect(...)
+src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_statx(...)
+src/sim/syscall_desc.hh:211: fatal: Syscall 403 out of range
+Memory Usage: 712912 KBytes
+
+  This may be due to syscall 403. Consider using simple_test benchmark.
+⚠ LMUL simulation failed (exit code: 1)
+  Check log: lmul_vs_ieee_comparison/lmul/simulation.log
+src/mem/dram_interface.cc:690: warn: DRAM device capacity (8192 Mbytes) does not match the address range assigned (512 Mbytes)
+src/base/statistics.hh:279: warn: One of the stats is a legacy stat. Legacy stat is a stat that does not belong to any statistics::Group. Legacy stat is deprecated.
+src/base/remote_gdb.cc:418: warn: Sockets disabled, not accepting gdb connections
+DEBUG: Mapped accelerator MMIO region 0x40000000 (size 0x1000)
+System created
+Creating root object...
+Instantiating configuration...
+Configuration instantiated successfully
+Starting simulation with 4x4 PE array (LMUL Accelerator)
+Running: /LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm 64 64 64 1 result.bin
+Beginning simulation...
+src/sim/syscall_emul.cc:86: warn: ignoring syscall set_robust_list(...)
+src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_rseq(...)
+src/sim/mem_state.cc:443: info: Increasing stack size by one page.
+src/sim/syscall_emul.hh:1127: warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
+      Returning '/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm'
+src/sim/syscall_emul.cc:86: warn: ignoring syscall mprotect(...)
+src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_statx(...)
+src/sim/syscall_desc.hh:211: fatal: Syscall 403 out of range
+Memory Usage: 712912 KBytes
+
+  This may be due to syscall 403. Consider using simple_test benchmark.

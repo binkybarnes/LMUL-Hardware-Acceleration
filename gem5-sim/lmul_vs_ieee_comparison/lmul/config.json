@@ -678,13 +678,14 @@
                     "name": "workload",
                     "path": "system.cpu.workload",
                     "cmd": [
-                        "/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm",
-                        "4",
-                        "4",
-                        "4",
-                        "1"
+                        "/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm",
+                        "64",
+                        "64",
+                        "64",
+                        "1",
+                        "result.bin"
                     ],
-                    "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim",
+                    "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim/m5out",
                     "drivers": [],
                     "egid": 100,
                     "env": [],

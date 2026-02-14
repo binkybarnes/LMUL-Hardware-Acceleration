@@ -1,1 +1,27 @@
-/home/ashi1/projects/lmul_accel/LMUL-Hardware-Acceleration/gem5/build/ARM/gem5.opt: error while loading shared libraries: libpython3.10.so.1.0: cannot open shared object file: No such file or directory
+DEBUG: __name__ = '__m5_main__'
+DEBUG: Entering __m5_main__ block
+DEBUG: main() called
+DEBUG: Parser created
+DEBUG: About to parse args
+DEBUG: Args parsed successfully: cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm, pe_rows=4, pe_cols=4
+DEBUG: About to create system
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 25.1.0.0
+gem5 compiled Feb 13 2026 17:21:36
+gem5 started Feb 13 2026 17:29:56
+gem5 executing on exp-2-01, pid 2322667
+command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/ieee /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm --cmd-args 64 64 64 0 result.bin
+
+info: Standard input is not a terminal, disabling listeners.
+Creating system...
+warn: Base 10 memory/cache size 512MB will be cast to base 2 size 512MiB.
+ERROR in main(): local variable 'os' referenced before assignment
+Traceback (most recent call last):
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 251, in <module>
+    main()
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 155, in main
+    process.cwd = os.path.abspath(args.output_dir)
+UnboundLocalError: local variable 'os' referenced before assignment
+System created
