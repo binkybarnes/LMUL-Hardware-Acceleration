@@ -678,7 +678,7 @@
                     "name": "workload",
                     "path": "system.cpu.workload",
                     "cmd": [
-                        "/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm",
+                        "/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm",
                         "64",
                         "64",
                         "64",
