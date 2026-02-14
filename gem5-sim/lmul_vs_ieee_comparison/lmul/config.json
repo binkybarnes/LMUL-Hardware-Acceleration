@@ -685,7 +685,7 @@
                         "1",
                         "result.bin"
                     ],
-                    "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim/m5out",
+                    "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/lmul",
                     "drivers": [],
                     "egid": 100,
                     "env": [],
