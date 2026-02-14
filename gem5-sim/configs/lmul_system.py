@@ -225,7 +225,6 @@ def main():
             print(f"WARNING: Failed to dump statistics: {e}", flush=True)
     
     # Also ensure we're in the right directory
-    import os
     output_dir = args.output_dir if hasattr(args, 'output_dir') else 'm5out'
     print(f"Output directory: {os.path.abspath(output_dir)}", flush=True)
     print(f"Stats file should be at: {os.path.abspath(output_dir)}/stats.txt", flush=True)

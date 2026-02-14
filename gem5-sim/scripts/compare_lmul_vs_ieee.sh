@@ -197,6 +197,9 @@ echo "LMUL Accelerator vs Native IEEE BF16 (CPU)"
 echo "=========================================="
 echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
 PERF_COMPARISON_FILE="$OUTPUT_DIR/performance_comparison_${MATRIX_SIZE}.txt"
+rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
+      "$LMUL_OUTPUT/result.bin" "$IEEE_OUTPUT/result.bin" \
+      "$PERF_COMPARISON_FILE"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
 echo "Output: ${OUTPUT_DIR}"
 echo "=========================================="
@@ -208,7 +211,7 @@ echo "  This may take a few minutes..."
 echo "  Command: $GEM5_BINARY --outdir=$LMUL_OUTPUT $CONFIG ..."
 echo
 
-if ! "$GEM5_BINARY" \
+if "$GEM5_BINARY" \
     --outdir="$LMUL_OUTPUT" \
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
@@ -216,6 +219,8 @@ if ! "$GEM5_BINARY" \
     --cmd="$BENCHMARK_BIN" \
     --cmd-args "${BENCHMARK_ARGS[@]}" "1" "${RESULT_FILE_ARGS[@]}" \
     > "$LMUL_OUTPUT/simulation.log" 2>&1; then
+    LMUL_EXIT_CODE=0
+else
     LMUL_EXIT_CODE=$?
     echo "⚠ LMUL simulation failed (exit code: $LMUL_EXIT_CODE)"
     echo "  Check log: $LMUL_OUTPUT/simulation.log"
@@ -226,8 +231,6 @@ if ! "$GEM5_BINARY" \
     echo
     echo "  This may be due to syscall 403. Consider using simple_test benchmark."
     # Don't exit here - continue to check if stats were generated
-else
-    LMUL_EXIT_CODE=0
 fi
 
 # Check if stats were generated
@@ -258,7 +261,7 @@ echo "  This uses CPU for standard IEEE multiplication (not accelerator)"
 echo "  This may take a few minutes..."
 echo
 
-if ! "$GEM5_BINARY" \
+if "$GEM5_BINARY" \
     --outdir="$IEEE_OUTPUT" \
     "$CONFIG" \
     --pe-rows="$PE_ROWS" \
@@ -266,6 +269,8 @@ if ! "$GEM5_BINARY" \
     --cmd="$BENCHMARK_BIN" \
     --cmd-args "${BENCHMARK_ARGS[@]}" "0" "${RESULT_FILE_ARGS[@]}" \
     > "$IEEE_OUTPUT/simulation.log" 2>&1; then
+    IEEE_EXIT_CODE=0
+else
     IEEE_EXIT_CODE=$?
     echo "⚠ IEEE simulation failed (exit code: $IEEE_EXIT_CODE)"
     echo "  Check log: $IEEE_OUTPUT/simulation.log"
@@ -276,8 +281,6 @@ if ! "$GEM5_BINARY" \
     echo
     echo "  This may be due to syscall 403. Consider using simple_test benchmark."
     # Don't exit here - continue to check if stats were generated
-else
-    IEEE_EXIT_CODE=0
 fi
 
 # Check if stats were generated
