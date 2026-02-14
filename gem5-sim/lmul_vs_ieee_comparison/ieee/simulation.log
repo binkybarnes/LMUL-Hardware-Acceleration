@@ -4,15 +4,16 @@ DEBUG: main() called
 DEBUG: Parser created
 DEBUG: About to parse args
 DEBUG: Args parsed successfully: cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm, pe_rows=4, pe_cols=4
+DEBUG: Using run output directory: /LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/ieee
 DEBUG: About to create system
 gem5 Simulator System.  https://www.gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 25.1.0.0
 gem5 compiled Feb 13 2026 18:37:34
-gem5 started Feb 13 2026 18:59:09
-gem5 executing on exp-2-01, pid 2361109
-command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/ieee /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm --cmd-args 64 64 64 0 result.bin
+gem5 started Feb 13 2026 19:23:09
+gem5 executing on exp-3-55, pid 1491328
+command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/ieee /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --output-dir=lmul_vs_ieee_comparison/ieee --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm --cmd-args 64 64 64 0 result.bin
 
 info: Standard input is not a terminal, disabling listeners.
 Creating system...
@@ -36,12 +37,12 @@ src/sim/mem_state.cc:443: info: Increasing stack size by one page.
 src/sim/syscall_emul.hh:1127: warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
       Returning '/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm'
 src/sim/syscall_emul.cc:86: warn: ignoring syscall mprotect(...)
-src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_statx(...)
+RESULT_WRITE_OK
 COMPLETE mode=cpu
 Simulation complete: exiting with last active thread context
 Exit code: 0
 Dumping statistics...
 Statistics dumped successfully
-Output directory: /LMUL-Hardware-Acceleration/workspace/gem5-sim/m5out
-Stats file should be at: /LMUL-Hardware-Acceleration/workspace/gem5-sim/m5out/stats.txt
-Stats file exists: m5out/stats.txt (0 bytes)
+Output directory: /LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/ieee
+Stats file should be at: /LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt
+Stats file exists: /LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt (93470 bytes)
