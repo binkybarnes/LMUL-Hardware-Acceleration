@@ -1,0 +1,142 @@
+==========================================
+Compare LMUL vs IEEE (batch job)
+==========================================
+Started: Fri Feb 13 17:29:54 PST 2026
+Node: exp-2-01
+gem5-sim dir: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim
+Repo root: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration
+Container: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/../../../esolares/lmul_accel.sif
+==========================================
+Using matrix_multiply benchmark (may hit syscall 403)
+  Build no-printf version: cd benchmarks/matrix_multiply && make both
+Debug: Output directories created
+  LMUL: lmul_vs_ieee_comparison/lmul
+  IEEE: lmul_vs_ieee_comparison/ieee
+==========================================
+LMUL Accelerator vs Native IEEE BF16 (CPU)
+==========================================
+Matrix Size: 64x64
+PE Array: 4x4
+Output: lmul_vs_ieee_comparison
+==========================================
+
+Step 1: Running LMUL accelerator simulation...
+  This may take a few minutes...
+  Command: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py ...
+
+⚠ LMUL simulation failed (exit code: 0)
+  Check log: lmul_vs_ieee_comparison/lmul/simulation.log
+  Last 30 lines:
+DEBUG: __name__ = '__m5_main__'
+DEBUG: Entering __m5_main__ block
+DEBUG: main() called
+DEBUG: Parser created
+DEBUG: About to parse args
+DEBUG: Args parsed successfully: cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm, pe_rows=4, pe_cols=4
+DEBUG: About to create system
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 25.1.0.0
+gem5 compiled Feb 13 2026 17:21:36
+gem5 started Feb 13 2026 17:29:55
+gem5 executing on exp-2-01, pid 2322665
+command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm --cmd-args 64 64 64 1 result.bin
+
+info: Standard input is not a terminal, disabling listeners.
+Creating system...
+warn: Base 10 memory/cache size 512MB will be cast to base 2 size 512MiB.
+ERROR in main(): local variable 'os' referenced before assignment
+Traceback (most recent call last):
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 251, in <module>
+    main()
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 155, in main
+    process.cwd = os.path.abspath(args.output_dir)
+UnboundLocalError: local variable 'os' referenced before assignment
+System created
+
+  This may be due to syscall 403. Consider using simple_test benchmark.
+⚠ LMUL simulation completed but no stats generated
+
+Step 2: Running Native IEEE BF16 (CPU) simulation...
+  This uses CPU for standard IEEE multiplication (not accelerator)
+  This may take a few minutes...
+
+⚠ IEEE simulation failed (exit code: 0)
+  Check log: lmul_vs_ieee_comparison/ieee/simulation.log
+  Last 30 lines:
+DEBUG: __name__ = '__m5_main__'
+DEBUG: Entering __m5_main__ block
+DEBUG: main() called
+DEBUG: Parser created
+DEBUG: About to parse args
+DEBUG: Args parsed successfully: cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm, pe_rows=4, pe_cols=4
+DEBUG: About to create system
+gem5 Simulator System.  https://www.gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 version 25.1.0.0
+gem5 compiled Feb 13 2026 17:21:36
+gem5 started Feb 13 2026 17:29:56
+gem5 executing on exp-2-01, pid 2322667
+command line: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/ieee /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py --pe-rows=4 --pe-cols=4 --cmd=/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply.arm --cmd-args 64 64 64 0 result.bin
+
+info: Standard input is not a terminal, disabling listeners.
+Creating system...
+warn: Base 10 memory/cache size 512MB will be cast to base 2 size 512MiB.
+ERROR in main(): local variable 'os' referenced before assignment
+Traceback (most recent call last):
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 251, in <module>
+    main()
+  File "/LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py", line 155, in main
+    process.cwd = os.path.abspath(args.output_dir)
+UnboundLocalError: local variable 'os' referenced before assignment
+System created
+
+  This may be due to syscall 403. Consider using simple_test benchmark.
+⚠ IEEE simulation completed but no stats generated
+
+Step 3: Correctness validation (LMUL vs IEEE result matrices)...
+  Skipped (no result.bin in one or both runs)
+  Result files are written when using matrix_multiply_no_printf with output filename.
+
+Step 4: Comparing performance metrics...
+⚠ Cannot compare metrics - missing stats files
+  LMUL stats: MISSING
+  IEEE stats: MISSING
+
+==========================================
+Comparison Complete!
+==========================================
+Results saved to: lmul_vs_ieee_comparison/
+
+Files:
+  - LMUL stats: lmul_vs_ieee_comparison/lmul/stats.txt
+  - IEEE stats: lmul_vs_ieee_comparison/ieee/stats.txt
+  - Performance comparison: lmul_vs_ieee_comparison/performance_comparison_64.txt
+
+Next Steps:
+===========
+
+1. View performance comparison:
+   cat lmul_vs_ieee_comparison/performance_comparison_64.txt
+
+2. Re-run correctness check (if result.bin present):
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/compare_result_binaries.py lmul_vs_ieee_comparison/lmul lmul_vs_ieee_comparison/ieee
+
+3. Compare stats manually:
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/compare_metrics.py lmul_vs_ieee_comparison/lmul/stats.txt lmul_vs_ieee_comparison/ieee/stats.txt
+
+4. View simulation logs:
+   tail -50 lmul_vs_ieee_comparison/lmul/simulation.log
+   tail -50 lmul_vs_ieee_comparison/ieee/simulation.log
+
+5. Extract detailed metrics:
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/extract_stats.py lmul_vs_ieee_comparison/lmul/stats.txt
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/extract_stats.py lmul_vs_ieee_comparison/ieee/stats.txt
+
+==========================================
+
+==========================================
+Finished: Fri Feb 13 17:29:56 PST 2026
+==========================================
