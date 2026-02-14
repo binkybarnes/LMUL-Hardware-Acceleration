@@ -55,17 +55,69 @@ void init_matrix(bf16_t *mat, uint32_t rows, uint32_t cols);
 void print_matrix(bf16_t *mat, uint32_t rows, uint32_t cols, const char *name);
 bf16_t float_to_bf16(float f);
 float bf16_to_float(bf16_t bf16);
+static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C);
+static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P,
+                           const bf16_t *A, const bf16_t *B);
+
+static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C)
+{
+    FILE *fp = fopen(path, "wb");
+    if (!fp) {
+        return -1;
+    }
+    if (fwrite(&M, sizeof(M), 1, fp) != 1 ||
+        fwrite(&P, sizeof(P), 1, fp) != 1 ||
+        fwrite(C, sizeof(bf16_t), (size_t)M * (size_t)P, fp) != (size_t)M * (size_t)P) {
+        fclose(fp);
+        return -1;
+    }
+    if (fclose(fp) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P,
+                           const bf16_t *A, const bf16_t *B)
+{
+    FILE *fp = fopen(path, "wb");
+    if (!fp) {
+        return -1;
+    }
+    if (fwrite(&M, sizeof(M), 1, fp) != 1 ||
+        fwrite(&N, sizeof(N), 1, fp) != 1 ||
+        fwrite(&P, sizeof(P), 1, fp) != 1 ||
+        fwrite(A, sizeof(bf16_t), (size_t)M * (size_t)N, fp) != (size_t)M * (size_t)N ||
+        fwrite(B, sizeof(bf16_t), (size_t)N * (size_t)P, fp) != (size_t)N * (size_t)P) {
+        fclose(fp);
+        return -1;
+    }
+    if (fclose(fp) != 0) {
+        return -1;
+    }
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
     uint32_t M = 8, N = 8, P = 8;
     int use_accel = 1;
+    const char *result_path = NULL;
+    const char *inputs_path = NULL;
     
     // Parse arguments
     if (argc > 1) M = atoi(argv[1]);
     if (argc > 2) N = atoi(argv[2]);
     if (argc > 3) P = atoi(argv[3]);
     if (argc > 4) use_accel = atoi(argv[4]);
+    if (argc > 5 && argv[5] && argv[5][0] != '\0') {
+        result_path = argv[5];
+        if (argc > 6 && argv[6] && argv[6][0] != '\0') {
+            inputs_path = argv[6];
+        } else {
+            inputs_path = "inputs.bin";
+        }
+    }
     
     printf("Matrix Multiply Benchmark\n");
     printf("=========================\n");
@@ -130,6 +182,20 @@ int main(int argc, char *argv[])
         printf("PE Array: %ux%u\n", pe_rows, pe_cols);
         if (cycles > 0) {
             printf("Throughput: %.2f ops/cycle\n", (double)ops_count / cycles);
+        }
+    }
+
+    // Optional: write simulation output and original inputs for offline validation.
+    if (result_path) {
+        if (write_result_bin(result_path, M, P, C) == 0) {
+            printf("RESULT_WRITE_OK\n");
+        } else {
+            printf("RESULT_WRITE_FAILED\n");
+        }
+        if (inputs_path && write_inputs_bin(inputs_path, M, N, P, A, B) == 0) {
+            printf("INPUTS_WRITE_OK\n");
+        } else if (inputs_path) {
+            printf("INPUTS_WRITE_FAILED\n");
         }
     }
     

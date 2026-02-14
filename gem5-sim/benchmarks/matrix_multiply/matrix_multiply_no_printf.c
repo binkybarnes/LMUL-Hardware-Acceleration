@@ -56,6 +56,8 @@ bf16_t float_to_bf16(float f);
 float bf16_to_float(bf16_t bf16);
 static int write_all(int fd, const void *buf, size_t bytes);
 static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C);
+static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P,
+                           const bf16_t *A, const bf16_t *B);
 
 static int write_all(int fd, const void *buf, size_t bytes)
 {
@@ -92,16 +94,51 @@ static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16
     return status;
 }
 
+static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P,
+                           const bf16_t *A, const bf16_t *B)
+{
+    int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+    if (fd < 0) {
+        return -1;
+    }
+
+    size_t a_bytes = (size_t)M * (size_t)N * sizeof(bf16_t);
+    size_t b_bytes = (size_t)N * (size_t)P * sizeof(bf16_t);
+    int status = 0;
+    if (write_all(fd, &M, sizeof(M)) != 0 ||
+        write_all(fd, &N, sizeof(N)) != 0 ||
+        write_all(fd, &P, sizeof(P)) != 0 ||
+        write_all(fd, A, a_bytes) != 0 ||
+        write_all(fd, B, b_bytes) != 0) {
+        status = -1;
+    }
+
+    if (close(fd) != 0) {
+        status = -1;
+    }
+    return status;
+}
+
 int main(int argc, char *argv[])
 {
     uint32_t M = 8, N = 8, P = 8;
     int use_accel = 1;
+    const char *result_path = NULL;
+    const char *inputs_path = NULL;
     
     // Parse arguments
     if (argc > 1) M = atoi(argv[1]);
     if (argc > 2) N = atoi(argv[2]);
     if (argc > 3) P = atoi(argv[3]);
     if (argc > 4) use_accel = atoi(argv[4]);
+    if (argc > 5 && argv[5] && argv[5][0] != '\0') {
+        result_path = argv[5];
+        if (argc > 6 && argv[6] && argv[6][0] != '\0') {
+            inputs_path = argv[6];
+        } else {
+            inputs_path = "inputs.bin";
+        }
+    }
     
     // Allocate matrices
     bf16_t *A = (bf16_t*)malloc(M * N * sizeof(bf16_t));
@@ -124,13 +161,21 @@ int main(int argc, char *argv[])
         cpu_matrix_multiply(A, B, C, M, N, P);
     }
     
-    // Optional: write result matrix C to file for correctness validation (argv[5] = filename)
-    if (argc >= 6 && argv[5] && argv[5][0] != '\0') {
-        if (write_result_bin(argv[5], M, P, C) == 0) {
+    // Optional: write result matrix C (argv[5]) and inputs A/B (argv[6] or inputs.bin).
+    if (result_path) {
+        if (write_result_bin(result_path, M, P, C) == 0) {
             const char ok_msg[] = "RESULT_WRITE_OK\n";
             (void)write(1, ok_msg, sizeof(ok_msg) - 1);
         } else {
             const char fail_msg[] = "RESULT_WRITE_FAILED\n";
+            (void)write(2, fail_msg, sizeof(fail_msg) - 1);
+        }
+
+        if (inputs_path && write_inputs_bin(inputs_path, M, N, P, A, B) == 0) {
+            const char ok_msg[] = "INPUTS_WRITE_OK\n";
+            (void)write(1, ok_msg, sizeof(ok_msg) - 1);
+        } else if (inputs_path) {
+            const char fail_msg[] = "INPUTS_WRITE_FAILED\n";
             (void)write(2, fail_msg, sizeof(fail_msg) - 1);
         }
     }

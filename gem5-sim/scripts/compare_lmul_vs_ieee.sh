@@ -5,7 +5,7 @@
 # This script:
 # 1. Runs simulation with LMUL accelerator
 # 2. Runs simulation with native IEEE BF16 (CPU-based)
-# 3. Compares outputs (accuracy verification)
+# 3. Validates each output against software reference using saved inputs
 # 4. Compares performance metrics
 #
 # Usage:
@@ -151,6 +151,7 @@ CONFIG="${LMUL_GEM5}/configs/lmul_system.py"
 if [ $USE_SIMPLE_TEST -eq 1 ]; then
     BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/simple_test/simple_test.arm"
     BENCHMARK_ARGS=()  # simple_test takes no arguments
+    USING_NO_PRINTF=0
     echo "Using simple_test benchmark (avoids syscall 403)"
 else
     # Try no-printf version first (avoids syscall 403)
@@ -158,13 +159,15 @@ else
     if [ -f "$NO_PRINTF_BIN" ]; then
         BENCHMARK_BIN="$NO_PRINTF_BIN"
         BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-        RESULT_FILE_ARGS=("result.bin")   # for correctness validation (writes C to outdir)
+        RESULT_FILE_ARGS=("result.bin" "inputs.bin")   # outputs for correctness validation
+        USING_NO_PRINTF=1
         echo "Using matrix_multiply_no_printf benchmark (avoids syscall 403)"
     else
         if [ "${ALLOW_PRINTF_FALLBACK:-0}" -eq 1 ]; then
             BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
             BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-            RESULT_FILE_ARGS=("result.bin")
+            RESULT_FILE_ARGS=("result.bin" "inputs.bin")
+            USING_NO_PRINTF=0
             echo "WARNING: Falling back to matrix_multiply.arm (ALLOW_PRINTF_FALLBACK=1)"
             echo "  This may fail with fatal syscall 403 in gem5 ARM SE."
         else
@@ -198,10 +201,17 @@ fi
 
 # Ensure matrix_multiply_no_printf binary includes result extraction support.
 # We key off a log marker string embedded by the benchmark source.
-if [ "${#RESULT_FILE_ARGS[@]}" -gt 0 ]; then
+if [ "${#RESULT_FILE_ARGS[@]}" -gt 0 ] && [ "${USING_NO_PRINTF:-0}" -eq 1 ]; then
     if command -v strings >/dev/null 2>&1; then
         if ! strings "$BENCHMARK_BIN" 2>/dev/null | grep -q "RESULT_WRITE_OK"; then
             echo "Error: benchmark binary appears stale (missing RESULT_WRITE_OK marker)."
+            echo "  Rebuild benchmark before running comparisons:"
+            echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+            echo "    make matrix_multiply_no_printf.arm"
+            exit 1
+        fi
+        if ! strings "$BENCHMARK_BIN" 2>/dev/null | grep -q "INPUTS_WRITE_OK"; then
+            echo "Error: benchmark binary appears stale (missing INPUTS_WRITE_OK marker)."
             echo "  Rebuild benchmark before running comparisons:"
             echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
             echo "    make matrix_multiply_no_printf.arm"
@@ -228,6 +238,7 @@ echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
 PERF_COMPARISON_FILE="$OUTPUT_DIR/performance_comparison_${MATRIX_SIZE}.txt"
 rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
       "$LMUL_OUTPUT/result.bin" "$IEEE_OUTPUT/result.bin" \
+      "$LMUL_OUTPUT/inputs.bin" "$IEEE_OUTPUT/inputs.bin" \
       "$PERF_COMPARISON_FILE"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
 echo "Output: ${OUTPUT_DIR}"
@@ -335,40 +346,53 @@ else
     echo "⚠ IEEE simulation completed but no stats generated"
 fi
 
-# Step 3: Correctness validation (compare result matrices if written)
+# Step 3: Correctness validation (simulation output vs software references)
 echo
-echo "Step 3: Correctness validation (LMUL vs IEEE result matrices)..."
+echo "Step 3: Correctness validation (using saved inputs + software references)..."
 LMUL_RESULT_FILE="$LMUL_OUTPUT/result.bin"
 IEEE_RESULT_FILE="$IEEE_OUTPUT/result.bin"
+LMUL_INPUTS_FILE="$LMUL_OUTPUT/inputs.bin"
+IEEE_INPUTS_FILE="$IEEE_OUTPUT/inputs.bin"
 if [ "${#RESULT_FILE_ARGS[@]}" -eq 0 ]; then
     echo "  Skipped (current benchmark mode does not emit result.bin)"
-elif [ -f "$LMUL_RESULT_FILE" ] && [ -f "$IEEE_RESULT_FILE" ]; then
-    if python3 "$SCRIPT_DIR/compare_result_binaries.py" "$LMUL_OUTPUT" "$IEEE_OUTPUT"; then
-        echo "✓ Correctness check passed"
+elif [ -f "$LMUL_RESULT_FILE" ] && [ -f "$IEEE_RESULT_FILE" ] && \
+     [ -f "$LMUL_INPUTS_FILE" ] && [ -f "$IEEE_INPUTS_FILE" ]; then
+    if python3 "$SCRIPT_DIR/validate_result_against_reference.py" "$LMUL_OUTPUT" --mode lmul; then
+        echo "✓ LMUL output matches LMUL software reference"
     else
-        echo "⚠ Correctness check reported differences (see above)"
+        echo "⚠ LMUL correctness check reported differences (see above)"
+    fi
+
+    if python3 "$SCRIPT_DIR/validate_result_against_reference.py" "$IEEE_OUTPUT" --mode ieee; then
+        echo "✓ IEEE output matches IEEE software reference"
+    else
+        echo "⚠ IEEE correctness check reported differences (see above)"
     fi
 else
-    echo "⚠ Missing result.bin from one or both runs"
+    echo "⚠ Missing correctness artifacts from one or both runs"
     echo "  Expected LMUL result: $LMUL_RESULT_FILE"
     echo "  Expected IEEE result: $IEEE_RESULT_FILE"
+    echo "  Expected LMUL inputs: $LMUL_INPUTS_FILE"
+    echo "  Expected IEEE inputs: $IEEE_INPUTS_FILE"
     [ -f "$LMUL_RESULT_FILE" ] || echo "  - LMUL result missing"
     [ -f "$IEEE_RESULT_FILE" ] || echo "  - IEEE result missing"
+    [ -f "$LMUL_INPUTS_FILE" ] || echo "  - LMUL inputs missing"
+    [ -f "$IEEE_INPUTS_FILE" ] || echo "  - IEEE inputs missing"
     echo
     echo "  Common causes:"
-    echo "  - old matrix_multiply_no_printf.arm binary (without result writing support)"
+    echo "  - old matrix_multiply_no_printf.arm binary (without input/result writing support)"
     echo "  - guest cwd not pointing to run outdir (fixed in latest lmul_system.py)"
     echo
     echo "  Suggested fix:"
     echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
     echo "    make matrix_multiply_no_printf.arm"
     echo
-    echo "  Log markers (should show RESULT_WRITE_OK):"
+    echo "  Log markers (should show RESULT_WRITE_OK and INPUTS_WRITE_OK):"
     echo "    LMUL log: $LMUL_OUTPUT/simulation.log"
     echo "    IEEE log: $IEEE_OUTPUT/simulation.log"
     if [ "$REQUIRE_RESULT_BIN" -eq 1 ]; then
         echo
-        echo "Error: correctness validation requires both result.bin files."
+        echo "Error: correctness validation requires result.bin and inputs.bin for both runs."
         echo "Set REQUIRE_RESULT_BIN=0 only if you want performance-only runs."
         exit 1
     fi
@@ -415,6 +439,10 @@ if [ -f "$LMUL_OUTPUT/result.bin" ] && [ -f "$IEEE_OUTPUT/result.bin" ]; then
     echo "  - LMUL result matrix: $LMUL_OUTPUT/result.bin"
     echo "  - IEEE result matrix: $IEEE_OUTPUT/result.bin"
 fi
+if [ -f "$LMUL_OUTPUT/inputs.bin" ] && [ -f "$IEEE_OUTPUT/inputs.bin" ]; then
+    echo "  - LMUL input matrices: $LMUL_OUTPUT/inputs.bin"
+    echo "  - IEEE input matrices: $IEEE_OUTPUT/inputs.bin"
+fi
 echo
 echo "Next Steps:"
 echo "==========="
@@ -422,8 +450,9 @@ echo
 echo "1. View performance comparison:"
 echo "   cat $PERF_COMPARISON_FILE"
 echo
-echo "2. Re-run correctness check (if result.bin present):"
-echo "   python3 $SCRIPT_DIR/compare_result_binaries.py $LMUL_OUTPUT $IEEE_OUTPUT"
+echo "2. Re-run correctness checks (if inputs/result files present):"
+echo "   python3 $SCRIPT_DIR/validate_result_against_reference.py $LMUL_OUTPUT --mode lmul"
+echo "   python3 $SCRIPT_DIR/validate_result_against_reference.py $IEEE_OUTPUT --mode ieee"
 echo
 echo "3. Compare stats manually:"
 echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt"
