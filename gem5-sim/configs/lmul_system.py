@@ -137,6 +137,13 @@ def main():
         import traceback
         traceback.print_exc()
         raise
+
+    # Prefer gem5's effective --outdir over config-local --output-dir.
+    # This keeps guest file outputs (e.g., result.bin) in the per-run outdir.
+    gem5_outdir = getattr(getattr(m5, "options", None), "outdir", None)
+    run_output_dir = os.path.abspath(gem5_outdir if gem5_outdir else args.output_dir)
+    os.makedirs(run_output_dir, exist_ok=True)
+    print(f"DEBUG: Using run output directory: {run_output_dir}", file=sys.stderr, flush=True)
     
     # Create system
     print("DEBUG: About to create system", file=sys.stderr, flush=True)
@@ -151,8 +158,8 @@ def main():
         process = Process()
         # Step 2: Set cmd (following hmc_hello.py)
         process.cmd = [args.cmd] + args.cmd_args
-        # Step 2b: Set cwd to output_dir so benchmark can write result.bin into run directory
-        process.cwd = os.path.abspath(args.output_dir)
+        # Step 2b: Set cwd to effective gem5 outdir so benchmark writes into run directory.
+        process.cwd = run_output_dir
         # Step 3: Set system workload (following hmc_hello.py - must be before cpu.workload)
         system.workload = SEWorkload.init_compatible(args.cmd)
         # Step 4: Set cpu workload (following hmc_hello.py)
@@ -224,13 +231,11 @@ def main():
         except Exception as e:
             print(f"WARNING: Failed to dump statistics: {e}", flush=True)
     
-    # Also ensure we're in the right directory
-    output_dir = args.output_dir if hasattr(args, 'output_dir') else 'm5out'
-    print(f"Output directory: {os.path.abspath(output_dir)}", flush=True)
-    print(f"Stats file should be at: {os.path.abspath(output_dir)}/stats.txt", flush=True)
+    print(f"Output directory: {run_output_dir}", flush=True)
+    print(f"Stats file should be at: {run_output_dir}/stats.txt", flush=True)
     
     # Verify stats file exists
-    stats_file = os.path.join(output_dir, 'stats.txt')
+    stats_file = os.path.join(run_output_dir, 'stats.txt')
     if os.path.exists(stats_file):
         size = os.path.getsize(stats_file)
         print(f"Stats file exists: {stats_file} ({size} bytes)", flush=True)

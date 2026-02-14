@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -54,6 +54,43 @@ void cpu_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
 void init_matrix(bf16_t *mat, uint32_t rows, uint32_t cols);
 bf16_t float_to_bf16(float f);
 float bf16_to_float(bf16_t bf16);
+static int write_all(int fd, const void *buf, size_t bytes);
+static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C);
+
+static int write_all(int fd, const void *buf, size_t bytes)
+{
+    const uint8_t *ptr = (const uint8_t *)buf;
+    while (bytes > 0) {
+        ssize_t written = write(fd, ptr, bytes);
+        if (written <= 0) {
+            return -1;
+        }
+        ptr += (size_t)written;
+        bytes -= (size_t)written;
+    }
+    return 0;
+}
+
+static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C)
+{
+    int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+    if (fd < 0) {
+        return -1;
+    }
+
+    size_t matrix_bytes = (size_t)M * (size_t)P * sizeof(bf16_t);
+    int status = 0;
+    if (write_all(fd, &M, sizeof(M)) != 0 ||
+        write_all(fd, &P, sizeof(P)) != 0 ||
+        write_all(fd, C, matrix_bytes) != 0) {
+        status = -1;
+    }
+
+    if (close(fd) != 0) {
+        status = -1;
+    }
+    return status;
+}
 
 int main(int argc, char *argv[])
 {
@@ -89,12 +126,12 @@ int main(int argc, char *argv[])
     
     // Optional: write result matrix C to file for correctness validation (argv[5] = filename)
     if (argc >= 6 && argv[5] && argv[5][0] != '\0') {
-        FILE *fp = fopen(argv[5], "wb");
-        if (fp) {
-            (void)fwrite(&M, sizeof(M), 1, fp);
-            (void)fwrite(&P, sizeof(P), 1, fp);
-            (void)fwrite(C, sizeof(bf16_t), (size_t)M * P, fp);
-            fclose(fp);
+        if (write_result_bin(argv[5], M, P, C) == 0) {
+            const char ok_msg[] = "RESULT_WRITE_OK\n";
+            (void)write(1, ok_msg, sizeof(ok_msg) - 1);
+        } else {
+            const char fail_msg[] = "RESULT_WRITE_FAILED\n";
+            (void)write(2, fail_msg, sizeof(fail_msg) - 1);
         }
     }
     

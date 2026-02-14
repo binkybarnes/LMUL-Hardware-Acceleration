@@ -23,6 +23,7 @@ PE_COLS=4
 OUTPUT_DIR="lmul_vs_ieee_comparison"
 USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall 403
 LOG_FILE=""
+REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-1}"  # 1: fail if result.bin missing (recommended)
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -59,6 +60,8 @@ while [[ $# -gt 0 ]]; do
             echo "  - Verifies output accuracy"
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
+            echo "  - Requires matrix_multiply_no_printf.arm (set ALLOW_PRINTF_FALLBACK=1 to force printf binary)"
+            echo "  - Env: REQUIRE_RESULT_BIN=0 allows continuing when result.bin is missing"
             exit 0
             ;;
         *)
@@ -158,11 +161,21 @@ else
         RESULT_FILE_ARGS=("result.bin")   # for correctness validation (writes C to outdir)
         echo "Using matrix_multiply_no_printf benchmark (avoids syscall 403)"
     else
-        BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
-        BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-        RESULT_FILE_ARGS=("result.bin")
-        echo "Using matrix_multiply benchmark (may hit syscall 403)"
-        echo "  Build no-printf version: cd benchmarks/matrix_multiply && make both"
+        if [ "${ALLOW_PRINTF_FALLBACK:-0}" -eq 1 ]; then
+            BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
+            BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
+            RESULT_FILE_ARGS=("result.bin")
+            echo "WARNING: Falling back to matrix_multiply.arm (ALLOW_PRINTF_FALLBACK=1)"
+            echo "  This may fail with fatal syscall 403 in gem5 ARM SE."
+        else
+            echo "Error: matrix_multiply_no_printf.arm not found."
+            echo "  Refusing to run matrix_multiply.arm by default (can trigger fatal syscall 403)."
+            echo "  Build no-printf benchmark first:"
+            echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+            echo "    make matrix_multiply_no_printf.arm"
+            echo "  If you really want fallback, set: ALLOW_PRINTF_FALLBACK=1"
+            exit 1
+        fi
     fi
 fi
 # simple_test has no result file
@@ -181,6 +194,22 @@ if [ ! -f "$BENCHMARK_BIN" ]; then
     fi
     echo "  make"
     exit 1
+fi
+
+# Ensure matrix_multiply_no_printf binary includes result extraction support.
+# We key off a log marker string embedded by the benchmark source.
+if [ "${#RESULT_FILE_ARGS[@]}" -gt 0 ]; then
+    if command -v strings >/dev/null 2>&1; then
+        if ! strings "$BENCHMARK_BIN" 2>/dev/null | grep -q "RESULT_WRITE_OK"; then
+            echo "Error: benchmark binary appears stale (missing RESULT_WRITE_OK marker)."
+            echo "  Rebuild benchmark before running comparisons:"
+            echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+            echo "    make matrix_multiply_no_printf.arm"
+            exit 1
+        fi
+    else
+        echo "Warning: 'strings' not found; cannot verify benchmark freshness."
+    fi
 fi
 
 # Create output directories
@@ -214,6 +243,7 @@ echo
 if "$GEM5_BINARY" \
     --outdir="$LMUL_OUTPUT" \
     "$CONFIG" \
+    --output-dir="$LMUL_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
@@ -264,6 +294,7 @@ echo
 if "$GEM5_BINARY" \
     --outdir="$IEEE_OUTPUT" \
     "$CONFIG" \
+    --output-dir="$IEEE_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
     --cmd="$BENCHMARK_BIN" \
@@ -307,15 +338,40 @@ fi
 # Step 3: Correctness validation (compare result matrices if written)
 echo
 echo "Step 3: Correctness validation (LMUL vs IEEE result matrices)..."
-if [ -f "$LMUL_OUTPUT/result.bin" ] && [ -f "$IEEE_OUTPUT/result.bin" ]; then
+LMUL_RESULT_FILE="$LMUL_OUTPUT/result.bin"
+IEEE_RESULT_FILE="$IEEE_OUTPUT/result.bin"
+if [ "${#RESULT_FILE_ARGS[@]}" -eq 0 ]; then
+    echo "  Skipped (current benchmark mode does not emit result.bin)"
+elif [ -f "$LMUL_RESULT_FILE" ] && [ -f "$IEEE_RESULT_FILE" ]; then
     if python3 "$SCRIPT_DIR/compare_result_binaries.py" "$LMUL_OUTPUT" "$IEEE_OUTPUT"; then
         echo "✓ Correctness check passed"
     else
         echo "⚠ Correctness check reported differences (see above)"
     fi
 else
-    echo "  Skipped (no result.bin in one or both runs)"
-    echo "  Result files are written when using matrix_multiply_no_printf with output filename."
+    echo "⚠ Missing result.bin from one or both runs"
+    echo "  Expected LMUL result: $LMUL_RESULT_FILE"
+    echo "  Expected IEEE result: $IEEE_RESULT_FILE"
+    [ -f "$LMUL_RESULT_FILE" ] || echo "  - LMUL result missing"
+    [ -f "$IEEE_RESULT_FILE" ] || echo "  - IEEE result missing"
+    echo
+    echo "  Common causes:"
+    echo "  - old matrix_multiply_no_printf.arm binary (without result writing support)"
+    echo "  - guest cwd not pointing to run outdir (fixed in latest lmul_system.py)"
+    echo
+    echo "  Suggested fix:"
+    echo "    cd ${LMUL_GEM5}/benchmarks/matrix_multiply"
+    echo "    make matrix_multiply_no_printf.arm"
+    echo
+    echo "  Log markers (should show RESULT_WRITE_OK):"
+    echo "    LMUL log: $LMUL_OUTPUT/simulation.log"
+    echo "    IEEE log: $IEEE_OUTPUT/simulation.log"
+    if [ "$REQUIRE_RESULT_BIN" -eq 1 ]; then
+        echo
+        echo "Error: correctness validation requires both result.bin files."
+        echo "Set REQUIRE_RESULT_BIN=0 only if you want performance-only runs."
+        exit 1
+    fi
 fi
 
 # Step 4: Compare performance metrics
