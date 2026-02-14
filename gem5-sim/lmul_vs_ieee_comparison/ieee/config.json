@@ -683,7 +683,8 @@
                         "64",
                         "64",
                         "0",
-                        "result.bin"
+                        "result.bin",
+                        "inputs.bin"
                     ],
                     "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/ieee",
                     "drivers": [],

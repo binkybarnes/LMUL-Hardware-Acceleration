@@ -7,19 +7,19 @@ Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
 
 Metric                         LMUL                 IEEE                
 ----------------------------------------------------------------------
-Simulation Time (s)            0.015144             0.202028            
-  → Speedup: 13.34x
-CPU Cycles                     30,287,383           404,055,323         
-  → Speedup: 13.34x
-Instructions                   199,131              2,821,288           
-CPI                            152.0924             143.2163            
+Simulation Time (s)            0.015168             0.202052            
+  → Speedup: 13.32x
+CPU Cycles                     30,336,365           404,104,601         
+  → Speedup: 13.32x
+Instructions                   199,463              2,821,620           
+CPI                            152.0848             143.2169            
   → Improvement: 0.94x
 IPC                            0.006575             0.006982            
   → Improvement: 0.94x
 
-DRAM energy (µJ)               17389778.28          238737547.19        
-  → DRAM energy ratio (IEEE/LMUL): 13.73x (>1 = LMUL used less)
-DRAM avg power (mW)            1148.32              1181.71             
+DRAM energy (µJ)               17421302.50          238766990.21        
+  → DRAM energy ratio (IEEE/LMUL): 13.71x (>1 = LMUL used less)
+DRAM avg power (mW)            1148.54              1181.71             
   (CPU and accelerator energy require power models; not in default gem5 SE)
 
 
