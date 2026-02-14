@@ -23,6 +23,7 @@ PE_COLS=4
 OUTPUT_DIR="lmul_vs_ieee_comparison"
 USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall 403
 LOG_FILE=""
+EXTRACT_OUTPUTS="${EXTRACT_OUTPUTS:-1}"  # 1: write inputs/result files + run correctness checks
 REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-1}"  # 1: fail if result.bin missing (recommended)
 
 # Parse arguments
@@ -52,15 +53,21 @@ while [[ $# -gt 0 ]]; do
             USE_SIMPLE_TEST=1
             shift
             ;;
+        --no-output-extraction)
+            EXTRACT_OUTPUTS=0
+            shift
+            ;;
         -h|--help)
-            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE]"
+            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE] [--no-output-extraction]"
             echo
             echo "Compares LMUL accelerator vs IEEE BF16 accelerator:"
             echo "  - Runs both simulations"
             echo "  - Verifies output accuracy"
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
+            echo "  - --no-output-extraction: skip writing inputs/result files and correctness checks"
             echo "  - Requires matrix_multiply_no_printf.arm (set ALLOW_PRINTF_FALLBACK=1 to force printf binary)"
+            echo "  - Env: EXTRACT_OUTPUTS=0 is equivalent to --no-output-extraction"
             echo "  - Env: REQUIRE_RESULT_BIN=0 allows continuing when result.bin is missing"
             exit 0
             ;;
@@ -70,6 +77,11 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Normalize EXTRACT_OUTPUTS values to 0/1
+if [ "${EXTRACT_OUTPUTS}" != "0" ]; then
+    EXTRACT_OUTPUTS=1
+fi
 
 # Optionally tee all output to a log file
 if [ -n "$LOG_FILE" ]; then
@@ -159,14 +171,22 @@ else
     if [ -f "$NO_PRINTF_BIN" ]; then
         BENCHMARK_BIN="$NO_PRINTF_BIN"
         BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-        RESULT_FILE_ARGS=("result.bin" "inputs.bin")   # outputs for correctness validation
+        if [ "$EXTRACT_OUTPUTS" -eq 1 ]; then
+            RESULT_FILE_ARGS=("result.bin" "inputs.bin")   # outputs for correctness validation
+        else
+            RESULT_FILE_ARGS=()
+        fi
         USING_NO_PRINTF=1
         echo "Using matrix_multiply_no_printf benchmark (avoids syscall 403)"
     else
         if [ "${ALLOW_PRINTF_FALLBACK:-0}" -eq 1 ]; then
             BENCHMARK_BIN="${LMUL_GEM5}/benchmarks/matrix_multiply/matrix_multiply.arm"
             BENCHMARK_ARGS=("$MATRIX_SIZE" "$MATRIX_SIZE" "$MATRIX_SIZE")
-            RESULT_FILE_ARGS=("result.bin" "inputs.bin")
+            if [ "$EXTRACT_OUTPUTS" -eq 1 ]; then
+                RESULT_FILE_ARGS=("result.bin" "inputs.bin")
+            else
+                RESULT_FILE_ARGS=()
+            fi
             USING_NO_PRINTF=0
             echo "WARNING: Falling back to matrix_multiply.arm (ALLOW_PRINTF_FALLBACK=1)"
             echo "  This may fail with fatal syscall 403 in gem5 ARM SE."
@@ -242,6 +262,11 @@ rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
       "$PERF_COMPARISON_FILE"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
 echo "Output: ${OUTPUT_DIR}"
+if [ "$EXTRACT_OUTPUTS" -eq 1 ]; then
+    echo "Output extraction: ON (inputs.bin/result.bin + correctness checks)"
+else
+    echo "Output extraction: OFF (performance-only run)"
+fi
 echo "=========================================="
 echo
 
@@ -353,7 +378,9 @@ LMUL_RESULT_FILE="$LMUL_OUTPUT/result.bin"
 IEEE_RESULT_FILE="$IEEE_OUTPUT/result.bin"
 LMUL_INPUTS_FILE="$LMUL_OUTPUT/inputs.bin"
 IEEE_INPUTS_FILE="$IEEE_OUTPUT/inputs.bin"
-if [ "${#RESULT_FILE_ARGS[@]}" -eq 0 ]; then
+if [ "$EXTRACT_OUTPUTS" -eq 0 ]; then
+    echo "  Skipped (--no-output-extraction / EXTRACT_OUTPUTS=0)"
+elif [ "${#RESULT_FILE_ARGS[@]}" -eq 0 ]; then
     echo "  Skipped (current benchmark mode does not emit result.bin)"
 elif [ -f "$LMUL_RESULT_FILE" ] && [ -f "$IEEE_RESULT_FILE" ] && \
      [ -f "$LMUL_INPUTS_FILE" ] && [ -f "$IEEE_INPUTS_FILE" ]; then

@@ -17,6 +17,10 @@
 # Optional: pass args to the compare script via env before submitting:
 #   COMPARE_EXTRA_ARGS="--size 64" sbatch scripts/sbatch_compare_lmul_vs_ieee.slurm
 #
+# Performance-only mode (skip inputs/result extraction + correctness checks):
+#   COMPARE_EXTRA_ARGS="--size 512 --pe-rows 8 --pe-cols 8 --no-output-extraction" \
+#   sbatch --time=03:00:00 --mem=32G scripts/sbatch_compare_lmul_vs_ieee.slurm
+#
 # For 512x512 (recommended: 8x8 PE, 3h, 32G):
 #   COMPARE_EXTRA_ARGS="--size 512 --pe-rows 8 --pe-cols 8" sbatch --time=03:00:00 --mem=32G scripts/sbatch_compare_lmul_vs_ieee.slurm
 #
@@ -31,7 +35,7 @@
 #   lmul_vs_ieee_comparison/           - created by compare script
 #     lmul/stats.txt, simulation.log, ...
 #     ieee/stats.txt, simulation.log, ...
-#     performance_comparison.txt
+#     performance_comparison_<size>.txt
 
 set -e
 
