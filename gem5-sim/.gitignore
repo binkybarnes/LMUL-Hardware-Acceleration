@@ -1,0 +1,20 @@
+# gem5 build artifacts
+build/
+*.pyc
+*.o
+*.a
+.scons*
+.sconsign*
+
+# Simulation outputs
+m5out*/
+*.trace
+*.out
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
