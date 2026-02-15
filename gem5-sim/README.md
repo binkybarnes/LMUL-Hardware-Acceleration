@@ -1,509 +1,209 @@
 # LMUL Accelerator gem5 Simulation
 
-Complete gem5 integration for simulating the LMUL (Logarithmic Multiplication) hardware accelerator in a full system context.
+gem5 integration for simulating the LMUL (Logarithmic Multiplication) BF16 hardware accelerator and comparing it to native IEEE BF16 on the CPU.
 
 ## Overview
 
-This directory contains a custom gem5 device model for the LMUL accelerator, allowing you to:
-- Simulate end-to-end application performance
-- Evaluate memory bandwidth requirements and bottlenecks
-- Measure CPU-accelerator communication overhead
-- Compare LMUL accelerator vs native CPU IEEE BF16 performance
-- Analyze realistic workload behavior
+This directory provides:
+- A custom gem5 device model for the LMUL accelerator
+- Configs and benchmarks to run matrix multiply with the accelerator or on the CPU
+- Scripts to compare both runs and validate correctness
+
+**Typical workflow (local):** install the model into gem5 → build gem5 → build the benchmark → run the comparison script → inspect performance and (optionally) correctness.
 
 ## Directory Structure
 
 ```
 gem5-sim/
-├── README.md                    # This file
-├── models/                      # gem5 accelerator model
-│   ├── LMulAccelerator.py      # Python wrapper
-│   ├── lmul_accelerator.hh     # C++ header
-│   ├── lmul_accelerator.cc     # C++ implementation
-│   ├── SConscript              # Build configuration
-│   └── README.md               # Model documentation
-├── configs/                     # gem5 system configurations
-│   ├── lmul_system.py          # System with LMUL accelerator
-│   └── README.md               # Configuration guide
-├── benchmarks/                  # Test benchmarks
-│   ├── matrix_multiply/        # Matrix multiplication tests
-│   └── README.md               # Benchmark documentation
-└── scripts/                     # Utility scripts
-    ├── install_model.sh        # Install accelerator into gem5
-    ├── clean_gem5.sh           # Clean gem5 installation
-    ├── test_accelerator.sh     # Verify installation
-    └── run_simulation.sh       # Run simulations
+├── README.md                 # This file
+├── docs/                     # Design and caveats
+│   ├── COMPARISON_FAIRNESS.md
+│   └── DEPLOYMENT_REALITY.md
+├── models/                   # gem5 accelerator model (C++ + Python)
+├── configs/                  # System config (lmul_system.py)
+├── benchmarks/matrix_multiply/   # BF16 matrix multiply benchmark
+├── datasets/                 # Optional (e.g. Fashion-MNIST)
+└── scripts/                  # Setup and run scripts
+    ├── install_model.sh      # Install accelerator into gem5 and build
+    ├── clean_gem5.sh         # Remove accelerator from gem5
+    ├── test_accelerator.sh   # Verify build
+    ├── run_simulation.sh     # Single run (LMUL or IEEE)
+    ├── compare_lmul_vs_ieee.sh   # Run both + compare metrics + correctness
+    ├── compare_metrics.py    # Build performance_comparison_<size>.txt
+    ├── validate_result_against_reference.py  # Correctness vs rtl/numpy_lmul
+    ├── extract_stats.py      # Dump stats from one stats.txt
+    ├── check_compatibility.sh
+    ├── check_gem5_dependencies.sh
+    ├── check_zlib.sh         # Zlib diagnostic
+    ├── fix_git_permanently.sh
+    ├── fetch_fashion_mnist.sh   # Optional dataset
+    ├── scons_with_zlib.sh    # Used by install_model.sh
+    └── create_zlib_symlinks.sh
 ```
-
-# Onboarding Guide: gem5 LMUL Accelerator Project
-
-This guide will help you get up and running with the gem5 simulator and LMUL accelerator model, from initial setup to running simulations and analyzing results.
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Initial Setup](#initial-setup)
-3. [Building gem5 with LMUL Accelerator](#building-gem5-with-lmul-accelerator)
-4. [Running Simulations](#running-simulations)
-5. [Comparing Results](#comparing-results)
-6. [Understanding Output](#understanding-output)
-7. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Prerequisites
 
-### System Requirements
-- **RAM**: 32GB+ recommended (16GB minimum, but linker may fail)
-- **Disk**: 50GB+ free space
-- **OS**: Linux (Ubuntu 20.04+ recommended) or access to NSF Singularity container
-- **Architecture**: x86_64 (preferred)
-
-### Required Software
-- `git` - Version control
-- `python3` (3.6+) - Python interpreter
-- `scons` - Build system (can be installed via pip)
-- ARM cross-compiler (for benchmarks): `gcc-arm-linux-gnueabihf`
+- **RAM**: 32GB+ recommended (16GB minimum; linker may fail with less).
+- **Disk**: 50GB+ free.
+- **OS**: Linux (e.g. Ubuntu 20.04+), x86_64.
+- **Software**: `git`, `python3` (3.6+), `scons` (e.g. `pip install scons`), and for building benchmarks: **ARM cross-compiler** `gcc-arm-linux-gnueabihf` (`sudo apt-get install gcc-arm-linux-gnueabihf`).
 
 ---
 
-## Initial Setup
+## Setup and Workflow (Local)
 
-### Step 1: Check System Compatibility
+All commands assume you are in the repo root: `LMUL-Hardware-Acceleration/`.
 
-First, verify your system can build and run gem5:
+### 1. Check system and dependencies
 
 ```bash
-cd /path/to/LMUL-Hardware-Acceleration
 ./gem5-sim/scripts/check_compatibility.sh
-```
-
-This will check:
-- Architecture compatibility
-- Available RAM and disk space
-- Required dependencies
-- Build tools
-
-**Expected output**: Should show ✓ for most checks. If there are warnings, address them before proceeding.
-
-### Step 2: Check Dependencies
-
-Check for all required libraries:
-
-```bash
 ./gem5-sim/scripts/check_gem5_dependencies.sh
 ```
 
-This verifies:
-- zlib (required)
-- Python development headers (required)
-- Optional libraries (libpng, HDF5, protobuf)
+Install any missing build deps, e.g.:
 
-**If dependencies are missing**, install:
 ```bash
 sudo apt-get install zlib1g-dev python3-dev protobuf-compiler pkg-config
 ```
 
-### Step 3: Clone gem5 Repository
+### 2. Clone gem5 (if needed)
 
-If you haven't already cloned gem5:
+gem5 must be at `LMUL-Hardware-Acceleration/gem5/`. If it is not there:
 
 ```bash
-cd /path/to/LMUL-Hardware-Acceleration
 git clone https://github.com/gem5/gem5.git
-cd gem5
-git checkout stable
-pip install -r requirements.txt
-cd ..
+cd gem5 && git checkout stable && pip install -r requirements.txt && cd ..
 ```
 
-**Note**: The `install_model.sh` script will handle this automatically if gem5 doesn't exist.
+`install_model.sh` will not clone gem5 for you; it expects `gem5/` to already exist.
 
----
+### 3. Install the LMUL model and build gem5
 
-## Datasets (Fashion-MNIST)
-
-Fashion-MNIST is **data** (not a library). On Expanse, download it **once** to a shared filesystem (e.g., `$PROJECT` or `$SCRATCH`) and reuse it across simulation runs.
-
-Download + prepare (creates decompressed IDX files and a `fashion-mnist.npz`):
+This copies the accelerator into gem5 and builds gem5 (can take 30–60 minutes):
 
 ```bash
-./gem5-sim/scripts/fetch_fashion_mnist.sh "$SCRATCH/fashion-mnist"
-```
-
-Notes for gem5:
-
-- In **SE mode**, your benchmark can open files from that host path directly (pass the path in via argv/env).
-- For details on what gets generated, see `gem5-sim/datasets/README.md`.
-
----
-
-## Building gem5 with LMUL Accelerator
-
-### Step 1: Install the LMUL Accelerator Model
-
-This script will:
-- Copy accelerator model files into gem5
-- Register with gem5's build system
-- Build gem5 with the accelerator integrated
-
-```bash
-cd /path/to/LMUL-Hardware-Acceleration
 ./gem5-sim/scripts/install_model.sh
 ```
 
-**What it does:**
-1. Cleans up any previous installation
-2. Creates `gem5/src/dev/lmul_accel/` directory
-3. Copies accelerator model files (C++, Python, build config)
-4. Registers with gem5's build system
-5. **Builds gem5** (takes 30-60 minutes)
-
-**Expected output**: 
-- Should complete with "✓ gem5 rebuild successful!"
-- If it fails, check the error messages (common issues: missing zlib, linker OOM)
-
-### Step 2: Verify Installation
-
-Check that the accelerator was installed correctly:
+Then verify:
 
 ```bash
 ./gem5-sim/scripts/test_accelerator.sh
 ```
 
-**Expected output**: Should show:
-- ✓ Accelerator object file exists
-- ✓ Python bindings generated
-- ✓ Accelerator can be instantiated
+You should see that the accelerator object file and Python bindings exist and that the accelerator can be instantiated.
 
----
+### 4. Build the benchmark
 
-## Running Simulations
-
-### Step 1: Build Benchmarks
-
-First, compile the matrix multiplication benchmark:
+The comparison workflow uses the **no-printf** benchmark to avoid syscall 403 in gem5 ARM SE. Build it (and optionally the printf version):
 
 ```bash
 cd gem5-sim/benchmarks/matrix_multiply
-make
+make matrix_multiply_no_printf.arm
+cd ../../..
 ```
 
-This creates `matrix_multiply.arm` (ARM binary) or `matrix_multiply_no_printf.arm` (no printf version, avoids syscall 403 errors).
+If the ARM cross-compiler is missing, install it or build for x86: `make ARCH=x86 matrix_multiply_no_printf.x86` (only if you run gem5 for X86).
 
-**If ARM cross-compiler is missing:**
-- Contact mentor to install: `sudo apt-get install gcc-arm-linux-gnueabihf`
-- Or build for x86: `make x86` (if supported)
-
-### Step 2: Run a Simple Simulation
-
-Run a basic test simulation:
+### 5. Run a quick test (single simulation)
 
 ```bash
-cd /path/to/LMUL-Hardware-Acceleration
 ./gem5-sim/scripts/run_simulation.sh --test
 ```
 
-**What this does:**
-- Runs a 4x4 matrix multiplication
-- Uses the LMUL accelerator
-- Outputs results to `gem5-sim/m5out/`
+This runs a 4×4 matrix multiply with the LMUL accelerator and writes output under `gem5-sim/m5out/`. Check:
 
-**Check results:**
 ```bash
-ls -lh gem5-sim/m5out/
-cat gem5-sim/m5out/stats.txt | head -50
+ls -la gem5-sim/m5out/
+head -50 gem5-sim/m5out/stats.txt
 ```
 
-### Step 3: Run Custom Simulation
+### 6. Run the full comparison (LMUL vs IEEE)
 
-Run with custom parameters:
-
-```bash
-./gem5-sim/scripts/run_simulation.sh \
-    --pe-rows 8 \
-    --pe-cols 8 \
-    --matrix-size 16
-```
-
-**Parameters:**
-- `--pe-rows N`: Processing element array rows (default: 4)
-- `--pe-cols N`: Processing element array columns (default: 4)
-- `--matrix-size N`: Matrix dimension (default: 8)
-
----
-
-## Comparing Results
-
-### Compare LMUL Accelerator vs Native IEEE (CPU)
-
-This is the main comparison workflow - it runs two simulations (one with accelerator, one with CPU) and compares performance:
+This runs **both** simulations (LMUL accelerator and native IEEE BF16 on CPU), then compares metrics and optionally checks correctness:
 
 ```bash
-cd /path/to/LMUL-Hardware-Acceleration
 ./gem5-sim/scripts/compare_lmul_vs_ieee.sh
 ```
 
-**What it does:**
-1. Runs LMUL accelerator simulation
-2. Runs native IEEE BF16 (CPU) simulation
-3. Extracts performance metrics from both
-4. Compares and generates a report
+Defaults: 4×4 matrices, 4×4 PE array. Outputs go to `gem5-sim/lmul_vs_ieee_comparison/`:
 
-**Output files:**
-- `lmul_vs_ieee_comparison/lmul/stats.txt` - LMUL accelerator stats
-- `lmul_vs_ieee_comparison/ieee/stats.txt` - Native IEEE stats
-- `lmul_vs_ieee_comparison/performance_comparison.txt` - Comparison report
+- `lmul/stats.txt`, `ieee/stats.txt` — simulation stats
+- `performance_comparison_4.txt` — comparison report (speedup, cycles, DRAM energy, etc.)
+- With output extraction on (default): `lmul/result.bin`, `ieee/result.bin`, `lmul/inputs.bin`, `ieee/inputs.bin` for correctness checks
 
-**View results:**
+View the report:
+
 ```bash
-cat lmul_vs_ieee_comparison/performance_comparison.txt
+cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_4.txt
 ```
 
-### Custom Comparison
-
-Run comparison with specific parameters:
+**Larger runs or performance-only (no correctness files):**
 
 ```bash
-# Set matrix size and PE array size
-MATRIX_SIZE=16
-PE_ROWS=8
-PE_COLS=8
-
-./gem5-sim/scripts/compare_lmul_vs_ieee.sh \
-    --matrix-size $MATRIX_SIZE \
-    --pe-rows $PE_ROWS \
-    --pe-cols $PE_COLS
+./gem5-sim/scripts/compare_lmul_vs_ieee.sh --size 64 --pe-rows 4 --pe-cols 4
+./gem5-sim/scripts/compare_lmul_vs_ieee.sh --size 128 --no-output-extraction
 ```
 
-### Manual Metric Extraction
+- `--size N` — N×N matrices  
+- `--pe-rows N`, `--pe-cols N` — PE array dimensions  
+- `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)
 
-Extract metrics from a specific stats file:
+### 7. Re-run metrics or correctness locally
 
 ```bash
+# Regenerate comparison table from two stats files
 python3 gem5-sim/scripts/compare_metrics.py \
-    lmul_vs_ieee_comparison/lmul/stats.txt \
-    lmul_vs_ieee_comparison/ieee/stats.txt
-```
+  gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt \
+  gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt
 
-This prints a formatted comparison table with:
-- Simulation time
-- CPU cycles
-- Instructions
-- CPI (Cycles Per Instruction)
-- IPC (Instructions Per Cycle)
-- Accelerator-specific metrics (if using accelerator)
+# Correctness: compare simulation output to software reference (requires inputs.bin + result.bin)
+python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/lmul --mode lmul
+python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/ieee --mode ieee
+```
 
 ---
 
 ## Understanding Output
 
-### Key Files
-
-**Simulation Output Directory**: `gem5-sim/m5out/` (or custom output dir)
-
-- `stats.txt` - Detailed simulation statistics
-- `config.ini` - Complete system configuration
-- `config.json` - JSON version of configuration
-
-### Important Statistics
-
-**From `stats.txt`:**
-
-```
-sim_seconds                    # Total simulation time (seconds)
-system.cpu.numCycles          # Total CPU cycles
-system.cpu.committedInsts     # Committed instructions
-system.cpu.cpi                # Cycles per instruction
-system.cpu.ipc                # Instructions per cycle
-```
-
-**LMUL Accelerator Statistics** (if using accelerator):
-```
-system.lmul_accel.numcompletions    # Number of completed operations
-system.lmul_accel.totalcycles       # Total accelerator cycles
-system.lmul_accel.totalops          # Total operations
-system.lmul_accel.oplatency::Mean   # Average operation latency
-```
-
-### Performance Metrics
-
-**Speedup Calculation:**
-```
-Speedup = (IEEE simulation time) / (LMUL simulation time)
-```
-
-**Energy Efficiency** (if available):
-- Look for power/energy statistics in `stats.txt`
-- Compare total energy consumption between LMUL and IEEE
-
----
-
-## Common Workflows
-
-### Workflow 1: Quick Test
-
-```bash
-# 1. Check system
-./gem5-sim/scripts/check_compatibility.sh
-
-# 2. Install model (if not done)
-./gem5-sim/scripts/install_model.sh
-
-# 3. Run test simulation
-./gem5-sim/scripts/run_simulation.sh --test
-
-# 4. Check results
-cat gem5-sim/m5out/stats.txt | head -30
-```
-
-### Workflow 2: Full Comparison
-
-```bash
-# 1. Ensure gem5 is built with accelerator
-./gem5-sim/scripts/test_accelerator.sh
-
-# 2. Build benchmarks
-cd gem5-sim/benchmarks/matrix_multiply && make && cd ../../..
-
-# 3. Run comparison
-./gem5-sim/scripts/compare_lmul_vs_ieee.sh
-
-# 4. View results
-cat lmul_vs_ieee_comparison/performance_comparison.txt
-
-# 5. Extract detailed metrics
-python3 gem5-sim/scripts/compare_metrics.py \
-    lmul_vs_ieee_comparison/lmul/stats.txt \
-    lmul_vs_ieee_comparison/ieee/stats.txt
-```
-
-### Workflow 3: Parameter Sweep
-
-Test different PE array sizes:
-
-```bash
-for pe_size in 4 8 16; do
-    echo "Testing PE array: ${pe_size}x${pe_size}"
-    ./gem5-sim/scripts/compare_lmul_vs_ieee.sh \
-        --pe-rows $pe_size \
-        --pe-cols $pe_size \
-        --matrix-size $((pe_size * 2))
-done
-```
+- **stats.txt** (per run): `sim_seconds`, `system.cpu.numCycles`, `system.cpu.committedInsts`, CPI, IPC, DRAM energy, and accelerator stats (e.g. `system.lmul_accel.totalcycles`, `totalops`).
+- **performance_comparison_<size>.txt**: side-by-side LMUL vs IEEE and speedups (sim time, cycles, DRAM energy ratio, etc.).
+- Correctness is reported when you run the comparison with output extraction enabled: the script compares each run’s output to the reference (`rtl.numpy_lmul.lmul_numpy_matmul` for LMUL, IEEE matmul for CPU).
 
 ---
 
 ## Troubleshooting
 
-### Issue: "zlib library missing"
-
-**Symptom**: Build fails with "Error: Did not find needed zlib compression library"
-
-**Solution**:
-```bash
-# Check if zlib exists
-./gem5-sim/scripts/check_zlib.sh
-
-# If missing, contact mentor to install:
-# sudo apt-get install zlib1g-dev
-```
-
-### Issue: "Linker OOM" or build fails during linking
-
-**Symptom**: Build fails with "ld terminated" or "out of memory"
-
-**Solution**:
-- Need more RAM (32GB+ recommended)
-- Or build on a machine with more memory
-- Or use Singularity container on NSF machine
-
-### Issue: "Syscall 403 out of range"
-
-**Symptom**: Simulation fails early with syscall error
-
-**Solution**:
-```bash
-# Use the no-printf version of the benchmark
-cd gem5-sim/benchmarks/matrix_multiply
-make matrix_multiply_no_printf.arm
-```
-
-### Issue: "stats.txt is empty"
-
-**Symptom**: Simulation completes but no statistics generated
-
-**Possible causes**:
-- Simulation failed before completion
-- Check simulation log for errors
-- Verify benchmark binary exists and is ARM format
-
-**Check**:
-```bash
-# Check if binary exists
-ls -lh gem5-sim/benchmarks/matrix_multiply/*.arm
-
-# Check simulation log
-tail -50 lmul_vs_ieee_comparison/lmul/simulation.log
-```
-
-### Issue: "Permission denied" when running scripts
-
-**Solution**:
-```bash
-chmod +x gem5-sim/scripts/*.sh
-```
-
-### Issue: "git pull" fails with OpenSSL error
-
-**Symptom**: "OpenSSL version mismatch" when using git
-
-**Solution**:
-```bash
-# Use the git wrapper
-./gem5-sim/scripts/fix_git_permanently.sh
-# Then restart your shell or: source ~/.bashrc
-```
+| Problem | What to do |
+|--------|------------|
+| **zlib missing** | `./gem5-sim/scripts/check_zlib.sh`; install with `sudo apt-get install zlib1g-dev`. |
+| **Linker OOM** | Build on a machine with 32GB+ RAM. |
+| **Syscall 403** | Use the no-printf benchmark: `make matrix_multiply_no_printf.arm` in `gem5-sim/benchmarks/matrix_multiply`. |
+| **Empty stats.txt** | Check `lmul_vs_ieee_comparison/lmul/simulation.log` (or `ieee/`) for errors; ensure the benchmark binary exists. |
+| **Permission denied** | `chmod +x gem5-sim/scripts/*.sh` |
+| **Git OpenSSL error** | `./gem5-sim/scripts/fix_git_permanently.sh` then restart shell or `source ~/.bashrc`. |
 
 ---
 
-## Next Steps
-
-Once you're comfortable with the basics:
-
-1. **Experiment with parameters**: Try different PE array sizes, matrix sizes
-2. **Analyze results**: Look at the detailed statistics in `stats.txt`
-3. **Compare configurations**: Run multiple comparisons with different settings
-4. **Extract insights**: Look for trends in performance vs. configuration
-
-## Getting Help
-
-- **Check logs**: Most scripts output detailed logs
-- **Read documentation**: See `gem5-sim/README.md` for more details
-- **Check compatibility**: Run `check_compatibility.sh` if something doesn't work
-- **Contact team**: Share error messages and logs for debugging
-
----
-
-## Quick Reference
+## Quick reference (local)
 
 ```bash
-# Setup
+# One-time setup
 ./gem5-sim/scripts/check_compatibility.sh
 ./gem5-sim/scripts/install_model.sh
-
-# Verify
 ./gem5-sim/scripts/test_accelerator.sh
+cd gem5-sim/benchmarks/matrix_multiply && make matrix_multiply_no_printf.arm && cd ../../..
 
-# Build benchmarks
-cd gem5-sim/benchmarks/matrix_multiply && make
-
-# Run simulation
+# Single test run
 ./gem5-sim/scripts/run_simulation.sh --test
 
-# Compare
+# Full comparison (default 4×4)
 ./gem5-sim/scripts/compare_lmul_vs_ieee.sh
 
-# View results
-cat lmul_vs_ieee_comparison/performance_comparison.txt
+# Custom size, then view report
+./gem5-sim/scripts/compare_lmul_vs_ieee.sh --size 64 --pe-rows 4 --pe-cols 4
+cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_64.txt
 ```

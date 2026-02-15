@@ -59,3 +59,6 @@ synthesis/out/*
 # gem5 repository (large, should be cloned separately)
 gem5/
 !gem5/.gitignore
+
+# Local-only cluster scripts (keep locally, do not commit)
+gem5-sim/scripts/sbatch_compare_lmul_vs_ieee.slurm
