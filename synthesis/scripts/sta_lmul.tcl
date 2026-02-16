@@ -2,6 +2,7 @@
 # Static Timing Analysis for L-Mul
 
 # Load library and netlist
+# Paths are relative to workspace root (run from workspace root)
 read_liberty lib/NangateOpenCellLibrary_typical.lib
 read_verilog synthesis/out/lmul_synth.v
 

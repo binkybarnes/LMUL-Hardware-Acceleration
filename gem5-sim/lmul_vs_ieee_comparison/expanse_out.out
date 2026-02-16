@@ -1,0 +1,144 @@
+==========================================
+Compare LMUL vs IEEE (batch job)
+==========================================
+Started: Fri Feb 13 18:59:06 PST 2026
+Node: exp-2-01
+gem5-sim dir: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim
+Repo root: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration
+Container: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/../../../esolares/lmul_accel.sif
+==========================================
+Using matrix_multiply_no_printf benchmark (avoids syscall 403)
+Debug: Output directories created
+  LMUL: lmul_vs_ieee_comparison/lmul
+  IEEE: lmul_vs_ieee_comparison/ieee
+==========================================
+LMUL Accelerator vs Native IEEE BF16 (CPU)
+==========================================
+Matrix Size: 64x64
+PE Array: 4x4
+Output: lmul_vs_ieee_comparison
+==========================================
+
+Step 1: Running LMUL accelerator simulation...
+  This may take a few minutes...
+  Command: /LMUL-Hardware-Acceleration/workspace/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /LMUL-Hardware-Acceleration/workspace/gem5-sim/configs/lmul_system.py ...
+
+✓ LMUL simulation complete (stats generated)
+
+Step 2: Running Native IEEE BF16 (CPU) simulation...
+  This uses CPU for standard IEEE multiplication (not accelerator)
+  This may take a few minutes...
+
+✓ IEEE simulation complete (stats generated)
+
+Step 3: Correctness validation (LMUL vs IEEE result matrices)...
+  Skipped (no result.bin in one or both runs)
+  Result files are written when using matrix_multiply_no_printf with output filename.
+
+Step 4: Comparing performance metrics...
+  Running comparison...
+✓ Performance comparison complete
+
+Loading LMUL stats from: lmul_vs_ieee_comparison/lmul/stats.txt
+Loading IEEE stats from: lmul_vs_ieee_comparison/ieee/stats.txt
+
+======================================================================
+Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
+======================================================================
+
+Metric                         LMUL                 IEEE                
+----------------------------------------------------------------------
+Simulation Time (s)            0.015466             0.202350            
+  → Speedup: 13.08x
+CPU Cycles                     30,931,495           404,699,908         
+  → Speedup: 13.08x
+Instructions                   203,652              2,825,809           
+CPI                            151.8729             143.2148            
+  → Improvement: 0.94x
+IPC                            0.006584             0.006983            
+  → Improvement: 0.94x
+
+DRAM energy (µJ)               17784701.20          239132886.39        
+  → DRAM energy ratio (IEEE/LMUL): 13.45x (>1 = LMUL used less)
+DRAM avg power (mW)            1149.94              1181.78             
+  (CPU and accelerator energy require power models; not in default gem5 SE)
+
+
+Accelerator Metrics (summary) 
+----------------------------------------------------------------------
+Numcompletions                 1                    0                   
+Numstarts                      1                    0                   
+Numreads                       4130                 0                   
+Numwrites                      12296                0                   
+Totalcycles                    16460                0                   
+Totalops                       262144               0                   
+Oplatency::Mean                8230400              nan                 
+Oplatency::Gmean               8230400.0            nan                 
+Oplatency::Samples             1                    0                   
+02931E+06                      0                    N/A                 
+04858E+06                      0                    N/A                 
+07789E+06                      0                    N/A                 
+09715E+06                      0                    N/A                 
+12646E+06                      0                    N/A                 
+14573E+06                      0                    N/A                 
+1943E+06                       0                    N/A                 
+24288E+06                      0                    N/A                 
+29146E+06                      0                    N/A                 
+31072E+06                      0                    N/A                 
+34003E+06                      0                    N/A                 
+3593E+06                       0                    N/A                 
+38861E+06                      1                    N/A                 
+40787E+06                      0                    N/A                 
+45645E+06                      0                    N/A                 
+50502E+06                      0                    N/A                 
+5536E+06                       0                    N/A                 
+57286E+06                      0                    N/A                 
+60218E+06                      0                    N/A                 
+62144E+06                      0                    N/A                 
+67002E+06                      0                    N/A                 
+71859E+06                      0                    N/A                 
+76717E+06                      0                    N/A                 
+81574E+06                      0                    N/A                 
+83501E+06                      0                    N/A                 
+86432E+06                      0                    N/A                 
+88358E+06                      0                    N/A                 
+93216E+06                      0                    N/A                 
+98074E+06                      0                    N/A                 
+======================================================================
+
+
+==========================================
+Comparison Complete!
+==========================================
+Results saved to: lmul_vs_ieee_comparison/
+
+Files:
+  - LMUL stats: lmul_vs_ieee_comparison/lmul/stats.txt
+  - IEEE stats: lmul_vs_ieee_comparison/ieee/stats.txt
+  - Performance comparison: lmul_vs_ieee_comparison/performance_comparison_64.txt
+
+Next Steps:
+===========
+
+1. View performance comparison:
+   cat lmul_vs_ieee_comparison/performance_comparison_64.txt
+
+2. Re-run correctness check (if result.bin present):
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/compare_result_binaries.py lmul_vs_ieee_comparison/lmul lmul_vs_ieee_comparison/ieee
+
+3. Compare stats manually:
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/compare_metrics.py lmul_vs_ieee_comparison/lmul/stats.txt lmul_vs_ieee_comparison/ieee/stats.txt
+
+4. View simulation logs:
+   tail -50 lmul_vs_ieee_comparison/lmul/simulation.log
+   tail -50 lmul_vs_ieee_comparison/ieee/simulation.log
+
+5. Extract detailed metrics:
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/extract_stats.py lmul_vs_ieee_comparison/lmul/stats.txt
+   python3 /LMUL-Hardware-Acceleration/workspace/gem5-sim/scripts/extract_stats.py lmul_vs_ieee_comparison/ieee/stats.txt
+
+==========================================
+
+==========================================
+Finished: Fri Feb 13 18:59:20 PST 2026
+==========================================

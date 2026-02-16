@@ -1,0 +1,24 @@
+// Dev container configuration for gem5 testing
+// Use this when you want to run gem5 simulations
+{
+	"name": "gem5-test-container",
+	"build": {
+		"context": "..",
+		"dockerfile": "../Dockerfile.gem5-test"
+	},
+	
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter"
+			]
+		}
+	},
+	
+	// Mount workspace
+	"workspaceFolder": "/workspace",
+	
+	// Forward ports if needed for visualization
+	"forwardPorts": [8888]
+}

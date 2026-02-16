@@ -1,0 +1,41 @@
+# synthesis/scripts/synth_pe_array_lmul.ys
+# Synthesis script for L-Mul PE Array (4x4 = 16 multipliers)
+
+# Load standard cell library
+read_liberty -lib lib/NangateOpenCellLibrary_typical.lib
+
+# Read RTL files
+read_verilog rtl/lmul_bf16.v
+read_verilog synthesis/rtl/pe_array_simple.v
+
+# Set top module with L-Mul parameter
+hierarchy -check -top pe_array_simple -chparam USE_LMUL 1
+
+# Generic synthesis steps
+proc;      # Process procedures
+opt;       # Optimize
+fsm;       # Optimize finite state machines
+opt;       # Optimize again
+memory;    # Optimize memories
+opt;       # Final optimization
+flatten;   # Flatten hierarchy for ABC mapping
+
+# Map flip-flops to library cells
+dfflibmap -liberty lib/NangateOpenCellLibrary_typical.lib
+
+# Use techmap to convert generic cells before ABC
+techmap
+
+# Map combinational logic to standard cells using ABC
+# -D 2.0 means target clock period of 2ns (500 MHz)
+abc -liberty lib/NangateOpenCellLibrary_typical.lib -D 2.0
+
+# Final optimizations
+opt;
+clean;
+
+# Print statistics (area, cell count)
+stat -liberty lib/NangateOpenCellLibrary_typical.lib
+
+# Write gate-level netlist
+write_verilog -noattr synthesis/out/pe_array_lmul_synth.v

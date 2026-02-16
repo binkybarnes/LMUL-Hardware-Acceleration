@@ -2,12 +2,39 @@
 
 Import('*')
 
-# Compile C++ source files
-Source('lmul_accelerator.cc')
+# Guard to ensure we only add sources once
+# Use file-based guard (works even if SConscript executed in separate contexts)
+import os
+sources_guard_file = 'lmul_accel_sources_added.flag'
+if not os.path.exists(sources_guard_file):
+    # Compile C++ source files
+    Source('lmul_accelerator.cc')
+    # Create guard file to prevent duplicate Source() calls
+    open(sources_guard_file, 'w').close()
 
 # Include Python configuration
-SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+# Use a file-based guard to prevent duplicate SimObject registration
+# This works even if SConscript is executed in separate Python contexts
+import os
+guard_file = 'lmul_accel_registered.flag'
+if not os.path.exists(guard_file):
+    SimObject('LMulAccelerator.py', sim_objects=['LMulAccelerator'])
+    # Create guard file to prevent duplicate registration
+    open(guard_file, 'w').close()
 
 # Debug flags for this device
-DebugFlag('LMulAccel', "LMUL Accelerator operations")
-DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")
+try:
+    DebugFlag('LMulAccel', "LMUL Accelerator operations")
+except AttributeError as e:
+    if 'already specified' in str(e):
+        pass
+    else:
+        raise
+
+try:
+    DebugFlag('LMulAccelVerbose', "Detailed LMUL Accelerator operations")
+except AttributeError as e:
+    if 'already specified' in str(e):
+        pass
+    else:
+        raise

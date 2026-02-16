@@ -11,6 +11,9 @@ m5out*/
 *.trace
 *.out
 
+# Datasets (downloaded locally / on HPC shared storage)
+datasets/
+
 # IDE
 .vscode/
 .idea/

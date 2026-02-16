@@ -52,7 +52,6 @@ class LMulAccelerator : public BasicPioDevice
     const uint32_t peArrayCols;      // PE array cols (e.g., 4)
     const Tick computeLatency;       // Cycles per PE operation
     const Tick memoryLatency;        // Memory access latency
-    const bool useLMul;              // true=LMUL, false=IEEE BF16
     
     // Register map (memory-mapped I/O)
     enum Registers {
@@ -68,7 +67,11 @@ class LMulAccelerator : public BasicPioDevice
         REG_CYCLES      = 0x24,  // Cycle counter
         REG_OPS_COUNT   = 0x28,  // Operations counter
         REG_ERROR       = 0x2C,  // Error register
-        REG_SIZE        = 0x30   // Total register space
+        REG_RESULT_IDX  = 0x30,  // Result readback: element index
+        REG_RESULT_DATA = 0x34,  // Result readback: element data (BF16)
+        REG_A_STREAM    = 0x38,  // Stream input A element (lower 16b)
+        REG_B_STREAM    = 0x3C,  // Stream input B element (lower 16b)
+        REG_SIZE        = 0x40   // Total register space
     };
 
     // Control register bits
@@ -100,6 +103,7 @@ class LMulAccelerator : public BasicPioDevice
         uint32_t cycles;
         uint32_t opsCount;
         uint32_t error;
+        uint32_t resultIdx;  // For result readback
     } state;
 
     // Statistics
@@ -121,12 +125,16 @@ class LMulAccelerator : public BasicPioDevice
         Tick startTick;
         uint32_t m, n, p;
         Addr aAddr, bAddr, cAddr;
+        bool useStreamedInputs = false;
         std::vector<uint16_t> matrixA;
         std::vector<uint16_t> matrixB;
         std::vector<uint16_t> matrixC;
     };
     
     ComputeJob *currentJob;
+    std::vector<uint16_t> lastResult;  // Completed result buffer for MMIO readback
+    std::vector<uint16_t> stagedA;      // Input A streamed over MMIO
+    std::vector<uint16_t> stagedB;      // Input B streamed over MMIO
 
     // Event for async computation completion
     EventFunctionWrapper computeEvent;
@@ -138,7 +146,6 @@ class LMulAccelerator : public BasicPioDevice
     
     // BF16 operations
     uint16_t lmulBF16(uint16_t a, uint16_t b);
-    uint16_t ieeeBF16(uint16_t a, uint16_t b);
     float bf16ToFloat(uint16_t bf16);
     uint16_t floatToBF16(float f);
     

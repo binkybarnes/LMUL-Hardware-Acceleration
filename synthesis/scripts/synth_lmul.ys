@@ -2,6 +2,7 @@
 # Synthesis script for L-Mul multiplier
 
 # Load standard cell library (Nangate 45nm)
+# Path is relative to workspace root (run from workspace root)
 read_liberty -lib lib/NangateOpenCellLibrary_typical.lib
 
 # Read your RTL files

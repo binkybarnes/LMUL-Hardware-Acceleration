@@ -66,33 +66,9 @@ def lmul_bits(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     #Convert back to float32 by restoring 16 LSBs as zeros
     result_bits_f32 = result_bits_bf16 << 16
     result = result_bits_f32.view(torch.float32)
-    #--------------------------------
     #bias bitshift
     result = result + (result / (1 << 5)) + (result / (1 << 6))
     #Handle zeros
     result = torch.where(zero_mask, torch.zeros_like(result), result)
    
     return result 
-
-@torch.compile
-def lmul_matmul(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-    """
-    LMUL-based matrix multiplication.
-
-    Behaves like torch.matmul:
-      a: (..., M, K)
-      b: (..., K, N)
-      out: (..., M, N)
-    """
-    # Ensure float tensors
-    a = a.to(torch.float32)
-    b = b.to(torch.float32)
-    # a -> (..., M, K, 1)
-    # b -> (..., 1, K, N)
-    a_exp = a.unsqueeze(-1)
-    b_exp = b.unsqueeze(-3)
-    #Elementwise LMUL "multiply"
-    prod = lmul_bits(a_exp, b_exp) 
-    # Reduction over K 
-    out = prod.sum(dim=-2)            
-    return out

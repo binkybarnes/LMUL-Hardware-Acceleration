@@ -1,0 +1,67 @@
+Loading LMUL stats from: lmul_vs_ieee_comparison/lmul/stats.txt
+Loading IEEE stats from: lmul_vs_ieee_comparison/ieee/stats.txt
+
+======================================================================
+Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
+======================================================================
+
+Metric                         LMUL                 IEEE                
+----------------------------------------------------------------------
+Simulation Time (s)            0.015168             0.202052            
+  → Speedup: 13.32x
+CPU Cycles                     30,336,365           404,104,601         
+  → Speedup: 13.32x
+Instructions                   199,463              2,821,620           
+CPI                            152.0848             143.2169            
+  → Improvement: 0.94x
+IPC                            0.006575             0.006982            
+  → Improvement: 0.94x
+
+DRAM energy (µJ)               17421302.50          238766990.21        
+  → DRAM energy ratio (IEEE/LMUL): 13.71x (>1 = LMUL used less)
+DRAM avg power (mW)            1148.54              1181.71             
+  (CPU and accelerator energy require power models; not in default gem5 SE)
+
+
+Accelerator Metrics (summary) 
+----------------------------------------------------------------------
+Numcompletions                 1                    0                   
+Numstarts                      1                    0                   
+Numreads                       4130                 0                   
+Numwrites                      12296                0                   
+Totalcycles                    16460                0                   
+Totalops                       262144               0                   
+Oplatency::Mean                8230400              nan                 
+Oplatency::Gmean               8230400.0            nan                 
+Oplatency::Samples             1                    0                   
+02931E+06                      0                    N/A                 
+04858E+06                      0                    N/A                 
+07789E+06                      0                    N/A                 
+09715E+06                      0                    N/A                 
+12646E+06                      0                    N/A                 
+14573E+06                      0                    N/A                 
+1943E+06                       0                    N/A                 
+24288E+06                      0                    N/A                 
+29146E+06                      0                    N/A                 
+31072E+06                      0                    N/A                 
+34003E+06                      0                    N/A                 
+3593E+06                       0                    N/A                 
+38861E+06                      1                    N/A                 
+40787E+06                      0                    N/A                 
+45645E+06                      0                    N/A                 
+50502E+06                      0                    N/A                 
+5536E+06                       0                    N/A                 
+57286E+06                      0                    N/A                 
+60218E+06                      0                    N/A                 
+62144E+06                      0                    N/A                 
+67002E+06                      0                    N/A                 
+71859E+06                      0                    N/A                 
+76717E+06                      0                    N/A                 
+81574E+06                      0                    N/A                 
+83501E+06                      0                    N/A                 
+86432E+06                      0                    N/A                 
+88358E+06                      0                    N/A                 
+93216E+06                      0                    N/A                 
+98074E+06                      0                    N/A                 
+======================================================================
+

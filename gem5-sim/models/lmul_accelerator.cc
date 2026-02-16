@@ -21,7 +21,6 @@ LMulAccelerator::LMulAccelerator(const Params &p)
       peArrayCols(p.pe_array_cols),
       computeLatency(p.compute_latency),
       memoryLatency(p.memory_latency),
-      useLMul(p.use_lmul),
       stats(this),
       currentJob(nullptr),
       computeEvent([this]{ completeComputation(); }, name())
@@ -38,9 +37,10 @@ LMulAccelerator::LMulAccelerator(const Params &p)
     state.cycles = 0;
     state.opsCount = 0;
     state.error = 0;
+    state.resultIdx = 0;
 
-    DPRINTF(LMulAccel, "LMulAccelerator created: PE=%dx%d, LMUL=%d\n",
-            peArrayRows, peArrayCols, useLMul);
+    DPRINTF(LMulAccel, "LMulAccelerator created: PE=%dx%d\n",
+            peArrayRows, peArrayCols);
 }
 
 LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
@@ -66,9 +66,16 @@ LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
 Tick
 LMulAccelerator::read(PacketPtr pkt)
 {
-    assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+    Addr pkt_addr = pkt->getAddr();
+    if (pkt_addr < pioAddr || pkt_addr >= pioAddr + pioSize) {
+        warn("LMulAccelerator::read: Address 0x%x out of range [0x%x, 0x%x)\n",
+             pkt_addr, pioAddr, pioAddr + pioSize);
+        pkt->makeResponse();
+        pkt->setUintX(0, ByteOrder::little);
+        return pioDelay;
+    }
     
-    Addr offset = pkt->getAddr() - pioAddr;
+    Addr offset = pkt_addr - pioAddr;
     uint32_t value = 0;
 
     // Read appropriate register
@@ -109,12 +116,39 @@ LMulAccelerator::read(PacketPtr pkt)
         case REG_ERROR:
             value = state.error;
             break;
+        case REG_RESULT_IDX:
+            value = state.resultIdx;
+            break;
+        case REG_RESULT_DATA:
+            // Read result element at current index
+            if (currentJob && !currentJob->matrixC.empty()) {
+                if (state.resultIdx < currentJob->matrixC.size()) {
+                    value = currentJob->matrixC[state.resultIdx];
+                } else {
+                    value = 0;
+                    warn("LMulAccelerator: Result index %d out of range (max %d)\n",
+                         state.resultIdx, currentJob->matrixC.size() - 1);
+                }
+            } else if (!lastResult.empty()) {
+                if (state.resultIdx < lastResult.size()) {
+                    value = lastResult[state.resultIdx];
+                } else {
+                    value = 0;
+                    warn("LMulAccelerator: Result index %d out of range (max %d)\n",
+                         state.resultIdx, lastResult.size() - 1);
+                }
+            } else {
+                value = 0;
+            }
+            break;
         default:
             warn("LMulAccelerator: Read from invalid offset 0x%x\n", offset);
             value = 0;
     }
 
-    pkt->setUintX(value);
+    // Convert request to response (required by PioPort)
+    pkt->makeResponse();
+    pkt->setUintX(value, ByteOrder::little);
     stats.numReads++;
 
     DPRINTF(LMulAccel, "Read offset=0x%x, value=0x%x\n", offset, value);
@@ -125,10 +159,17 @@ LMulAccelerator::read(PacketPtr pkt)
 Tick
 LMulAccelerator::write(PacketPtr pkt)
 {
-    assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+    Addr pkt_addr = pkt->getAddr();
+    if (pkt_addr < pioAddr || pkt_addr >= pioAddr + pioSize) {
+        warn("LMulAccelerator::write: Address 0x%x out of range [0x%x, 0x%x)\n",
+             pkt_addr, pioAddr, pioAddr + pioSize);
+        pkt->makeResponse();
+        return pioDelay;
+    }
     
-    Addr offset = pkt->getAddr() - pioAddr;
-    uint32_t value = pkt->getUintX();
+    Addr offset = pkt_addr - pioAddr;
+    // Read value from packet using little-endian byte order
+    uint32_t value = pkt->getUintX(ByteOrder::little);
 
     DPRINTF(LMulAccel, "Write offset=0x%x, value=0x%x\n", offset, value);
 
@@ -144,6 +185,10 @@ LMulAccelerator::write(PacketPtr pkt)
                 state.cycles = 0;
                 state.opsCount = 0;
                 state.error = 0;
+                state.resultIdx = 0;
+                lastResult.clear();
+                stagedA.clear();
+                stagedB.clear();
             }
             break;
             
@@ -161,21 +206,63 @@ LMulAccelerator::write(PacketPtr pkt)
             
         case REG_M_SIZE:
             state.mSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
             
         case REG_N_SIZE:
             state.nSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
             
         case REG_P_SIZE:
             state.pSize = value;
+            stagedA.clear();
+            stagedB.clear();
             break;
+            
+        case REG_RESULT_IDX:
+            state.resultIdx = value;
+            break;
+
+        case REG_A_STREAM: {
+            const uint64_t expected = static_cast<uint64_t>(state.mSize) * state.nSize;
+            if (expected == 0) {
+                warn("LMulAccelerator: A stream write before dimensions configured\n");
+            } else if (stagedA.size() >= expected) {
+                warn("LMulAccelerator: A stream overflow (%llu >= %llu)\n",
+                     static_cast<unsigned long long>(stagedA.size()),
+                     static_cast<unsigned long long>(expected));
+                state.error = 3;
+            } else {
+                stagedA.push_back(static_cast<uint16_t>(value & 0xFFFFu));
+            }
+            break;
+        }
+
+        case REG_B_STREAM: {
+            const uint64_t expected = static_cast<uint64_t>(state.nSize) * state.pSize;
+            if (expected == 0) {
+                warn("LMulAccelerator: B stream write before dimensions configured\n");
+            } else if (stagedB.size() >= expected) {
+                warn("LMulAccelerator: B stream overflow (%llu >= %llu)\n",
+                     static_cast<unsigned long long>(stagedB.size()),
+                     static_cast<unsigned long long>(expected));
+                state.error = 4;
+            } else {
+                stagedB.push_back(static_cast<uint16_t>(value & 0xFFFFu));
+            }
+            break;
+        }
             
         default:
             warn("LMulAccelerator: Write to read-only or invalid offset 0x%x\n",
                  offset);
     }
 
+    // Convert request to response (required by PioPort)
+    pkt->makeResponse();
     stats.numWrites++;
     return pioDelay;
 }
@@ -215,9 +302,32 @@ LMulAccelerator::startComputation()
     currentJob->matrixB.resize(state.nSize * state.pSize);
     currentJob->matrixC.resize(state.mSize * state.pSize, 0);
 
+    // If benchmark streamed inputs over MMIO, use them directly.
+    const uint64_t expectedA = static_cast<uint64_t>(state.mSize) * state.nSize;
+    const uint64_t expectedB = static_cast<uint64_t>(state.nSize) * state.pSize;
+    if (stagedA.size() == expectedA && stagedB.size() == expectedB) {
+        currentJob->matrixA = stagedA;
+        currentJob->matrixB = stagedB;
+        currentJob->useStreamedInputs = true;
+        DPRINTF(LMulAccel, "Using streamed inputs (A=%llu, B=%llu)\n",
+                static_cast<unsigned long long>(stagedA.size()),
+                static_cast<unsigned long long>(stagedB.size()));
+    } else {
+        currentJob->useStreamedInputs = false;
+        DPRINTF(LMulAccel,
+                "No full streamed inputs (A=%llu/%llu, B=%llu/%llu), using fallback pattern\n",
+                static_cast<unsigned long long>(stagedA.size()),
+                static_cast<unsigned long long>(expectedA),
+                static_cast<unsigned long long>(stagedB.size()),
+                static_cast<unsigned long long>(expectedB));
+    }
+
     // Update state
     state.status = STAT_BUSY;
     state.cycles = 0;
+    lastResult.clear();
+    stagedA.clear();
+    stagedB.clear();
     stats.numStarts++;
 
     // Schedule computation completion
@@ -255,14 +365,12 @@ LMulAccelerator::completeComputation()
     stats.totalOps += totalOps;
     stats.opLatency.sample(latency);
 
-    if (state.cycles > 0) {
-        DPRINTF(LMulAccel, "Completed: %d ops in %d cycles (%.2f GOPS)\n",
-                totalOps, state.cycles,
-                (double)totalOps / state.cycles);
-    } else {
-        DPRINTF(LMulAccel, "Completed: %d ops in %d cycles\n",
-                totalOps, state.cycles);
-    }
+    DPRINTF(LMulAccel, "Completed: %d ops in %d cycles (%.2f GOPS)\n",
+            totalOps, state.cycles, 
+            (double)totalOps / state.cycles);
+
+    // Keep completed results available for MMIO readback after job teardown.
+    lastResult = currentJob->matrixC;
 
     // Clean up
     delete currentJob;
@@ -283,13 +391,27 @@ LMulAccelerator::processCompute()
     // B: N x P
     // C: M x P
 
-    // For functional simulation, assume data is already available
-    // In reality, we'd DMA this data
-    
-    // For now, use dummy data (all 1.0 in BF16)
-    uint16_t one_bf16 = floatToBF16(1.0f);
-    std::fill(currentJob->matrixA.begin(), currentJob->matrixA.end(), one_bf16);
-    std::fill(currentJob->matrixB.begin(), currentJob->matrixB.end(), one_bf16);
+    if (!currentJob->useStreamedInputs) {
+        // TODO: Implement true DMA path from aAddr/bAddr/cAddr.
+        // Fallback for compatibility when no streamed inputs are provided.
+        for (uint32_t i = 0; i < currentJob->m; i++) {
+            for (uint32_t j = 0; j < currentJob->n; j++) {
+                uint32_t idx = i * currentJob->n + j;
+                float val = ((float)(idx % 10) / 10.0f) + 0.5f;
+                currentJob->matrixA[i * currentJob->n + j] = floatToBF16(val);
+            }
+        }
+
+        for (uint32_t i = 0; i < currentJob->n; i++) {
+            for (uint32_t j = 0; j < currentJob->p; j++) {
+                uint32_t idx = i * currentJob->p + j;
+                float val = ((float)(idx % 10) / 10.0f) + 0.5f;
+                currentJob->matrixB[i * currentJob->p + j] = floatToBF16(val);
+            }
+        }
+
+        DPRINTF(LMulAccel, "Using fallback test pattern (no streamed inputs)\n");
+    }
 
     // Perform multiplication
     for (uint32_t i = 0; i < currentJob->m; i++) {
@@ -300,11 +422,8 @@ LMulAccelerator::processCompute()
                 uint16_t b = currentJob->matrixB[k * currentJob->p + j];
                 uint16_t prod;
                 
-                if (useLMul) {
-                    prod = lmulBF16(a, b);
-                } else {
-                    prod = ieeeBF16(a, b);
-                }
+                // LMUL accelerator only does LMUL multiplication
+                prod = lmulBF16(a, b);
                 
                 sum += bf16ToFloat(prod);
             }
@@ -385,15 +504,6 @@ LMulAccelerator::lmulBF16(uint16_t a, uint16_t b)
     if (result_fld == 0) result_sign = 0;
     
     return (result_sign << 15) | result_fld;
-}
-
-uint16_t
-LMulAccelerator::ieeeBF16(uint16_t a, uint16_t b)
-{
-    // Convert to float, multiply, convert back
-    float fa = bf16ToFloat(a);
-    float fb = bf16ToFloat(b);
-    return floatToBF16(fa * fb);
 }
 
 float

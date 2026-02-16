@@ -1,0 +1,106 @@
+Loading LMUL stats from: lmul_vs_ieee_comparison/lmul/stats.txt
+Loading IEEE stats from: lmul_vs_ieee_comparison/ieee/stats.txt
+
+======================================================================
+Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
+======================================================================
+
+Metric                         LMUL                 IEEE                
+----------------------------------------------------------------------
+Simulation Time (s)            0.000547             0.000608            
+  → Speedup: 1.11x
+CPU Cycles                     1,094,673            1,216,650           
+  → Speedup: 1.11x
+Instructions                   8,158                9,086               
+CPI                            134.0690             133.8007            
+  → Improvement: 1.00x
+IPC                            0.007459             0.007474            
+  → Improvement: 1.00x
+
+DRAM energy (µJ)               667250.08            742730.94           
+  → DRAM energy ratio (IEEE/LMUL): 1.11x (>1 = LMUL used less)
+DRAM avg power (mW)            1219.09              1220.94             
+  (CPU and accelerator energy require power models; not in default gem5 SE)
+
+
+Accelerator Metrics           
+----------------------------------------------------------------------
+Numcompletions                 1                    0                   
+Numreads                       1                    0                   
+Numstarts                      1                    0                   
+Numwrites                      8                    0                   
+Oplatency::0                   N/A                  0                   
+Oplatency::0-127               0                    N/A                 
+Oplatency::1                   N/A                  0                   
+Oplatency::10                  N/A                  0                   
+Oplatency::1024-1151           0                    N/A                 
+Oplatency::11                  N/A                  0                   
+Oplatency::1152-1279           0                    N/A                 
+Oplatency::12                  N/A                  0                   
+Oplatency::128-255             0                    N/A                 
+Oplatency::1280-1407           0                    N/A                 
+Oplatency::13                  N/A                  0                   
+Oplatency::14                  N/A                  0                   
+Oplatency::1408-1535           0                    N/A                 
+Oplatency::15                  N/A                  0                   
+Oplatency::1536-1663           0                    N/A                 
+Oplatency::16                  N/A                  0                   
+Oplatency::1664-1791           0                    N/A                 
+Oplatency::17                  N/A                  0                   
+Oplatency::1792-1919           0                    N/A                 
+Oplatency::18                  N/A                  0                   
+Oplatency::19                  N/A                  0                   
+Oplatency::1920-2047           0                    N/A                 
+Oplatency::2                   N/A                  0                   
+Oplatency::20                  N/A                  0                   
+Oplatency::2048-2175           1                    N/A                 
+Oplatency::21                  N/A                  0                   
+Oplatency::2176-2303           0                    N/A                 
+Oplatency::22                  N/A                  0                   
+Oplatency::23                  N/A                  0                   
+Oplatency::2304-2431           0                    N/A                 
+Oplatency::24                  N/A                  0                   
+Oplatency::2432-2559           0                    N/A                 
+Oplatency::25                  N/A                  0                   
+Oplatency::256-383             0                    N/A                 
+Oplatency::2560-2687           0                    N/A                 
+Oplatency::26                  N/A                  0                   
+Oplatency::2688-2815           0                    N/A                 
+Oplatency::27                  N/A                  0                   
+Oplatency::28                  N/A                  0                   
+Oplatency::2816-2943           0                    N/A                 
+Oplatency::29                  N/A                  0                   
+Oplatency::2944-3071           0                    N/A                 
+Oplatency::3                   N/A                  0                   
+Oplatency::30                  N/A                  0                   
+Oplatency::3072-3199           0                    N/A                 
+Oplatency::31                  N/A                  0                   
+Oplatency::3200-3327           0                    N/A                 
+Oplatency::3328-3455           0                    N/A                 
+Oplatency::3456-3583           0                    N/A                 
+Oplatency::3584-3711           0                    N/A                 
+Oplatency::3712-3839           0                    N/A                 
+Oplatency::384-511             0                    N/A                 
+Oplatency::3840-3967           0                    N/A                 
+Oplatency::3968-4095           0                    N/A                 
+Oplatency::4                   N/A                  0                   
+Oplatency::5                   N/A                  0                   
+Oplatency::512-639             0                    N/A                 
+Oplatency::6                   N/A                  0                   
+Oplatency::640-767             0                    N/A                 
+Oplatency::7                   N/A                  0                   
+Oplatency::768-895             0                    N/A                 
+Oplatency::8                   N/A                  0                   
+Oplatency::896-1023            0                    N/A                 
+Oplatency::9                   N/A                  0                   
+Oplatency::Gmean               2100                 nan                 
+Oplatency::Mean                2100                 nan                 
+Oplatency::Samples             1                    0                   
+Oplatency::Stdev               nan                  nan                 
+Oplatency::Total               1                    0                   
+Pio                            36                   N/A                 
+Pwrstateresidencyticks::Undefined 547336500            608325000           
+Totalcycles                    4                    0                   
+Totalops                       64                   0                   
+======================================================================
+

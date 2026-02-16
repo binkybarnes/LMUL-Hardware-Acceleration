@@ -5,6 +5,11 @@ sim_build/
 *.fst
 *.out
 
+# Compiled binaries (architecture-specific)
+*.arm
+*.x86
+*.o
+
 # Simulation files
 sim_work/
 *.xml
@@ -46,35 +51,14 @@ synthesis/out/*
 !synthesis/out/.gitkeep
 !synthesis/out/README.md
 
-# .pt's (these exceed 100MB)
-*.ptNNs/core
-NNs/core
-*.pt
-*.pth
-*.bin
-
-# Vivado files (Edgar's logs)
-Vivado/lmul_rtl/.Xil
-Vivado/lmul_rtl/lmul_rtl.cache
-Vivado/lmul_rtl/lmul_rtl.hw
-Vivado/lmul_rtl/lmul_rtl.ip_user_files
-Vivado/lmul_rtl/vivado.jou
-Vivado/lmul_rtl/vivado.log
-Vivado/lmul_rtl/dfx_runtime.txt
-
-Vivado/lmul_tb/.Xil
-Vivado/lmul_tb/lmul_tb.cache
-Vivado/lmul_tb/lmul_tb.hw
-Vivado/lmul_tb/lmul_tb.ip_user_files
-Vivado/lmul_tb/vivado.jou
-Vivado/lmul_tb/vivado.log
-Vivado/lmul_tb/dfx_runtime.txt
-Vivado/lmul_tb/lmul_tb.sim/sim_1/behav/xsim/tb_lmul_behav.wdb
-Vivado/lmul_tb/generate_mnist_input.ipynb
-Vivado/lmul_tb/generate_weights.ipynb
-Vivado/Xilinx.lic
-Vivado/Xilinx_2.lic
+# Documentation files (ignore .md files except README.md)
+*.md
+!README.md
+!**/README.md
 
 # gem5 repository (large, should be cloned separately)
 gem5/
 !gem5/.gitignore
+
+# Local-only cluster scripts (keep locally, do not commit)
+gem5-sim/scripts/sbatch_compare_lmul_vs_ieee.slurm
