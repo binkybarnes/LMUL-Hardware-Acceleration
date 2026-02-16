@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssh-client \
     yosys \
     opensta \
-    # gem5 dependencies
     m4 scons \
     zlib1g zlib1g-dev \
     libprotobuf-dev protobuf-compiler libprotoc-dev \

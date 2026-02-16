@@ -2,16 +2,16 @@
 
 ## Setup
 
-Install Docker, clone the repository, and choose a setup method
+Install Docker, clone the repository, and choose a setup method. The image is built from the root `Dockerfile` and includes dependencies for RTL/synthesis, notebooks, and **gem5-sim** (build tools for the gem5 accelerator workflow; see [gem5-sim/README.md](gem5-sim/README.md)).
 
 ### 1) VS Code
 
 - Install Dev Containers extension
-
-- Open a remote window -> Reopen in dev container
+- Open a remote window → Reopen in dev container
 
 ### 2) Terminal
-```
+
+```bash
 docker build -t lmul-dev .
 docker run -it --rm \
   -p 8888:8888 \
@@ -21,6 +21,7 @@ docker run -it --rm \
   jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.password='' \
   --allow-root
 ```
+
 Then open http://localhost:8888
 
 ## Repo Structure
@@ -37,7 +38,7 @@ Then open http://localhost:8888
 
 ### Speed/Accuracy Unit Tests (`sim/`)
 
-Contains reproducible notebooks (after container setup) for speed an accuracy analyses.
+Contains reproducible notebooks (after container setup) for speed and accuracy analyses.
 
 - `sim/lmul_accuracy_tester.ipynb`
   - Compares outputs between verilog and software to visualize consistency across implementations.
@@ -71,7 +72,7 @@ Contains reproducible notebooks (after container setup) for LMUL accuracy analys
 - `transformerLMUL.ipynb`
   - Jupyter Notebook for testing NanoGPT scripts and perplexity analysis. 
 
-### gem5 Full-System Simulation (`gem5/`)
+### gem5 Full-System Simulation (`gem5-sim/`)
 
 Complete gem5 integration for full-system simulation of LMUL accelerator in realistic system contexts.
 
@@ -82,19 +83,12 @@ Complete gem5 integration for full-system simulation of LMUL accelerator in real
 - End-to-end application performance
 
 **Key Components**:
-- `gem5/models/` - C++ device model for LMUL accelerator
-- `gem5/configs/` - System configurations (CPU + memory + accelerator)
-- `gem5/benchmarks/` - Test programs (matrix multiply, NN layers, etc.)
-- `gem5/scripts/` - Automation scripts for building and running
+- `gem5-sim/models/` - C++ device model for LMUL accelerator
+- `gem5-sim/configs/` - System configurations (CPU + memory + accelerator)
+- `gem5-sim/benchmarks/` - Test programs (matrix multiply, NN layers, etc.)
+- `gem5-sim/scripts/` - Automation scripts for building and running
 
-**Quick Start**:
-```bash
-# See detailed guide
-cat gem5/GETTING_STARTED.md
-
-# Or quick start
-cat gem5/QUICKSTART.md
-```
+**Quick Start**: See [gem5-sim/README.md](gem5-sim/README.md) for prerequisites, setup, and workflow.
 
 **Features**:
 - Memory-mapped accelerator device
