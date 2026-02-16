@@ -68,6 +68,8 @@ Contains reproducible notebooks (after container setup) for LMUL accuracy analys
   - Script to evaluate perplexity across a validation dataset that doesn't require long lines of context.
 - `NNs/eval_OWT.py`
   - Script to evaluate perplexity across a validation dataset that requires context.
+- `transformerLMUL.ipynb`
+  - Jupyter Notebook for testing NanoGPT scripts and perplexity analysis. 
 
 ### gem5 Full-System Simulation (`gem5/`)
 
