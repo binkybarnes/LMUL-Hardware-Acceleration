@@ -60,6 +60,16 @@ Contains reproducible notebooks (after container setup) for LMUL accuracy analys
   - Compares MLP accuracy performance on LSTM classification between LMUL and FP32 multiplication with numerous datasets, including FashionMNIST, MNIST, SeqMNIST, and KMNIST. Standardizes testing pipeline. 
 - `NNs/LSTM_LMUL_LLM.ipynb`
   - Uses LMUL to generate characters regressively via LSTM.
+- `NNs/model.py`
+  - Definition for NanoGPT models using togglealble LMUL layers
+- `NNs/train_nano.py`
+  - Script to train NanoGPT model
+- `NNs/eval_perplexity.py`
+  - Script to evaluate perplexity across a validation dataset that doesn't require long lines of context.
+- `NNs/eval_OWT.py`
+  - Script to evaluate perplexity across a validation dataset that requires context.
+- `transformerLMUL.ipynb`
+  - Jupyter Notebook for testing NanoGPT scripts and perplexity analysis. 
 
 ### gem5 Full-System Simulation (`gem5/`)
 
