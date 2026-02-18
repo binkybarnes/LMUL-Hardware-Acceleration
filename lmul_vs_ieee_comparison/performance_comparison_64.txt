@@ -1,0 +1,106 @@
+Loading LMUL stats from: lmul_vs_ieee_comparison/lmul/stats.txt
+Loading IEEE stats from: lmul_vs_ieee_comparison/ieee/stats.txt
+
+======================================================================
+Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
+======================================================================
+
+Metric                         LMUL                 IEEE                
+----------------------------------------------------------------------
+Simulation Time (s)            0.010000             0.202052            
+  → Speedup: 20.21x
+CPU Cycles                     19,999,590           404,104,806         
+  → Speedup: 20.21x
+Instructions                   142,107              2,821,620           
+CPI                            140.7292             143.2169            
+  → Improvement: 1.02x
+IPC                            0.007106             0.006982            
+  → Improvement: 1.02x
+
+DRAM energy (µJ)               11668881.95          238766998.26        
+  → DRAM energy ratio (IEEE/LMUL): 20.46x (>1 = LMUL used less)
+DRAM avg power (mW)            1166.91              1181.71             
+  (DRAM energy is from gem5; accelerator energy below is a first-order model)
+
+
+Accelerator Metrics (summary) 
+----------------------------------------------------------------------
+Numcompletions                 1                    0                   
+Numstarts                      1                    0                   
+Numreads                       39                   0                   
+Numwrites                      8                    0                   
+Totalcycles                    21525                0                   
+Totalops                       262144               0                   
+Dmareadreqs                    2                    0                   
+Dmawritereqs                   1                    0                   
+Dmareadbytes                   16384                0                   
+Dmawritebytes                  8192                 0                   
+Estimatedcomputeenergyj        0.0                  0                   
+Estimateddmaenergyj            0.0                  0                   
+Estimatedleakageenergyj        0.0                  0                   
+Estimatedtotalenergyj          0.0                  0                   
+Oplatency::Mean                10762500             nan                 
+Oplatency::Gmean               10762500.0           nan                 
+Oplatency::Samples             1                    0                   
+04858E+06                      0                    N/A                 
+04858E+07                      0                    N/A                 
+09715E+06                      0                    N/A                 
+101E+07                        1                    N/A                 
+14573E+06                      0                    N/A                 
+15343E+07                      0                    N/A                 
+1943E+06                       0                    N/A                 
+20586E+07                      0                    N/A                 
+24288E+06                      0                    N/A                 
+25829E+07                      0                    N/A                 
+29146E+06                      0                    N/A                 
+31072E+07                      0                    N/A                 
+34003E+06                      0                    N/A                 
+36315E+07                      0                    N/A                 
+38861E+06                      0                    N/A                 
+41558E+07                      0                    N/A                 
+43718E+06                      0                    N/A                 
+46801E+07                      0                    N/A                 
+52044E+07                      0                    N/A                 
+57286E+06                      0                    N/A                 
+57286E+07                      0                    N/A                 
+62144E+06                      0                    N/A                 
+62529E+07                      0                    N/A                 
+67002E+06                      0                    N/A                 
+67772E+07                      0                    N/A                 
+71859E+06                      0                    N/A                 
+76717E+06                      0                    N/A                 
+81574E+06                      0                    N/A                 
+86432E+06                      0                    N/A                 
+9129E+06                       0                    N/A                 
+96147E+06                      0                    N/A                 
+Avgpriority Lmul Accel::Samples 387.0                N/A                 
+Avg Power Mw                   0.0                  0.0                 
+Bwread::Lmul Accel             1638434              N/A                 
+Bwtotal::Lmul Accel            2457650              N/A                 
+Bwwrite::Lmul Accel            819217               N/A                 
+Bytesread::Lmul Accel          16384                N/A                 
+Byteswritten::Lmul Accel       8192                 N/A                 
+Compute Energy J               0.0                  0                   
+Compute Energy Uj              0.0                  0.0                 
+Dma::Total                     24576                N/A                 
+Dma Energy J                   0.0                  0                   
+Dma Energy Uj                  0.0                  0.0                 
+Leakage Energy J               0.0                  0                   
+Leakage Energy Uj              0.0                  0.0                 
+Numreads::Lmul Accel           258                  N/A                 
+Numwrites::Lmul Accel          129                  N/A                 
+Port                           24576                N/A                 
+Requestorreadaccesses::Lmul Accel 258                  N/A                 
+Requestorreadavglat::Lmul Accel 196073.64            N/A                 
+Requestorreadbytes::Lmul Accel 16384                N/A                 
+Requestorreadrate::Lmul Accel  1638433.5878885516   N/A                 
+Requestorreadtotallat::Lmul Accel 50587000             N/A                 
+Requestorwriteaccesses::Lmul Accel 129                  N/A                 
+Requestorwriteavglat::Lmul Accel 882930.23            N/A                 
+Requestorwritebytes::Lmul Accel 7264                 N/A                 
+Requestorwriterate::Lmul Accel 726414.8915052759    N/A                 
+Requestorwritetotallat::Lmul Accel 113898000            N/A                 
+Total Energy J                 0.0                  0                   
+Total Energy Uj                0.0                  0.0                 
+======================================================================
+
