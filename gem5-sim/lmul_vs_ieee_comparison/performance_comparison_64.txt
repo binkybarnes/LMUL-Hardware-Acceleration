@@ -22,6 +22,12 @@ DRAM energy (µJ)               11668881.95          238766998.26
 DRAM avg power (mW)            1166.91              1181.71             
   (DRAM energy is from gem5; accelerator energy below is a first-order model)
 
+Accel total energy (µJ)        0.143                0.000               
+Accel compute energy (µJ)      0.131                0.000               
+Accel DMA energy (µJ)          0.001                0.000               
+Accel leakage energy (µJ)      0.011                0.000               
+Accel avg power (mW)           0.014                0.000               
+
 
 Accelerator Metrics (summary) 
 ----------------------------------------------------------------------
@@ -35,10 +41,10 @@ Dmareadreqs                    2                    0
 Dmawritereqs                   1                    0                   
 Dmareadbytes                   16384                0                   
 Dmawritebytes                  8192                 0                   
-Estimatedcomputeenergyj        0.0                  0                   
-Estimateddmaenergyj            0.0                  0                   
-Estimatedleakageenergyj        0.0                  0                   
-Estimatedtotalenergyj          0.0                  0                   
+Estimatedcomputeenergyj        1.31072e-07          0.0                 
+Estimateddmaenergyj            1.229e-09            0.0                 
+Estimatedleakageenergyj        1.0763e-08           0.0                 
+Estimatedtotalenergyj          1.43063e-07          0.0                 
 Oplatency::Mean                10762500             nan                 
 Oplatency::Gmean               10762500.0           nan                 
 Oplatency::Samples             1                    0                   
@@ -74,19 +80,19 @@ Oplatency::Samples             1                    0
 9129E+06                       0                    N/A                 
 96147E+06                      0                    N/A                 
 Avgpriority Lmul Accel::Samples 387.0                N/A                 
-Avg Power Mw                   0.0                  0.0                 
+Avg Power Mw                   0.0143063            0.0                 
 Bwread::Lmul Accel             1638434              N/A                 
 Bwtotal::Lmul Accel            2457650              N/A                 
 Bwwrite::Lmul Accel            819217               N/A                 
 Bytesread::Lmul Accel          16384                N/A                 
 Byteswritten::Lmul Accel       8192                 N/A                 
-Compute Energy J               0.0                  0                   
-Compute Energy Uj              0.0                  0.0                 
+Compute Energy J               1.31072e-07          0.0                 
+Compute Energy Uj              0.131072             0.0                 
 Dma::Total                     24576                N/A                 
-Dma Energy J                   0.0                  0                   
-Dma Energy Uj                  0.0                  0.0                 
-Leakage Energy J               0.0                  0                   
-Leakage Energy Uj              0.0                  0.0                 
+Dma Energy J                   1.229e-09            0.0                 
+Dma Energy Uj                  0.001229             0.0                 
+Leakage Energy J               1.0763e-08           0.0                 
+Leakage Energy Uj              0.010763             0.0                 
 Numreads::Lmul Accel           258                  N/A                 
 Numwrites::Lmul Accel          129                  N/A                 
 Port                           24576                N/A                 
@@ -100,7 +106,7 @@ Requestorwriteavglat::Lmul Accel 882930.23            N/A
 Requestorwritebytes::Lmul Accel 7264                 N/A                 
 Requestorwriterate::Lmul Accel 726414.8915052759    N/A                 
 Requestorwritetotallat::Lmul Accel 113898000            N/A                 
-Total Energy J                 0.0                  0                   
-Total Energy Uj                0.0                  0.0                 
+Total Energy J                 1.43063e-07          0.0                 
+Total Energy Uj                0.143063             0.0                 
 ======================================================================
 
