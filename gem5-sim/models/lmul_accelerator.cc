@@ -93,6 +93,12 @@ LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
                "Latency distribution for operations")
 {
     opLatency.init(32);  // 32 bins for histogram
+    // Energy values are often sub-microjoule for small matrices; increase
+    // dump precision so stats.txt does not round them to 0.000000.
+    estimatedComputeEnergyJ.precision(12);
+    estimatedDmaEnergyJ.precision(12);
+    estimatedLeakageEnergyJ.precision(12);
+    estimatedTotalEnergyJ.precision(12);
 }
 
 Tick
