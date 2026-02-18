@@ -29,13 +29,13 @@ def parse_stats(filename):
             if match:
                 name, value = match.groups()
                 try:
-                    # Try to convert to number
-                    if '.' in value:
-                        stats[name] = float(value)
-                    else:
-                        stats[name] = int(value)
+                    # Try integer first, then float (handles scientific notation)
+                    stats[name] = int(value, 0)
                 except ValueError:
-                    stats[name] = value
+                    try:
+                        stats[name] = float(value)
+                    except ValueError:
+                        stats[name] = value
     
     return stats
 
@@ -58,6 +58,24 @@ def extract_key_metrics(stats):
     for key in accel_keys:
         simple_key = key.split('.')[-1]
         metrics[f'accel_{simple_key}'] = stats[key]
+
+    # Estimated accelerator power/energy metrics (if accelerator exports them)
+    accel_total_energy_j = metrics.get('accel_estimatedTotalEnergyJ', 0)
+    accel_compute_energy_j = metrics.get('accel_estimatedComputeEnergyJ', 0)
+    accel_dma_energy_j = metrics.get('accel_estimatedDmaEnergyJ', 0)
+    accel_leakage_energy_j = metrics.get('accel_estimatedLeakageEnergyJ', 0)
+    metrics['accel_total_energy_j'] = accel_total_energy_j
+    metrics['accel_compute_energy_j'] = accel_compute_energy_j
+    metrics['accel_dma_energy_j'] = accel_dma_energy_j
+    metrics['accel_leakage_energy_j'] = accel_leakage_energy_j
+    metrics['accel_total_energy_uJ'] = accel_total_energy_j * 1e6
+    metrics['accel_compute_energy_uJ'] = accel_compute_energy_j * 1e6
+    metrics['accel_dma_energy_uJ'] = accel_dma_energy_j * 1e6
+    metrics['accel_leakage_energy_uJ'] = accel_leakage_energy_j * 1e6
+    metrics['accel_avg_power_mW'] = (
+        (accel_total_energy_j / metrics['sim_seconds']) * 1e3
+        if metrics.get('sim_seconds', 0) > 0 else 0
+    )
     
     # Memory metrics
     metrics['host_memory'] = stats.get('hostMemory', 0)
@@ -85,6 +103,13 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
             ieee_metrics.get('dram_energy_pJ', 0) > 0):
         speedup['dram_energy'] = (ieee_metrics['dram_energy_pJ'] /
                                   lmul_metrics['dram_energy_pJ'])
+
+    if (lmul_metrics.get('accel_total_energy_j', 0) > 0 and
+            ieee_metrics.get('accel_total_energy_j', 0) > 0):
+        speedup['accel_total_energy'] = (
+            ieee_metrics['accel_total_energy_j'] /
+            lmul_metrics['accel_total_energy_j']
+        )
     
     if ieee_metrics['cpu_cycles'] > 0 and lmul_metrics['cpu_cycles'] > 0:
         speedup['cycles'] = ieee_metrics['cpu_cycles'] / lmul_metrics['cpu_cycles']
@@ -125,12 +150,27 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     if 'dram_energy' in speedup:
         lines.append(f"  → DRAM energy ratio (IEEE/LMUL): {speedup['dram_energy']:.2f}x (>1 = LMUL used less)")
     lines.append(f"{'DRAM avg power (mW)':<30s} {lmul_metrics.get('dram_power_mW', 0):<20.2f} {ieee_metrics.get('dram_power_mW', 0):<20.2f}")
-    lines.append("  (CPU and accelerator energy require power models; not in default gem5 SE)")
+    lines.append("  (DRAM energy is from gem5; accelerator energy below is a first-order model)")
+
+    if (lmul_metrics.get('accel_total_energy_j', 0) > 0 or
+            ieee_metrics.get('accel_total_energy_j', 0) > 0):
+        lines.append("")
+        lines.append(f"{'Accel total energy (µJ)':<30s} {lmul_metrics.get('accel_total_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_total_energy_uJ', 0):<20.3f}")
+        if 'accel_total_energy' in speedup:
+            lines.append(f"  → Accel energy ratio (IEEE/LMUL): {speedup['accel_total_energy']:.2f}x (>1 = LMUL used less)")
+        lines.append(f"{'Accel compute energy (µJ)':<30s} {lmul_metrics.get('accel_compute_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_compute_energy_uJ', 0):<20.3f}")
+        lines.append(f"{'Accel DMA energy (µJ)':<30s} {lmul_metrics.get('accel_dma_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_dma_energy_uJ', 0):<20.3f}")
+        lines.append(f"{'Accel leakage energy (µJ)':<30s} {lmul_metrics.get('accel_leakage_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_leakage_energy_uJ', 0):<20.3f}")
+        lines.append(f"{'Accel avg power (mW)':<30s} {lmul_metrics.get('accel_avg_power_mW', 0):<20.3f} {ieee_metrics.get('accel_avg_power_mW', 0):<20.3f}")
     lines.append("")
     # Prefer only key accelerator stats for a readable report (skip opLatency buckets / power_state)
     ACCEL_SUMMARY_KEYS = (
         'accel_numCompletions', 'accel_numStarts', 'accel_numReads', 'accel_numWrites',
         'accel_totalCycles', 'accel_totalOps',
+        'accel_dmaReadReqs', 'accel_dmaWriteReqs',
+        'accel_dmaReadBytes', 'accel_dmaWriteBytes',
+        'accel_estimatedComputeEnergyJ', 'accel_estimatedDmaEnergyJ',
+        'accel_estimatedLeakageEnergyJ', 'accel_estimatedTotalEnergyJ',
         'accel_opLatency::mean', 'accel_opLatency::gmean', 'accel_opLatency::samples',
     )
     lmul_accel = {k: v for k, v in lmul_metrics.items() if k.startswith('accel_')}

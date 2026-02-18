@@ -47,6 +47,7 @@ class LMulSystem(System):
             )
             # Connect accelerator to memory bus
             self.lmul_accel.pio = self.membus.mem_side_ports
+            self.lmul_accel.dma = self.membus.cpu_side_ports
         else:
             self.lmul_accel = None
         

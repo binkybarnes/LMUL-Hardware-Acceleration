@@ -11,7 +11,7 @@
 #include <queue>
 #include <vector>
 
-#include "dev/io_device.hh"
+#include "dev/dma_device.hh"
 #include "params/LMulAccelerator.hh"
 #include "sim/eventq.hh"
 
@@ -30,11 +30,12 @@ namespace gem5
  * - Interrupt on completion
  * - Cycle-accurate timing model
  */
-class LMulAccelerator : public BasicPioDevice
+class LMulAccelerator : public DmaDevice
 {
   public:
     typedef LMulAcceleratorParams Params;
     LMulAccelerator(const Params &p);
+    AddrRangeList getAddrRanges() const override;
 
     /**
      * Read from device registers
@@ -47,11 +48,19 @@ class LMulAccelerator : public BasicPioDevice
     Tick write(PacketPtr pkt) override;
 
   protected:
+    // MMIO configuration
+    const Addr pioAddr;
+    const Addr pioSize;
+    const Tick pioDelay;
+
     // Configuration parameters
     const uint32_t peArrayRows;      // PE array rows (e.g., 4)
     const uint32_t peArrayCols;      // PE array cols (e.g., 4)
     const Tick computeLatency;       // Cycles per PE operation
     const Tick memoryLatency;        // Memory access latency
+    const double energyPerOpPJ;      // Estimated compute energy per op (pJ)
+    const double dmaEnergyPerBytePJ; // Estimated DMA energy per byte (pJ)
+    const double leakagePowerMW;     // Estimated leakage power during active time (mW)
     
     // Register map (memory-mapped I/O)
     enum Registers {
@@ -117,6 +126,14 @@ class LMulAccelerator : public BasicPioDevice
         statistics::Scalar numCompletions;
         statistics::Scalar totalCycles;
         statistics::Scalar totalOps;
+        statistics::Scalar dmaReadReqs;
+        statistics::Scalar dmaWriteReqs;
+        statistics::Scalar dmaReadBytes;
+        statistics::Scalar dmaWriteBytes;
+        statistics::Scalar estimatedComputeEnergyJ;
+        statistics::Scalar estimatedDmaEnergyJ;
+        statistics::Scalar estimatedLeakageEnergyJ;
+        statistics::Scalar estimatedTotalEnergyJ;
         statistics::Histogram opLatency;
     } stats;
 
@@ -125,7 +142,10 @@ class LMulAccelerator : public BasicPioDevice
         Tick startTick;
         uint32_t m, n, p;
         Addr aAddr, bAddr, cAddr;
+        bool useDma = false;
         bool useStreamedInputs = false;
+        uint64_t dmaReadBytes = 0;
+        uint64_t dmaWriteBytes = 0;
         std::vector<uint16_t> matrixA;
         std::vector<uint16_t> matrixB;
         std::vector<uint16_t> matrixC;
@@ -138,10 +158,17 @@ class LMulAccelerator : public BasicPioDevice
 
     // Event for async computation completion
     EventFunctionWrapper computeEvent;
+    EventFunctionWrapper dmaReadAEvent;
+    EventFunctionWrapper dmaReadBEvent;
+    EventFunctionWrapper dmaWriteCEvent;
 
     // Internal methods
     void startComputation();
     void completeComputation();
+    void onDmaReadAComplete();
+    void onDmaReadBComplete();
+    void onDmaWriteCComplete();
+    void finalizeComputation();
     void processCompute();
     
     // BF16 operations
