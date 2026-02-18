@@ -16,8 +16,8 @@
 		}
 	},
 	
-	// Workspace folder - Codespaces uses /workspaces/<repo-name>
-	// Don't override, let Codespaces set it automatically
+	// Mount workspace
+	"workspaceFolder": "/workspace",
 	
 	// Forward ports if needed for visualization
 	"forwardPorts": [8888]
