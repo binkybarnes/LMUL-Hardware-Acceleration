@@ -18,17 +18,91 @@ from m5.util import addToPath
 # Add common config paths
 addToPath('../')
 
+
+class CpuPowerOn(MathExprPowerModel):
+    """First-order CPU power model for ON state."""
+
+    def __init__(
+        self,
+        cpu_path,
+        dyn_energy_per_cycle_pj=500.0,
+        dyn_energy_per_inst_pj=50.0,
+        static_power_mw=200.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        cycle_energy_j = dyn_energy_per_cycle_pj * 1.0e-12
+        inst_energy_j = dyn_energy_per_inst_pj * 1.0e-12
+        static_power_w = static_power_mw * 1.0e-3
+        # Power = rate * energy_per_event.
+        self.dyn = (
+            f"(({cpu_path}.numCycles / simSeconds) * {cycle_energy_j:.12e}) + "
+            f"((simInsts / simSeconds) * {inst_energy_j:.12e})"
+        )
+        self.st = f"{static_power_w:.12e}"
+
+
+class CpuPowerOff(MathExprPowerModel):
+    dyn = "0"
+    st = "0"
+
+
+class CpuPowerModel(PowerModel):
+    """Power model wrapper for CPU power states."""
+
+    def __init__(
+        self,
+        cpu_path,
+        dyn_energy_per_cycle_pj=500.0,
+        dyn_energy_per_inst_pj=50.0,
+        static_power_mw=200.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.pm = [
+            CpuPowerOn(
+                cpu_path,
+                dyn_energy_per_cycle_pj=dyn_energy_per_cycle_pj,
+                dyn_energy_per_inst_pj=dyn_energy_per_inst_pj,
+                static_power_mw=static_power_mw,
+            ),  # ON
+            CpuPowerOff(),  # CLK_GATED
+            CpuPowerOff(),  # SRAM_RETENTION
+            CpuPowerOff(),  # OFF
+        ]
+
+
 class LMulSystem(System):
     """
     Simple system with LMUL accelerator attached
     """
     
-    def __init__(self, pe_rows=4, pe_cols=4, use_accelerator=True, **kwargs):
+    def __init__(
+        self,
+        pe_rows=4,
+        pe_cols=4,
+        use_accelerator=True,
+        enable_cpu_power_model=True,
+        cpu_dyn_energy_per_cycle_pj=500.0,
+        cpu_dyn_energy_per_inst_pj=50.0,
+        cpu_static_power_mw=200.0,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         
         # CPU - must be created as a child of System (not an attribute)
         # This ensures proper parenting in the SimObject hierarchy
         self.cpu = TimingSimpleCPU()
+
+        # Optional first-order CPU power model (emits system.cpu.power_model.* stats).
+        if enable_cpu_power_model:
+            self.cpu.power_state.default_state = "ON"
+            self.cpu.power_model = CpuPowerModel(
+                self.cpu.path(),
+                dyn_energy_per_cycle_pj=cpu_dyn_energy_per_cycle_pj,
+                dyn_energy_per_inst_pj=cpu_dyn_energy_per_inst_pj,
+                static_power_mw=cpu_static_power_mw,
+            )
         
         # Memory
         self.membus = SystemXBar()
@@ -76,6 +150,10 @@ def createSystem(args):
         pe_rows=args.pe_rows,
         pe_cols=args.pe_cols,
         use_accelerator=not args.use_ieee,
+        enable_cpu_power_model=not args.disable_cpu_power_model,
+        cpu_dyn_energy_per_cycle_pj=args.cpu_dyn_energy_per_cycle_pj,
+        cpu_dyn_energy_per_inst_pj=args.cpu_dyn_energy_per_inst_pj,
+        cpu_static_power_mw=args.cpu_static_power_mw,
         mem_mode='timing'
     )
     
@@ -115,6 +193,14 @@ def main():
                        help='Use IEEE BF16 instead of LMUL')
     parser.add_argument('--cpu-clock', type=str, default='2GHz',
                        help='CPU clock frequency (default: 2GHz)')
+    parser.add_argument('--disable-cpu-power-model', action='store_true',
+                       help='Disable first-order CPU power model stats')
+    parser.add_argument('--cpu-dyn-energy-per-cycle-pj', type=float, default=500.0,
+                       help='CPU dynamic energy per cycle (pJ), default: 500')
+    parser.add_argument('--cpu-dyn-energy-per-inst-pj', type=float, default=50.0,
+                       help='CPU dynamic energy per committed instruction (pJ), default: 50')
+    parser.add_argument('--cpu-static-power-mw', type=float, default=200.0,
+                       help='CPU static/leakage power (mW), default: 200')
     
     # Benchmark configuration
     parser.add_argument('--cmd', type=str, default=None,

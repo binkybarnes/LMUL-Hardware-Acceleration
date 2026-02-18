@@ -25,6 +25,10 @@ USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall
 LOG_FILE=""
 EXTRACT_OUTPUTS="${EXTRACT_OUTPUTS:-1}"  # 1: write inputs/result files + run correctness checks
 REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-1}"  # 1: fail if result.bin missing (recommended)
+DISABLE_CPU_POWER_MODEL=0
+CPU_DYN_ENERGY_PER_CYCLE_PJ="${CPU_DYN_ENERGY_PER_CYCLE_PJ:-500.0}"
+CPU_DYN_ENERGY_PER_INST_PJ="${CPU_DYN_ENERGY_PER_INST_PJ:-50.0}"
+CPU_STATIC_POWER_MW="${CPU_STATIC_POWER_MW:-200.0}"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -57,8 +61,24 @@ while [[ $# -gt 0 ]]; do
             EXTRACT_OUTPUTS=0
             shift
             ;;
+        --disable-cpu-power-model)
+            DISABLE_CPU_POWER_MODEL=1
+            shift
+            ;;
+        --cpu-dyn-energy-per-cycle-pj)
+            CPU_DYN_ENERGY_PER_CYCLE_PJ="$2"
+            shift 2
+            ;;
+        --cpu-dyn-energy-per-inst-pj)
+            CPU_DYN_ENERGY_PER_INST_PJ="$2"
+            shift 2
+            ;;
+        --cpu-static-power-mw)
+            CPU_STATIC_POWER_MW="$2"
+            shift 2
+            ;;
         -h|--help)
-            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE] [--no-output-extraction]"
+            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE] [--no-output-extraction] [--disable-cpu-power-model]"
             echo
             echo "Compares LMUL accelerator vs IEEE BF16 accelerator:"
             echo "  - Runs both simulations"
@@ -66,6 +86,10 @@ while [[ $# -gt 0 ]]; do
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
             echo "  - --no-output-extraction: skip writing inputs/result files and correctness checks"
+            echo "  - --disable-cpu-power-model: disable CPU power model stats (no total-energy ratio)"
+            echo "  - --cpu-dyn-energy-per-cycle-pj N: CPU dynamic energy per cycle (default: ${CPU_DYN_ENERGY_PER_CYCLE_PJ})"
+            echo "  - --cpu-dyn-energy-per-inst-pj N: CPU dynamic energy per instruction (default: ${CPU_DYN_ENERGY_PER_INST_PJ})"
+            echo "  - --cpu-static-power-mw N: CPU static power in mW (default: ${CPU_STATIC_POWER_MW})"
             echo "  - Requires matrix_multiply_no_printf.arm (set ALLOW_PRINTF_FALLBACK=1 to force printf binary)"
             echo "  - Env: EXTRACT_OUTPUTS=0 is equivalent to --no-output-extraction"
             echo "  - Env: REQUIRE_RESULT_BIN=0 allows continuing when result.bin is missing"
@@ -261,6 +285,10 @@ rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
       "$LMUL_OUTPUT/inputs.bin" "$IEEE_OUTPUT/inputs.bin" \
       "$PERF_COMPARISON_FILE"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
+echo "CPU power model: $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo OFF || echo ON)"
+if [ "$DISABLE_CPU_POWER_MODEL" -eq 0 ]; then
+    echo "CPU power params: cycle=${CPU_DYN_ENERGY_PER_CYCLE_PJ}pJ inst=${CPU_DYN_ENERGY_PER_INST_PJ}pJ static=${CPU_STATIC_POWER_MW}mW"
+fi
 echo "Output: ${OUTPUT_DIR}"
 if [ "$EXTRACT_OUTPUTS" -eq 1 ]; then
     echo "Output extraction: ON (inputs.bin/result.bin + correctness checks)"
@@ -282,6 +310,10 @@ if "$GEM5_BINARY" \
     --output-dir="$LMUL_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
+    --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
+    --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
+    $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo --disable-cpu-power-model) \
     --cmd="$BENCHMARK_BIN" \
     --cmd-args "${BENCHMARK_ARGS[@]}" "1" "${RESULT_FILE_ARGS[@]}" \
     > "$LMUL_OUTPUT/simulation.log" 2>&1; then
@@ -333,6 +365,10 @@ if "$GEM5_BINARY" \
     --output-dir="$IEEE_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
+    --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
+    --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
+    $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo --disable-cpu-power-model) \
     --cmd="$BENCHMARK_BIN" \
     --cmd-args "${BENCHMARK_ARGS[@]}" "0" "${RESULT_FILE_ARGS[@]}" \
     > "$IEEE_OUTPUT/simulation.log" 2>&1; then
