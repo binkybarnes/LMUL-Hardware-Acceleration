@@ -240,6 +240,53 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
     } else if (status == STAT_DONE) {
         printf("Accelerator computation complete (DMA writeback)\n");
     }
+
+    /* In DMA mode, result matrix C should be written to memory.
+     * In some SE setups, DMA may complete without updating C correctly.
+     * If that happens, fall back to streamed MMIO inputs + MMIO readback. */
+    int need_stream_fallback = (status != STAT_DONE);
+    if (!need_stream_fallback) {
+        const size_t c_elems = (size_t)M * (size_t)P;
+        need_stream_fallback = (c_elems > 0);
+        for (size_t idx = 0; idx < c_elems; idx++) {
+            if (C[idx] != 0) {
+                need_stream_fallback = 0;
+                break;
+            }
+        }
+    }
+
+    if (need_stream_fallback) {
+        printf("Warning: DMA result appears invalid; retrying via streamed MMIO path\n");
+
+        LMUL_REG(REG_CONTROL) = CTRL_RESET;
+        LMUL_REG(REG_M_SIZE) = M;
+        LMUL_REG(REG_N_SIZE) = N;
+        LMUL_REG(REG_P_SIZE) = P;
+
+        for (size_t idx = 0; idx < (size_t)M * (size_t)N; idx++) {
+            LMUL_REG(REG_A_STREAM) = (uint32_t)A[idx];
+        }
+        for (size_t idx = 0; idx < (size_t)N * (size_t)P; idx++) {
+            LMUL_REG(REG_B_STREAM) = (uint32_t)B[idx];
+        }
+
+        LMUL_REG(REG_CONTROL) = CTRL_START;
+
+        do {
+            status = LMUL_REG(REG_STATUS);
+        } while (status == STAT_IDLE || status == STAT_BUSY);
+
+        if (status == STAT_DONE) {
+            for (size_t idx = 0; idx < (size_t)M * (size_t)P; idx++) {
+                LMUL_REG(REG_RESULT_IDX) = (uint32_t)idx;
+                C[idx] = (bf16_t)(LMUL_REG(REG_RESULT_DATA) & 0xFFFFu);
+            }
+            printf("Streamed MMIO fallback completed successfully\n");
+        } else {
+            printf("Error: Streamed MMIO fallback failed (status=0x%x)\n", status);
+        }
+    }
 }
 
 void cpu_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
