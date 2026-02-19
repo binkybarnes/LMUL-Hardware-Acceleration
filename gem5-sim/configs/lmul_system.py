@@ -13,7 +13,6 @@ import os
 
 import m5
 from m5.objects import *
-from m5.params import NULL, isNullPointer
 from m5.util import addToPath
 
 # Add common config paths
@@ -127,9 +126,6 @@ class LMulSystem(System):
             # Connect accelerator to memory bus
             self.lmul_accel.pio = self.membus.mem_side_ports
             self.lmul_accel.dma = self.membus.cpu_side_ports
-        else:
-            # SimObject parameters must use gem5's NULL sentinel, not Python None.
-            self.lmul_accel = NULL
         
         # Interrupt controller
         self.cpu.createInterruptController()
@@ -273,7 +269,7 @@ def main():
         
         # Map accelerator MMIO region AFTER instantiation (only if accelerator exists)
         # The process is now fully instantiated and we can safely access it
-        if args.cmd and not isNullPointer(system.lmul_accel):
+        if args.cmd and "lmul_accel" in system._children:
             accel_addr = system.lmul_accel.pio_addr
             accel_size = system.lmul_accel.pio_size
             try:
@@ -297,7 +293,7 @@ def main():
         return 1
     
     # Run simulation
-    if not isNullPointer(system.lmul_accel):
+    if "lmul_accel" in system._children:
         print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array (LMUL Accelerator)")
     else:
         print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator)")
