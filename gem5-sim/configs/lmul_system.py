@@ -162,9 +162,10 @@ def createSystem(args):
     )
     
     # Set memory ranges (must be set after creation, not in constructor)
-    # Accelerator is at 0x40000000 (1GB), which is outside normal memory
-    # This is fine - MMIO devices can be at any address
-    system.mem_ranges = [AddrRange('512MB')]
+    # Use 1GB so guest stack/high addresses (e.g. 0x3ffdf008) are mapped; 512MB caused
+    # "Unable to find destination for [0x3ffdf008:...] on system.membus" (syscall 403).
+    # Accelerator MMIO is at 0x40000000, outside this range.
+    system.mem_ranges = [AddrRange('1GB')]
     
     # Set memory controller range to match system memory range
     system.mem_ctrl.dram.range = system.mem_ranges[0]
