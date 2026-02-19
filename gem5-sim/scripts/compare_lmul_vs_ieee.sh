@@ -86,7 +86,7 @@ while [[ $# -gt 0 ]]; do
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
             echo "  - --no-output-extraction: skip writing inputs/result files and correctness checks"
-            echo "  - --disable-cpu-power-model: disable CPU power model stats (no total-energy ratio)"
+            echo "  - --disable-cpu-power-model: disable gem5 CPU power-model stats (report still uses first-order CPU energy model)"
             echo "  - --cpu-dyn-energy-per-cycle-pj N: CPU dynamic energy per cycle (default: ${CPU_DYN_ENERGY_PER_CYCLE_PJ})"
             echo "  - --cpu-dyn-energy-per-inst-pj N: CPU dynamic energy per instruction (default: ${CPU_DYN_ENERGY_PER_INST_PJ})"
             echo "  - --cpu-static-power-mw N: CPU static power in mW (default: ${CPU_STATIC_POWER_MW})"
@@ -469,6 +469,9 @@ if [ $LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
     python3 "$SCRIPT_DIR/compare_metrics.py" \
         "$LMUL_OUTPUT/stats.txt" \
         "$IEEE_OUTPUT/stats.txt" \
+        --cpu-dyn-energy-per-cycle-pj "$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
+        --cpu-dyn-energy-per-inst-pj "$CPU_DYN_ENERGY_PER_INST_PJ" \
+        --cpu-static-power-mw "$CPU_STATIC_POWER_MW" \
         > "$PERF_COMPARISON_FILE" 2>&1
     
     if [ $? -eq 0 ]; then

@@ -152,11 +152,11 @@ cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_4.txt
 - `--pe-rows N`, `--pe-cols N` — PE array dimensions  
 - `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)
 
-CPU energy model knobs (forwarded to `lmul_system.py` defaults unless changed there):
-- `--disable-cpu-power-model` — disable CPU power-model stats in runs
-- `--cpu-dyn-energy-per-cycle-pj` — dynamic energy per CPU cycle
-- `--cpu-dyn-energy-per-inst-pj` — dynamic energy per committed instruction
-- `--cpu-static-power-mw` — static CPU power term
+CPU energy model knobs:
+- `--cpu-dyn-energy-per-cycle-pj` — dynamic energy per CPU cycle (used by `compare_metrics.py`)
+- `--cpu-dyn-energy-per-inst-pj` — dynamic energy per committed instruction (used by `compare_metrics.py`)
+- `--cpu-static-power-mw` — static CPU power term (used by `compare_metrics.py`)
+- `--disable-cpu-power-model` — optional: disable gem5 `system.cpu.power_model.*` stats in runs
 
 ### 7. Re-run metrics or correctness locally
 
@@ -164,7 +164,10 @@ CPU energy model knobs (forwarded to `lmul_system.py` defaults unless changed th
 # Regenerate comparison table from two stats files
 python3 gem5-sim/scripts/compare_metrics.py \
   gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt \
-  gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt
+  gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt \
+  --cpu-dyn-energy-per-cycle-pj 500 \
+  --cpu-dyn-energy-per-inst-pj 50 \
+  --cpu-static-power-mw 200
 
 # Correctness: compare simulation output to software reference (requires inputs.bin + result.bin)
 python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/lmul --mode lmul
@@ -175,11 +178,11 @@ python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_i
 
 ## Understanding Output
 
-- **stats.txt** (per run): `sim_seconds`, `system.cpu.numCycles`, `system.cpu.committedInsts`, CPI, IPC, DRAM energy, accelerator stats (e.g. `system.lmul_accel.totalcycles`, `totalops`), and CPU power-model stats (`system.cpu.power_model.dynamicPower`, `staticPower`) when enabled.
-- **performance_comparison_<size>.txt**: side-by-side LMUL vs IEEE and speedups (sim time, cycles, DRAM ratio, accelerator energy, CPU energy, estimated total energy).
+- **stats.txt** (per run): `sim_seconds`, `system.cpu.numCycles`, `system.cpu.committedInsts`, CPI, IPC, DRAM energy, and accelerator stats (e.g. `system.lmul_accel.totalcycles`, `totalops`).
+- **performance_comparison_<size>.txt**: side-by-side LMUL vs IEEE and speedups (sim time, cycles, DRAM ratio, accelerator energy, modeled CPU energy, estimated total energy).
 - Correctness is reported when you run the comparison with output extraction enabled: the script compares each run’s output to the reference (`rtl.numpy_lmul.lmul_numpy_matmul` for LMUL, IEEE matmul for CPU).
 
-By default, `lmul_system.py` enables a first-order CPU power model so both LMUL and IEEE runs expose CPU energy estimates for total-energy comparison. You can disable it with `--disable-cpu-power-model`.
+CPU energy in the comparison report is a first-order model derived from cycle count, instruction count, and static power parameters. It does not require `system.cpu.power_model.dynamicPower` and avoids unit/path issues in gem5 power-model stats.
 
 ---
 
