@@ -28,16 +28,17 @@ Accel DMA energy (µJ)          0.001                0.000
 Accel leakage energy (µJ)      0.011                0.000               
 Accel avg power (mW)           0.014                0.000               
 
-CPU dyn power (mW)             71054935626.611      69823944419.506     
-CPU static power (mW)          1000.000             1000.000            
-CPU total power (mW)           71054936626.611      69823945419.506     
-CPU energy (µJ)                710549366266.110     14108067819902.027  
-  → CPU energy ratio (IEEE/LMUL): 19.86x (>1 = LMUL used less)
+CPU dyn power (mW)             1000.690             1000.700            
+CPU static power (mW)          200.000              200.000             
+CPU total power (mW)           1200.690             1200.700            
+CPU energy (µJ)                12006.900            242603.884          
+  → CPU energy ratio (IEEE/LMUL): 20.21x (>1 = LMUL used less)
+  (CPU energy model: 500.000 pJ/cycle + 50.000 pJ/instruction + 200.000 mW static)
 
-Estimated total energy (µJ)    710549377935.135     14108068058669.025  
-  → Total energy ratio (IEEE/LMUL): 19.86x (>1 = LMUL used less)
-Estimated total avg power (mW) 71054937793.514      69823946601.217     
-  (Estimated total = DRAM + CPU power model + accelerator first-order model)
+Estimated total energy (µJ)    23675.925            481370.882          
+  → Total energy ratio (IEEE/LMUL): 20.33x (>1 = LMUL used less)
+Estimated total avg power (mW) 2367.593             2382.411            
+  (Estimated total = DRAM + CPU first-order model + accelerator first-order model)
 
 
 Accelerator Metrics (summary) 
