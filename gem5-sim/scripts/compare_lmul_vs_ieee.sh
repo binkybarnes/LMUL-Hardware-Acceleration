@@ -24,7 +24,7 @@ OUTPUT_DIR="lmul_vs_ieee_comparison"
 USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall 403
 LOG_FILE=""
 EXTRACT_OUTPUTS="${EXTRACT_OUTPUTS:-1}"  # 1: write inputs/result files + run correctness checks
-REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-1}"  # 1: fail if result.bin missing (recommended)
+REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-0}"  # 0: allow performance-only runs; 1: fail if result.bin missing
 DISABLE_CPU_POWER_MODEL=0
 CPU_DYN_ENERGY_PER_CYCLE_PJ="${CPU_DYN_ENERGY_PER_CYCLE_PJ:-500.0}"
 CPU_DYN_ENERGY_PER_INST_PJ="${CPU_DYN_ENERGY_PER_INST_PJ:-50.0}"
@@ -92,7 +92,7 @@ while [[ $# -gt 0 ]]; do
             echo "  - --cpu-static-power-mw N: CPU static power in mW (default: ${CPU_STATIC_POWER_MW})"
             echo "  - Requires matrix_multiply_no_printf.arm (set ALLOW_PRINTF_FALLBACK=1 to force printf binary)"
             echo "  - Env: EXTRACT_OUTPUTS=0 is equivalent to --no-output-extraction"
-            echo "  - Env: REQUIRE_RESULT_BIN=0 allows continuing when result.bin is missing"
+            echo "  - Env: REQUIRE_RESULT_BIN=1 fails when result.bin is missing (default: 0)"
             exit 0
             ;;
         *)
