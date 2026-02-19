@@ -20,13 +20,24 @@ IPC                            0.007106             0.006982
 DRAM energy (µJ)               11668881.95          238766998.26        
   → DRAM energy ratio (IEEE/LMUL): 20.46x (>1 = LMUL used less)
 DRAM avg power (mW)            1166.91              1181.71             
-  (DRAM energy is from gem5; accelerator energy below is a first-order model)
+  (DRAM energy from gem5; accel/CPU energy below from configured models)
 
 Accel total energy (µJ)        0.143                0.000               
 Accel compute energy (µJ)      0.131                0.000               
 Accel DMA energy (µJ)          0.001                0.000               
 Accel leakage energy (µJ)      0.011                0.000               
 Accel avg power (mW)           0.014                0.000               
+
+CPU dyn power (mW)             71054935626.611      69823944419.506     
+CPU static power (mW)          1000.000             1000.000            
+CPU total power (mW)           71054936626.611      69823945419.506     
+CPU energy (µJ)                710549366266.110     14108067819902.027  
+  → CPU energy ratio (IEEE/LMUL): 19.86x (>1 = LMUL used less)
+
+Estimated total energy (µJ)    710549377935.135     14108068058669.025  
+  → Total energy ratio (IEEE/LMUL): 19.86x (>1 = LMUL used less)
+Estimated total avg power (mW) 71054937793.514      69823946601.217     
+  (Estimated total = DRAM + CPU power model + accelerator first-order model)
 
 
 Accelerator Metrics (summary) 
