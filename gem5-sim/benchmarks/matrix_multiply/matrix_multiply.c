@@ -228,11 +228,12 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
     // Start DMA-backed computation (A/B read by DMA, C written back by DMA).
     LMUL_REG(REG_CONTROL) = CTRL_START | CTRL_DMA_EN;
     
-    // Poll for completion
+    // Poll until hardware reaches a terminal state.
+    // Waiting only while STAT_BUSY can exit early if the first read still sees IDLE.
     uint32_t status;
     do {
         status = LMUL_REG(REG_STATUS);
-    } while (status == STAT_BUSY);
+    } while (status == STAT_IDLE || status == STAT_BUSY);
     
     if (status == STAT_ERROR) {
         printf("Error: Accelerator reported error\n");
