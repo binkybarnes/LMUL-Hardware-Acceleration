@@ -84,7 +84,12 @@ def extract_key_metrics(
     # Accelerator metrics (if available)
     accel_keys = [k for k in stats.keys() if 'lmul_accel' in k.lower()]
     for key in accel_keys:
-        simple_key = key.split('.')[-1]
+        # Keep the full stat suffix after `lmul_accel.` so histogram buckets
+        # remain identifiable and can be filtered in report formatting.
+        if 'lmul_accel.' in key:
+            simple_key = key.split('lmul_accel.', 1)[1]
+        else:
+            simple_key = key.split('.')[-1]
         metrics[f'accel_{simple_key}'] = stats[key]
 
     # Estimated accelerator power/energy metrics (if accelerator exports them)
@@ -113,7 +118,8 @@ def extract_key_metrics(
     dram_rank1_energy = stats.get('system.mem_ctrl.dram.rank1.totalEnergy', 0)
     metrics['dram_energy_pJ'] = dram_rank0_energy + dram_rank1_energy
     metrics['dram_energy_j'] = metrics['dram_energy_pJ'] * 1e-12
-    metrics['dram_energy_uJ'] = metrics['dram_energy_pJ'] / 1000.0
+    # pJ -> uJ: divide by 1e6 (1 uJ = 1e6 pJ)
+    metrics['dram_energy_uJ'] = metrics['dram_energy_pJ'] / 1e6
     metrics['dram_power_mW'] = (
         stats.get('system.mem_ctrl.dram.rank0.averagePower', 0) +
         stats.get('system.mem_ctrl.dram.rank1.averagePower', 0)
@@ -183,14 +189,23 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     lines.append("Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)")
     lines.append("="*70)
     lines.append("")
-    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
+    lines.append("Final Metrics")
     lines.append("-"*70)
+    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
     lines.append(f"{'Simulation Time (s)':<30s} {lmul_metrics['sim_seconds']:<20.6f} {ieee_metrics['sim_seconds']:<20.6f}")
     if 'time' in speedup:
         lines.append(f"  → Speedup: {speedup['time']:.2f}x")
     lines.append(f"{'CPU Cycles':<30s} {lmul_metrics['cpu_cycles']:<20,} {ieee_metrics['cpu_cycles']:<20,}")
     if 'cycles' in speedup:
         lines.append(f"  → Speedup: {speedup['cycles']:.2f}x")
+    lines.append(f"{'Estimated total energy (µJ)':<30s} {lmul_metrics.get('estimated_total_energy_uJ', 0):<20.3f} {ieee_metrics.get('estimated_total_energy_uJ', 0):<20.3f}")
+    if 'total_energy' in speedup:
+        lines.append(f"  → Total energy ratio (IEEE/LMUL): {speedup['total_energy']:.2f}x (>1 = LMUL used less)")
+    lines.append("")
+
+    lines.append("Performance Details")
+    lines.append("-"*70)
+    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
     lines.append(f"{'Instructions':<30s} {lmul_metrics['instructions']:<20,} {ieee_metrics['instructions']:<20,}")
     lines.append(f"{'CPI':<30s} {lmul_metrics['cpi']:<20.4f} {ieee_metrics['cpi']:<20.4f}")
     if 'cpi' in speedup:
@@ -198,17 +213,19 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     lines.append(f"{'IPC':<30s} {lmul_metrics['ipc']:<20.6f} {ieee_metrics['ipc']:<20.6f}")
     if 'ipc' in speedup:
         lines.append(f"  → Improvement: {speedup['ipc']:.2f}x")
-    # Energy section: DRAM energy comes directly from gem5 DRAM stats.
     lines.append("")
-    lines.append(f"{'DRAM energy (µJ)':<30s} {lmul_metrics.get('dram_energy_uJ', 0):<20.2f} {ieee_metrics.get('dram_energy_uJ', 0):<20.2f}")
+
+    lines.append("Energy Breakdown")
+    lines.append("-"*70)
+    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
+    # DRAM energy comes directly from gem5 DRAM stats.
+    lines.append(f"{'DRAM energy (µJ)':<30s} {lmul_metrics.get('dram_energy_uJ', 0):<20.3f} {ieee_metrics.get('dram_energy_uJ', 0):<20.3f}")
     if 'dram_energy' in speedup:
         lines.append(f"  → DRAM energy ratio (IEEE/LMUL): {speedup['dram_energy']:.2f}x (>1 = LMUL used less)")
-    lines.append(f"{'DRAM avg power (mW)':<30s} {lmul_metrics.get('dram_power_mW', 0):<20.2f} {ieee_metrics.get('dram_power_mW', 0):<20.2f}")
-    lines.append("  (DRAM energy from gem5; accel/CPU energy below from configured models)")
+    lines.append(f"{'DRAM avg power (mW)':<30s} {lmul_metrics.get('dram_power_mW', 0):<20.3f} {ieee_metrics.get('dram_power_mW', 0):<20.3f}")
 
     if (lmul_metrics.get('accel_total_energy_j', 0) > 0 or
             ieee_metrics.get('accel_total_energy_j', 0) > 0):
-        lines.append("")
         lines.append(f"{'Accel total energy (µJ)':<30s} {lmul_metrics.get('accel_total_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_total_energy_uJ', 0):<20.3f}")
         if 'accel_total_energy' in speedup:
             lines.append(f"  → Accel energy ratio (IEEE/LMUL): {speedup['accel_total_energy']:.2f}x (>1 = LMUL used less)")
@@ -217,7 +234,6 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
         lines.append(f"{'Accel leakage energy (µJ)':<30s} {lmul_metrics.get('accel_leakage_energy_uJ', 0):<20.3f} {ieee_metrics.get('accel_leakage_energy_uJ', 0):<20.3f}")
         lines.append(f"{'Accel avg power (mW)':<30s} {lmul_metrics.get('accel_avg_power_mW', 0):<20.3f} {ieee_metrics.get('accel_avg_power_mW', 0):<20.3f}")
 
-    lines.append("")
     lines.append(f"{'CPU dyn power (mW)':<30s} {lmul_metrics.get('cpu_dynamic_power_mW', 0):<20.3f} {ieee_metrics.get('cpu_dynamic_power_mW', 0):<20.3f}")
     lines.append(f"{'CPU static power (mW)':<30s} {lmul_metrics.get('cpu_static_power_mW', 0):<20.3f} {ieee_metrics.get('cpu_static_power_mW', 0):<20.3f}")
     lines.append(f"{'CPU total power (mW)':<30s} {lmul_metrics.get('cpu_total_power_mW', 0):<20.3f} {ieee_metrics.get('cpu_total_power_mW', 0):<20.3f}")
@@ -231,10 +247,6 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
         f"{lmul_metrics.get('cpu_static_power_mw_cfg', 0):.3f} mW static)"
     )
 
-    lines.append("")
-    lines.append(f"{'Estimated total energy (µJ)':<30s} {lmul_metrics.get('estimated_total_energy_uJ', 0):<20.3f} {ieee_metrics.get('estimated_total_energy_uJ', 0):<20.3f}")
-    if 'total_energy' in speedup:
-        lines.append(f"  → Total energy ratio (IEEE/LMUL): {speedup['total_energy']:.2f}x (>1 = LMUL used less)")
     lines.append(f"{'Estimated total avg power (mW)':<30s} {lmul_metrics.get('estimated_total_avg_power_mW', 0):<20.3f} {ieee_metrics.get('estimated_total_avg_power_mW', 0):<20.3f}")
     lines.append("  (Estimated total = DRAM + CPU first-order model + accelerator first-order model)")
     lines.append("")
