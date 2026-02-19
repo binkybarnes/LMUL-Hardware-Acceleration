@@ -12,6 +12,13 @@ Usage:
 import re
 import argparse
 
+def _first_present(mapping, keys, default=0):
+    """Return the first present key from mapping."""
+    for key in keys:
+        if key in mapping:
+            return mapping[key]
+    return default
+
 def parse_stats(filename):
     """Parse gem5 stats.txt file"""
     stats = {}
@@ -91,6 +98,54 @@ def extract_key_metrics(
         else:
             simple_key = key.split('.')[-1]
         metrics[f'accel_{simple_key}'] = stats[key]
+
+    accel_total_cycles = _first_present(
+        metrics, ['accel_totalCycles', 'accel_totalcycles'], 0
+    )
+    accel_compute_cycles = _first_present(
+        metrics, ['accel_computeCycles', 'accel_computecycles'], 0
+    )
+    accel_dma_read_cycles = _first_present(
+        metrics, ['accel_dmaReadCycles', 'accel_dmareadcycles'], 0
+    )
+    accel_dma_write_cycles = _first_present(
+        metrics, ['accel_dmaWriteCycles', 'accel_dmawritecycles'], 0
+    )
+    accel_mem_transfer_cycles = _first_present(
+        metrics,
+        ['accel_memoryTransferCycles', 'accel_memorytransfercycles'],
+        accel_dma_read_cycles + accel_dma_write_cycles,
+    )
+    accel_mmio_read_cycles = _first_present(
+        metrics, ['accel_mmioReadCycles', 'accel_mmioreadcycles'], 0
+    )
+    accel_mmio_write_cycles = _first_present(
+        metrics, ['accel_mmioWriteCycles', 'accel_mmiowritecycles'], 0
+    )
+    accel_mmio_total_cycles = _first_present(
+        metrics,
+        ['accel_mmioTotalCycles', 'accel_mmiototalcycles'],
+        accel_mmio_read_cycles + accel_mmio_write_cycles,
+    )
+    accounted_accel_cycles = (
+        accel_dma_read_cycles +
+        accel_compute_cycles +
+        accel_dma_write_cycles
+    )
+    accel_other_cycles = (
+        max(accel_total_cycles - accounted_accel_cycles, 0)
+        if accel_total_cycles > 0 else 0
+    )
+
+    metrics['accel_total_cycles'] = accel_total_cycles
+    metrics['accel_compute_cycles'] = accel_compute_cycles
+    metrics['accel_dma_read_cycles'] = accel_dma_read_cycles
+    metrics['accel_dma_write_cycles'] = accel_dma_write_cycles
+    metrics['accel_mem_transfer_cycles'] = accel_mem_transfer_cycles
+    metrics['accel_mmio_read_cycles'] = accel_mmio_read_cycles
+    metrics['accel_mmio_write_cycles'] = accel_mmio_write_cycles
+    metrics['accel_mmio_total_cycles'] = accel_mmio_total_cycles
+    metrics['accel_other_cycles'] = accel_other_cycles
 
     # Estimated accelerator power/energy metrics (if accelerator exports them)
     accel_total_energy_j = metrics.get('accel_estimatedTotalEnergyJ', 0)
@@ -184,6 +239,9 @@ def calculate_speedup(lmul_metrics, ieee_metrics):
 
 def format_comparison(lmul_metrics, ieee_metrics, speedup):
     """Return formatted comparison as a string."""
+    def pct(part, whole):
+        return (100.0 * part / whole) if whole > 0 else 0.0
+
     lines = []
     lines.append("\n" + "="*70)
     lines.append("Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)")
@@ -213,6 +271,48 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     lines.append(f"{'IPC':<30s} {lmul_metrics['ipc']:<20.6f} {ieee_metrics['ipc']:<20.6f}")
     if 'ipc' in speedup:
         lines.append(f"  → Improvement: {speedup['ipc']:.2f}x")
+    lines.append("")
+
+    lines.append("Cycle Categorization")
+    lines.append("-"*70)
+    lines.append(f"{'Metric':<30s} {'LMUL':<20s} {'IEEE':<20s}")
+    lines.append(f"{'CPU total cycles':<30s} {lmul_metrics.get('cpu_cycles', 0):<20,} {ieee_metrics.get('cpu_cycles', 0):<20,}")
+
+    lmul_accel_total = lmul_metrics.get('accel_total_cycles', 0)
+    ieee_accel_total = ieee_metrics.get('accel_total_cycles', 0)
+    if (lmul_accel_total > 0 or ieee_accel_total > 0):
+        lines.append(f"{'Accel total cycles':<30s} {lmul_accel_total:<20,} {ieee_accel_total:<20,}")
+        lines.append(
+            f"{'  - MMIO I/O cycles':<30s} "
+            f"{lmul_metrics.get('accel_mmio_total_cycles', 0):<20,} "
+            f"{ieee_metrics.get('accel_mmio_total_cycles', 0):<20,}"
+        )
+        lines.append(
+            f"{'  - DMA read cycles':<30s} "
+            f"{lmul_metrics.get('accel_dma_read_cycles', 0):<20,} "
+            f"{ieee_metrics.get('accel_dma_read_cycles', 0):<20,}"
+        )
+        lines.append(
+            f"{'  - Compute cycles':<30s} "
+            f"{lmul_metrics.get('accel_compute_cycles', 0):<20,} "
+            f"{ieee_metrics.get('accel_compute_cycles', 0):<20,}"
+        )
+        lines.append(
+            f"{'  - DMA write cycles':<30s} "
+            f"{lmul_metrics.get('accel_dma_write_cycles', 0):<20,} "
+            f"{ieee_metrics.get('accel_dma_write_cycles', 0):<20,}"
+        )
+        lines.append(
+            f"{'  - Other accel cycles':<30s} "
+            f"{lmul_metrics.get('accel_other_cycles', 0):<20,} "
+            f"{ieee_metrics.get('accel_other_cycles', 0):<20,}"
+        )
+        if lmul_accel_total > 0 or ieee_accel_total > 0:
+            lines.append(
+                f"{'  - DMA+compute share (%)':<30s} "
+                f"{pct(lmul_metrics.get('accel_mem_transfer_cycles', 0) + lmul_metrics.get('accel_compute_cycles', 0), lmul_accel_total):<20.2f} "
+                f"{pct(ieee_metrics.get('accel_mem_transfer_cycles', 0) + ieee_metrics.get('accel_compute_cycles', 0), ieee_accel_total):<20.2f}"
+            )
     lines.append("")
 
     lines.append("Energy Breakdown")
@@ -254,6 +354,9 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
     ACCEL_SUMMARY_KEYS = (
         'accel_numCompletions', 'accel_numStarts', 'accel_numReads', 'accel_numWrites',
         'accel_totalCycles', 'accel_totalOps',
+        'accel_mmioReadCycles', 'accel_mmioWriteCycles', 'accel_mmioTotalCycles',
+        'accel_dmaReadCycles', 'accel_computeCycles',
+        'accel_dmaWriteCycles', 'accel_memoryTransferCycles',
         'accel_dmaReadReqs', 'accel_dmaWriteReqs',
         'accel_dmaReadBytes', 'accel_dmaWriteBytes',
         'accel_estimatedComputeEnergyJ', 'accel_estimatedDmaEnergyJ',
@@ -266,15 +369,29 @@ def format_comparison(lmul_metrics, ieee_metrics, speedup):
         lines.append(f"\n{'Accelerator Metrics (summary)':<30s}")
         lines.append("-"*70)
         all_accel_keys = set(lmul_accel.keys()) | set(ieee_accel.keys())
-        summary_keys = [k for k in ACCEL_SUMMARY_KEYS if k in all_accel_keys]
-        remaining = sorted(all_accel_keys - set(ACCEL_SUMMARY_KEYS))
+        lower_to_key = {k.lower(): k for k in all_accel_keys}
+        summary_keys = []
+        for desired in ACCEL_SUMMARY_KEYS:
+            key = lower_to_key.get(desired.lower())
+            if key and key not in summary_keys:
+                summary_keys.append(key)
+        remaining = sorted(all_accel_keys - set(summary_keys))
         def skip_accel_key(k):
             if 'opLatency::' in k and k not in ACCEL_SUMMARY_KEYS:
                 return True
             if 'pwrStateResidencyTicks' in k or k.lower().endswith('pio'):
                 return True
+            if k.lower().startswith('accel_requestor'):
+                return True
+            if '::lmul_accel' in k.lower():
+                return True
+            if 'bwread' in k.lower() or 'bwwrite' in k.lower() or 'bwtotal' in k.lower():
+                return True
+            if 'avgpriority' in k.lower() or 'avg power' in k.lower():
+                return True
             return False
-        for key in summary_keys + [k for k in remaining if not skip_accel_key(k)]:
+        display_keys = summary_keys if summary_keys else [k for k in remaining if not skip_accel_key(k)]
+        for key in display_keys:
             name = key.replace('accel_', '').replace('_', ' ').title()
             lmul_val = lmul_accel.get(key, 'N/A')
             ieee_val = ieee_accel.get(key, 'N/A')

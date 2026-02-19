@@ -130,6 +130,13 @@ class LMulAccelerator : public DmaDevice
         statistics::Scalar dmaWriteReqs;
         statistics::Scalar dmaReadBytes;
         statistics::Scalar dmaWriteBytes;
+        statistics::Scalar mmioReadCycles;
+        statistics::Scalar mmioWriteCycles;
+        statistics::Scalar mmioTotalCycles;
+        statistics::Scalar dmaReadCycles;
+        statistics::Scalar computeCycles;
+        statistics::Scalar dmaWriteCycles;
+        statistics::Scalar memoryTransferCycles;
         statistics::Scalar estimatedComputeEnergyJ;
         statistics::Scalar estimatedDmaEnergyJ;
         statistics::Scalar estimatedLeakageEnergyJ;
@@ -146,6 +153,12 @@ class LMulAccelerator : public DmaDevice
         bool useStreamedInputs = false;
         uint64_t dmaReadBytes = 0;
         uint64_t dmaWriteBytes = 0;
+        Tick dmaReadStartTick = 0;
+        Tick computeStartTick = 0;
+        Tick dmaWriteStartTick = 0;
+        Tick dmaReadTicks = 0;
+        Tick computeTicks = 0;
+        Tick dmaWriteTicks = 0;
         std::vector<uint16_t> matrixA;
         std::vector<uint16_t> matrixB;
         std::vector<uint16_t> matrixC;

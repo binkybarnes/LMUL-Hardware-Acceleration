@@ -4,6 +4,7 @@
 
 #include "dev/lmul_accel/lmul_accelerator.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -81,6 +82,20 @@ LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
                "Total DMA read bytes"),
       ADD_STAT(dmaWriteBytes, statistics::units::Byte::get(),
                "Total DMA write bytes"),
+      ADD_STAT(mmioReadCycles, statistics::units::Cycle::get(),
+               "Estimated MMIO read service cycles"),
+      ADD_STAT(mmioWriteCycles, statistics::units::Cycle::get(),
+               "Estimated MMIO write service cycles"),
+      ADD_STAT(mmioTotalCycles, statistics::units::Cycle::get(),
+               "Estimated total MMIO service cycles"),
+      ADD_STAT(dmaReadCycles, statistics::units::Cycle::get(),
+               "DMA-read phase cycles"),
+      ADD_STAT(computeCycles, statistics::units::Cycle::get(),
+               "Compute phase cycles"),
+      ADD_STAT(dmaWriteCycles, statistics::units::Cycle::get(),
+               "DMA-write phase cycles"),
+      ADD_STAT(memoryTransferCycles, statistics::units::Cycle::get(),
+               "Total memory-transfer cycles (DMA read + DMA write)"),
       ADD_STAT(estimatedComputeEnergyJ, statistics::units::Joule::get(),
                "Estimated compute dynamic energy (J)"),
       ADD_STAT(estimatedDmaEnergyJ, statistics::units::Joule::get(),
@@ -188,6 +203,10 @@ LMulAccelerator::read(PacketPtr pkt)
     pkt->makeResponse();
     pkt->setUintX(value, ByteOrder::little);
     stats.numReads++;
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const uint64_t pioCycles = static_cast<uint64_t>((pioDelay + clk - 1) / clk);
+    stats.mmioReadCycles += pioCycles;
+    stats.mmioTotalCycles += pioCycles;
 
     DPRINTF(LMulAccel, "Read offset=0x%x, value=0x%x\n", offset, value);
 
@@ -321,6 +340,10 @@ LMulAccelerator::write(PacketPtr pkt)
     // Convert request to response (required by PioPort)
     pkt->makeResponse();
     stats.numWrites++;
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const uint64_t pioCycles = static_cast<uint64_t>((pioDelay + clk - 1) / clk);
+    stats.mmioWriteCycles += pioCycles;
+    stats.mmioTotalCycles += pioCycles;
     return pioDelay;
 }
 
@@ -414,6 +437,7 @@ LMulAccelerator::startComputation()
         stats.dmaWriteReqs += 1;
         stats.dmaReadBytes += currentJob->dmaReadBytes;
         stats.dmaWriteBytes += currentJob->dmaWriteBytes;
+        currentJob->dmaReadStartTick = curTick();
 
         DPRINTF(LMulAccel, "DMA read A: addr=0x%x bytes=%llu\n",
                 currentJob->aAddr,
@@ -426,8 +450,13 @@ LMulAccelerator::startComputation()
 
     // Non-DMA mode: use the synthetic memory-time model.
     Tick computeTime = estimateComputeTime(state.mSize, state.nSize, state.pSize);
-    Tick memoryTime = estimateMemoryTime(state.mSize, state.nSize, state.pSize);
+    Tick memoryTime = currentJob->useStreamedInputs
+        ? 0
+        : estimateMemoryTime(state.mSize, state.nSize, state.pSize);
     Tick totalTime = computeTime + memoryTime;
+    currentJob->dmaReadTicks = memoryTime;
+    currentJob->computeTicks = computeTime;
+    currentJob->dmaWriteTicks = 0;
 
     DPRINTF(LMulAccel, "Scheduling completion in %d ticks\n", totalTime);
     schedule(computeEvent, curTick() + totalTime);
@@ -444,6 +473,8 @@ LMulAccelerator::completeComputation()
     processCompute();
 
     if (currentJob->useDma) {
+        currentJob->computeTicks = curTick() - currentJob->computeStartTick;
+        currentJob->dmaWriteStartTick = curTick();
         const uint64_t bytesC =
             static_cast<uint64_t>(currentJob->m) * currentJob->p * sizeof(uint16_t);
         DPRINTF(LMulAccel, "DMA write C: addr=0x%x bytes=%llu\n",
@@ -477,6 +508,9 @@ LMulAccelerator::onDmaReadBComplete()
 {
     assert(currentJob != nullptr && currentJob->useDma);
 
+    currentJob->dmaReadTicks = curTick() - currentJob->dmaReadStartTick;
+    currentJob->computeStartTick = curTick();
+
     Tick computeTime = estimateComputeTime(currentJob->m, currentJob->n, currentJob->p);
     DPRINTF(LMulAccel, "DMA inputs ready, scheduling compute in %d ticks\n", computeTime);
     schedule(computeEvent, curTick() + computeTime);
@@ -486,6 +520,7 @@ void
 LMulAccelerator::onDmaWriteCComplete()
 {
     assert(currentJob != nullptr && currentJob->useDma);
+    currentJob->dmaWriteTicks = curTick() - currentJob->dmaWriteStartTick;
     finalizeComputation();
 }
 
@@ -505,6 +540,17 @@ LMulAccelerator::finalizeComputation()
     stats.totalCycles += state.cycles;
     stats.totalOps += totalOps;
     stats.opLatency.sample(latency);
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const auto ticksToCycles = [clk](Tick ticks) -> uint64_t {
+        return static_cast<uint64_t>((ticks + clk - 1) / clk);
+    };
+    const uint64_t dmaReadCycles = ticksToCycles(currentJob->dmaReadTicks);
+    const uint64_t computeCycles = ticksToCycles(currentJob->computeTicks);
+    const uint64_t dmaWriteCycles = ticksToCycles(currentJob->dmaWriteTicks);
+    stats.dmaReadCycles += dmaReadCycles;
+    stats.computeCycles += computeCycles;
+    stats.dmaWriteCycles += dmaWriteCycles;
+    stats.memoryTransferCycles += (dmaReadCycles + dmaWriteCycles);
 
     // Estimated accelerator energy metrics (simple first-order model).
     const double latencySeconds =

@@ -227,17 +227,72 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
 void cpu_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
                         uint32_t M, uint32_t N, uint32_t P)
 {
-    for (uint32_t i = 0; i < M; i++) {
-        for (uint32_t j = 0; j < P; j++) {
-            float sum = 0.0f;
-            for (uint32_t k = 0; k < N; k++) {
-                float a = bf16_to_float(A[i * N + k]);
-                float b = bf16_to_float(B[k * P + j]);
-                sum += a * b;
+    const size_t a_elems = (size_t)M * (size_t)N;
+    const size_t b_elems = (size_t)N * (size_t)P;
+    const size_t c_elems = (size_t)M * (size_t)P;
+    float *A_f32 = (float *)malloc(a_elems * sizeof(float));
+    float *B_t = (float *)malloc(b_elems * sizeof(float));    // B transposed: P x N
+    float *C_f32 = (float *)calloc(c_elems, sizeof(float));   // Accumulate in float32
+
+    // Fallback keeps behavior correct if scratch allocation fails.
+    if (!A_f32 || !B_t || !C_f32) {
+        if (A_f32) free(A_f32);
+        if (B_t) free(B_t);
+        if (C_f32) free(C_f32);
+        for (uint32_t i = 0; i < M; i++) {
+            for (uint32_t j = 0; j < P; j++) {
+                float sum = 0.0f;
+                for (uint32_t k = 0; k < N; k++) {
+                    float a = bf16_to_float(A[i * N + k]);
+                    float b = bf16_to_float(B[k * P + j]);
+                    sum += a * b;
+                }
+                C[i * P + j] = float_to_bf16(sum);
             }
-            C[i * P + j] = float_to_bf16(sum);
+        }
+        return;
+    }
+
+    for (size_t idx = 0; idx < a_elems; idx++) {
+        A_f32[idx] = bf16_to_float(A[idx]);
+    }
+    for (uint32_t k = 0; k < N; k++) {
+        for (uint32_t j = 0; j < P; j++) {
+            B_t[(size_t)j * N + k] = bf16_to_float(B[(size_t)k * P + j]);
         }
     }
+
+    // Tiled matmul for better cache locality while preserving IEEE math.
+    const uint32_t tile = 32;
+    for (uint32_t ii = 0; ii < M; ii += tile) {
+        const uint32_t i_end = (ii + tile < M) ? (ii + tile) : M;
+        for (uint32_t jj = 0; jj < P; jj += tile) {
+            const uint32_t j_end = (jj + tile < P) ? (jj + tile) : P;
+            for (uint32_t kk = 0; kk < N; kk += tile) {
+                const uint32_t k_end = (kk + tile < N) ? (kk + tile) : N;
+                for (uint32_t i = ii; i < i_end; i++) {
+                    float *c_row = &C_f32[(size_t)i * P];
+                    const float *a_row = &A_f32[(size_t)i * N];
+                    for (uint32_t j = jj; j < j_end; j++) {
+                        const float *b_row = &B_t[(size_t)j * N];
+                        float sum = c_row[j];
+                        for (uint32_t k = kk; k < k_end; k++) {
+                            sum += a_row[k] * b_row[k];
+                        }
+                        c_row[j] = sum;
+                    }
+                }
+            }
+        }
+    }
+
+    for (size_t idx = 0; idx < c_elems; idx++) {
+        C[idx] = float_to_bf16(C_f32[idx]);
+    }
+
+    free(A_f32);
+    free(B_t);
+    free(C_f32);
 }
 
 void init_matrix(bf16_t *mat, uint32_t rows, uint32_t cols)

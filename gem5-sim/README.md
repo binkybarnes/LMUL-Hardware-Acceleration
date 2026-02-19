@@ -179,10 +179,12 @@ python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_i
 ## Understanding Output
 
 - **stats.txt** (per run): `sim_seconds`, `system.cpu.numCycles`, `system.cpu.committedInsts`, CPI, IPC, DRAM energy, and accelerator stats (e.g. `system.lmul_accel.totalcycles`, `totalops`).
-- **performance_comparison_<size>.txt**: side-by-side LMUL vs IEEE and speedups (sim time, cycles, DRAM ratio, accelerator energy, modeled CPU energy, estimated total energy).
+- **performance_comparison_<size>.txt**: side-by-side LMUL vs IEEE and speedups (sim time, cycles, DRAM ratio, accelerator energy, modeled CPU energy, estimated total energy), plus cycle categorization.
 - Correctness is reported when you run the comparison with output extraction enabled: the script compares each run’s output to the reference (`rtl.numpy_lmul.lmul_numpy_matmul` for LMUL, IEEE matmul for CPU).
 
 CPU energy in the comparison report is a first-order model derived from cycle count, instruction count, and static power parameters. It does not require `system.cpu.power_model.dynamicPower` and avoids unit/path issues in gem5 power-model stats.
+
+The IEEE path uses an optimized but still realistic software implementation: BF16 inputs are converted once to float32, matrix multiply is cache-friendly (tiled), and outputs are rounded back to BF16. This keeps the comparison "realistic LMUL accelerator vs realistic IEEE software."
 
 ---
 
