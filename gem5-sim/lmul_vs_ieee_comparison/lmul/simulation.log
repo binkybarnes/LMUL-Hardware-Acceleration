@@ -10,21 +10,41 @@ gem5 Simulator System.  https://www.gem5.org
 gem5 is copyrighted software; use the --copyright option for details.
 
 gem5 version 25.1.0.0
-gem5 compiled Feb 13 2026 18:37:34
-gem5 started Feb 18 2026 12:21:29
-gem5 executing on exp-3-44, pid 3125221
-command line: /workspace/LMUL-Hardware-Acceleration/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py --output-dir=lmul_vs_ieee_comparison/lmul --pe-rows=4 --pe-cols=4 --cmd=/workspace/LMUL-Hardware-Acceleration/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm --cmd-args 4 4 4 1 result.bin inputs.bin
+gem5 compiled Feb 18 2026 21:53:41
+gem5 started Feb 19 2026 15:30:46
+gem5 executing on exp-16-56, pid 2655457
+command line: /workspace/LMUL-Hardware-Acceleration/gem5/build/ARM/gem5.opt --outdir=lmul_vs_ieee_comparison/lmul /workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py --output-dir=lmul_vs_ieee_comparison/lmul --pe-rows=4 --pe-cols=4 --cpu-dyn-energy-per-cycle-pj=500.0 --cpu-dyn-energy-per-inst-pj=50.0 --cpu-static-power-mw=200.0 --cmd=/workspace/LMUL-Hardware-Acceleration/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm --cmd-args 4 4 4 1 result.bin inputs.bin
 
 Creating system...
-ERROR in main(): Invalid assignment for Class LMulAccelerator with parameter dma
-Traceback (most recent call last):
-  File "/workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py", line 256, in <module>
-    main()
-  File "/workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py", line 152, in main
-    system = createSystem(args)
-  File "/workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py", line 75, in createSystem
-    system = LMulSystem(
-  File "/workspace/LMUL-Hardware-Acceleration/gem5-sim/configs/lmul_system.py", line 50, in __init__
-    self.lmul_accel.dma = self.membus.cpu_side_ports
-  File "src/python/m5/SimObject.py", line 934, in __setattr__
-AttributeError: Invalid assignment for Class LMulAccelerator with parameter dma
+warn: Base 10 memory/cache size 1GB will be cast to base 2 size 1GiB.
+Global frequency set at 1000000000000 ticks per second
+warn: No dot file generated. Please install pydot to generate the dot file and pdf.
+src/mem/dram_interface.cc:690: warn: DRAM device capacity (8192 Mbytes) does not match the address range assigned (1024 Mbytes)
+src/base/statistics.hh:279: warn: One of the stats is a legacy stat. Legacy stat is a stat that does not belong to any statistics::Group. Legacy stat is deprecated.
+system.remote_gdb: Listening for connections on port 7000
+src/sim/power_state.cc:105: warn: PowerState: Already in the requested power state, request ignored
+DEBUG: Mapped accelerator MMIO region 0x40000000 (size 0x1000)
+System created
+Creating root object...
+Instantiating configuration...
+Configuration instantiated successfully
+Starting simulation with 4x4 PE array (LMUL Accelerator)
+Running: /workspace/LMUL-Hardware-Acceleration/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm 4 4 4 1 result.bin inputs.bin
+Beginning simulation...
+src/sim/syscall_emul.cc:86: warn: ignoring syscall set_robust_list(...)
+src/sim/syscall_emul.cc:86: warn: ignoring syscall sys_rseq(...)
+src/sim/mem_state.cc:443: info: Increasing stack size by one page.
+src/sim/syscall_emul.hh:1127: warn: readlink() called on '/proc/self/exe' may yield unexpected results in various settings.
+      Returning '/workspace/LMUL-Hardware-Acceleration/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm'
+src/sim/syscall_emul.cc:86: warn: ignoring syscall mprotect(...)
+LMUL_STREAM_FALLBACK_OK
+RESULT_WRITE_OK
+INPUTS_WRITE_OK
+COMPLETE mode=accel
+Simulation complete: exiting with last active thread context
+Exit code: 0
+Dumping statistics...
+Statistics dumped successfully
+Output directory: /workspace/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul
+Stats file should be at: /workspace/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt
+Stats file exists: /workspace/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt (99580 bytes)
