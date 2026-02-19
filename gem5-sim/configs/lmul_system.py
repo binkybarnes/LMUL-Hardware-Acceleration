@@ -96,12 +96,16 @@ class LMulSystem(System):
 
         # Optional first-order CPU power model (emits system.cpu.power_model.* stats).
         if enable_cpu_power_model:
+            # PowerModel requires an attached SubSystem. In this simple SE setup
+            # there is no CPU cluster SubSystem, so create a local one.
+            self.cpu_power_subsystem = SubSystem()
             self.cpu.power_state.default_state = "ON"
             self.cpu.power_model = CpuPowerModel(
                 self.cpu.path(),
                 dyn_energy_per_cycle_pj=cpu_dyn_energy_per_cycle_pj,
                 dyn_energy_per_inst_pj=cpu_dyn_energy_per_inst_pj,
                 static_power_mw=cpu_static_power_mw,
+                subsystem=self.cpu_power_subsystem,
             )
         
         # Memory
