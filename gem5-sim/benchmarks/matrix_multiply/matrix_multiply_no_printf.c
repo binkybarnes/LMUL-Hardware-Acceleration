@@ -52,6 +52,8 @@ void lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
                          uint32_t M, uint32_t N, uint32_t P);
 void cpu_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
                         uint32_t M, uint32_t N, uint32_t P);
+void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
+                              uint32_t M, uint32_t N, uint32_t P);
 void init_matrix(bf16_t *mat, uint32_t rows, uint32_t cols);
 bf16_t float_to_bf16(float f);
 float bf16_to_float(bf16_t bf16);
@@ -155,9 +157,11 @@ int main(int argc, char *argv[])
     init_matrix(B, N, P);
     memset(C, 0, M * P * sizeof(bf16_t));
     
-    // Perform multiplication
-    if (use_accel) {
+    // Perform multiplication: 0 = IEEE CPU, 1 = LMUL accelerator, 2 = LMUL on CPU
+    if (use_accel == 1) {
         lmul_matrix_multiply(A, B, C, M, N, P);
+    } else if (use_accel == 2) {
+        cpu_lmul_matrix_multiply(A, B, C, M, N, P);
     } else {
         cpu_matrix_multiply(A, B, C, M, N, P);
     }
@@ -186,8 +190,15 @@ int main(int argc, char *argv[])
         const char msg[] = "COMPLETE mode=";
         const char acc[] = "accel\n";
         const char cpu[] = "cpu\n";
+        const char cpu_lmul[] = "cpu_lmul\n";
         (void)write(1, msg, sizeof(msg) - 1);
-        (void)write(1, use_accel ? acc : cpu, use_accel ? 6 : 4);
+        if (use_accel == 1) {
+            (void)write(1, acc, sizeof(acc) - 1);
+        } else if (use_accel == 2) {
+            (void)write(1, cpu_lmul, sizeof(cpu_lmul) - 1);
+        } else {
+            (void)write(1, cpu, sizeof(cpu) - 1);
+        }
     }
     
     // Cleanup
@@ -293,6 +304,36 @@ void cpu_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
     free(A_f32);
     free(B_t);
     free(C_f32);
+}
+
+/* BF16 matmul on CPU: same numerics as the LMUL accelerator (per-element
+ * convert-multiply-accumulate, BF16 output). Tiled for cache like IEEE path.
+ * Models realistic CPU-only LMUL path for algorithm vs hardware comparison. */
+void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
+                              uint32_t M, uint32_t N, uint32_t P)
+{
+    const uint32_t tile = 32;
+    for (uint32_t ii = 0; ii < M; ii += tile) {
+        const uint32_t i_end = (ii + tile < M) ? (ii + tile) : M;
+        for (uint32_t jj = 0; jj < P; jj += tile) {
+            const uint32_t j_end = (jj + tile < P) ? (jj + tile) : P;
+            for (uint32_t kk = 0; kk < N; kk += tile) {
+                const uint32_t k_end = (kk + tile < N) ? (kk + tile) : N;
+                for (uint32_t i = ii; i < i_end; i++) {
+                    for (uint32_t j = jj; j < j_end; j++) {
+                        float sum = 0.0f;
+                        for (uint32_t k = kk; k < k_end; k++) {
+                            float a = bf16_to_float(A[(size_t)i * N + k]);
+                            float b = bf16_to_float(B[(size_t)k * P + j]);
+                            sum += a * b;
+                        }
+                        float prev = bf16_to_float(C[(size_t)i * P + j]);
+                        C[(size_t)i * P + j] = float_to_bf16(prev + sum);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void init_matrix(bf16_t *mat, uint32_t rows, uint32_t cols)
