@@ -11,7 +11,7 @@
 #include <queue>
 #include <vector>
 
-#include "dev/dma_device.hh"
+#include "dev/dma_virt_device.hh"
 #include "params/LMulAccelerator.hh"
 #include "sim/eventq.hh"
 
@@ -30,12 +30,13 @@ namespace gem5
  * - Interrupt on completion
  * - Cycle-accurate timing model
  */
-class LMulAccelerator : public DmaDevice
+class LMulAccelerator : public DmaVirtDevice
 {
   public:
     typedef LMulAcceleratorParams Params;
     LMulAccelerator(const Params &p);
     AddrRangeList getAddrRanges() const override;
+    TranslationGenPtr translate(Addr vaddr, Addr size) override;
 
     /**
      * Read from device registers
@@ -146,6 +147,7 @@ class LMulAccelerator : public DmaDevice
 
     // Computation state
     struct ComputeJob {
+        uint64_t jobId = 0;
         Tick startTick;
         uint32_t m, n, p;
         Addr aAddr, bAddr, cAddr;
@@ -165,15 +167,13 @@ class LMulAccelerator : public DmaDevice
     };
     
     ComputeJob *currentJob;
+    uint64_t nextJobId;
     std::vector<uint16_t> lastResult;  // Completed result buffer for MMIO readback
     std::vector<uint16_t> stagedA;      // Input A streamed over MMIO
     std::vector<uint16_t> stagedB;      // Input B streamed over MMIO
 
     // Event for async computation completion
     EventFunctionWrapper computeEvent;
-    EventFunctionWrapper dmaReadAEvent;
-    EventFunctionWrapper dmaReadBEvent;
-    EventFunctionWrapper dmaWriteCEvent;
 
     // Internal methods
     void startComputation();

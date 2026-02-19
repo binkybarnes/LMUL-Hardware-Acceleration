@@ -13,12 +13,14 @@
 #include "mem/packet.hh"
 #include "mem/packet_access.hh"
 #include "sim/core.hh"
+#include "sim/full_system.hh"
+#include "sim/process.hh"
 
 namespace gem5
 {
 
 LMulAccelerator::LMulAccelerator(const Params &p)
-    : DmaDevice(p),
+    : DmaVirtDevice(p),
       pioAddr(p.pio_addr),
       pioSize(p.pio_size),
       pioDelay(p.pio_latency),
@@ -31,10 +33,8 @@ LMulAccelerator::LMulAccelerator(const Params &p)
       leakagePowerMW(p.leakage_power_mw),
       stats(this),
       currentJob(nullptr),
-      computeEvent([this]{ completeComputation(); }, name()),
-      dmaReadAEvent([this]{ onDmaReadAComplete(); }, name()),
-      dmaReadBEvent([this]{ onDmaReadBComplete(); }, name()),
-      dmaWriteCEvent([this]{ onDmaWriteCComplete(); }, name())
+      nextJobId(0),
+      computeEvent([this]{ completeComputation(); }, name())
 {
     // Initialize device state
     state.control = 0;
@@ -58,6 +58,18 @@ AddrRangeList
 LMulAccelerator::getAddrRanges() const
 {
     return {RangeSize(pioAddr, pioSize)};
+}
+
+TranslationGenPtr
+LMulAccelerator::translate(Addr vaddr, Addr size)
+{
+    if (!FullSystem) {
+        auto process = sys->threads[0]->getProcessPtr();
+        fatal_if(!process, "LMulAccelerator: no process for DMA translation");
+        return process->pTable->translateRange(vaddr, size);
+    }
+
+    fatal("LMulAccelerator: Full-system DMA translation is not implemented");
 }
 
 LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
@@ -241,15 +253,6 @@ LMulAccelerator::write(PacketPtr pkt)
                 if (computeEvent.scheduled()) {
                     deschedule(computeEvent);
                 }
-                if (dmaReadAEvent.scheduled()) {
-                    deschedule(dmaReadAEvent);
-                }
-                if (dmaReadBEvent.scheduled()) {
-                    deschedule(dmaReadBEvent);
-                }
-                if (dmaWriteCEvent.scheduled()) {
-                    deschedule(dmaWriteCEvent);
-                }
                 if (dmaPending()) {
                     dmaPort.abortPending();
                 }
@@ -369,6 +372,7 @@ LMulAccelerator::startComputation()
 
     // Create compute job
     currentJob = new ComputeJob;
+    currentJob->jobId = ++nextJobId;
     currentJob->m = state.mSize;
     currentJob->n = state.nSize;
     currentJob->p = state.pSize;
@@ -443,8 +447,16 @@ LMulAccelerator::startComputation()
                 currentJob->aAddr,
                 static_cast<unsigned long long>(bytesA));
 
-        dmaRead(currentJob->aAddr, static_cast<int>(bytesA), &dmaReadAEvent,
-                reinterpret_cast<uint8_t *>(currentJob->matrixA.data()));
+        const uint64_t job_id = currentJob->jobId;
+        auto *readACb = new DmaVirtDevice::DmaVirtCallback<int>(
+            [this, job_id](const int &) {
+                if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                    return;
+                }
+                onDmaReadAComplete();
+            });
+        dmaReadVirt(currentJob->aAddr, static_cast<unsigned>(bytesA), readACb,
+                    reinterpret_cast<void *>(currentJob->matrixA.data()));
         return;
     }
 
@@ -480,8 +492,16 @@ LMulAccelerator::completeComputation()
         DPRINTF(LMulAccel, "DMA write C: addr=0x%x bytes=%llu\n",
                 currentJob->cAddr,
                 static_cast<unsigned long long>(bytesC));
-        dmaWrite(currentJob->cAddr, static_cast<int>(bytesC), &dmaWriteCEvent,
-                 reinterpret_cast<uint8_t *>(currentJob->matrixC.data()));
+        const uint64_t job_id = currentJob->jobId;
+        auto *writeCCb = new DmaVirtDevice::DmaVirtCallback<int>(
+            [this, job_id](const int &) {
+                if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                    return;
+                }
+                onDmaWriteCComplete();
+            });
+        dmaWriteVirt(currentJob->cAddr, static_cast<unsigned>(bytesC), writeCCb,
+                     reinterpret_cast<void *>(currentJob->matrixC.data()));
         return;
     }
 
@@ -499,8 +519,16 @@ LMulAccelerator::onDmaReadAComplete()
             currentJob->bAddr,
             static_cast<unsigned long long>(bytesB));
 
-    dmaRead(currentJob->bAddr, static_cast<int>(bytesB), &dmaReadBEvent,
-            reinterpret_cast<uint8_t *>(currentJob->matrixB.data()));
+    const uint64_t job_id = currentJob->jobId;
+    auto *readBCb = new DmaVirtDevice::DmaVirtCallback<int>(
+        [this, job_id](const int &) {
+            if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                return;
+            }
+            onDmaReadBComplete();
+        });
+    dmaReadVirt(currentJob->bAddr, static_cast<unsigned>(bytesB), readBCb,
+                reinterpret_cast<void *>(currentJob->matrixB.data()));
 }
 
 void
@@ -675,40 +703,38 @@ LMulAccelerator::estimateMemoryTime(uint32_t m, uint32_t n, uint32_t p)
 uint16_t
 LMulAccelerator::lmulBF16(uint16_t a, uint16_t b)
 {
-    // Simplified LMUL implementation
-    // In reality, this would match your Verilog RTL exactly
-    
-    // Extract fields
-    uint8_t a_sign = (a >> 15) & 0x1;
-    uint8_t b_sign = (b >> 15) & 0x1;
-    uint16_t a_fld = a & 0x7FFF;  // exp + mantissa
-    uint16_t b_fld = b & 0x7FFF;
-    
-    // Check for zero
-    uint8_t a_exp = (a_fld >> 7) & 0xFF;
-    uint8_t b_exp = (b_fld >> 7) & 0xFF;
-    if (a_exp == 0 || b_exp == 0) {
-        return 0;
+    // Match CPU RTL-compatible helper used by cpu_lmul_matrix_multiply().
+    const uint16_t field_mask = 0x7FFFu;
+    const uint16_t offset_mod = 0x4080u;
+    const uint8_t mantissa_bits = 7u;
+
+    const uint16_t a_fld = static_cast<uint16_t>(a & field_mask);
+    const uint16_t b_fld = static_cast<uint16_t>(b & field_mask);
+    const uint8_t a_exp =
+        static_cast<uint8_t>((a_fld >> mantissa_bits) & 0xFFu);
+    const uint8_t b_exp =
+        static_cast<uint8_t>((b_fld >> mantissa_bits) & 0xFFu);
+
+    uint16_t field_sel = 0u;
+    if (a_exp != 0u && b_exp != 0u) {
+        const uint32_t sum_full =
+            static_cast<uint32_t>(a_fld) + static_cast<uint32_t>(b_fld) +
+            static_cast<uint32_t>(offset_mod);
+        const uint32_t carry2 = (sum_full >> 15) & 0x3u;
+        const uint16_t low_bits = static_cast<uint16_t>(sum_full & field_mask);
+        if (carry2 == 1u) {
+            field_sel = low_bits;
+        } else if (carry2 >= 2u) {
+            field_sel = field_mask;
+        }
     }
-    
-    // LMUL: add exponent+mantissa fields
-    uint32_t sum = (uint32_t)a_fld + b_fld + ((1 << 15) - (127 << 7));
-    
-    // Check overflow/underflow
-    uint16_t result_fld;
-    if (sum >= (1 << 17)) {
-        result_fld = 0x7FFF;  // Overflow: saturate
-    } else if (sum < (1 << 15)) {
-        result_fld = 0x0000;  // Underflow: zero
-    } else {
-        result_fld = (sum - (1 << 15)) & 0x7FFF;
+
+    uint16_t sign = static_cast<uint16_t>(((a ^ b) >> 15) & 0x1u);
+    if (field_sel == 0u) {
+        sign = 0u;
     }
-    
-    // Combine sign
-    uint8_t result_sign = a_sign ^ b_sign;
-    if (result_fld == 0) result_sign = 0;
-    
-    return (result_sign << 15) | result_fld;
+
+    return static_cast<uint16_t>((sign << 15) | field_sel);
 }
 
 float
