@@ -121,15 +121,14 @@ ls -la gem5-sim/m5out/
 head -50 gem5-sim/m5out/stats.txt
 ```
 
-### 6. Run the full comparison (LMUL Accel vs CPU LMUL vs IEEE)
+### 6. Run the full comparison (LMUL Accel vs IEEE)
 
-This runs **three** simulations, then compares metrics and optionally checks correctness:
+By default this runs **two** simulations, then compares metrics and optionally checks correctness:
 
 1. **LMUL accelerator** — BF16 matmul on the hardware accelerator  
-2. **CPU LMUL** — same BF16 matmul on the CPU only (no accelerator; models “algorithm” path)  
-3. **IEEE CPU** — optimized IEEE float path on the CPU  
+2. **IEEE CPU** — native IEEE BF16 matmul on the CPU (no accelerator)  
 
-The report separates **algorithm** (CPU LMUL vs IEEE: same hardware, different math) and **hardware** (CPU LMUL vs ACCEL LMUL: same algorithm, CPU vs accelerator).
+Add `--include-cpu-lmul` (or `RUN_CPU_LMUL=1`) for three-way (adds CPU LMUL: same numerics as accel but on CPU only).
 
 ```bash
 ./gem5-sim/scripts/compare_lmul_vs_ieee.sh
@@ -137,8 +136,8 @@ The report separates **algorithm** (CPU LMUL vs IEEE: same hardware, different m
 
 Defaults: 4×4 matrices, 4×4 PE array. Outputs go to `gem5-sim/lmul_vs_ieee_comparison/`:
 
-- `lmul/stats.txt`, `cpu_lmul/stats.txt`, `ieee/stats.txt` — simulation stats  
-- `performance_comparison_4.txt` — three-way comparison (when all three runs succeed)  
+- `lmul/stats.txt`, `ieee/stats.txt` — simulation stats (and `cpu_lmul/` when `--include-cpu-lmul`)  
+- `performance_comparison_4.txt` — two-way or three-way comparison  
 - With output extraction on (default): `result.bin` and `inputs.bin` per run for correctness checks  
 - Benchmark mode: argv[4] = 1 (accel), 2 (CPU LMUL), 0 (IEEE)
 
@@ -157,7 +156,8 @@ cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_4.txt
 
 - `--size N` — N×N matrices  
 - `--pe-rows N`, `--pe-cols N` — PE array dimensions  
-- `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)
+- `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)  
+- `--include-cpu-lmul` — also run CPU LMUL simulation for three-way comparison (default: off)
 
 CPU energy model knobs:
 - `--cpu-dyn-energy-per-cycle-pj` — dynamic energy per CPU cycle (used by `compare_metrics.py`)
@@ -168,17 +168,19 @@ CPU energy model knobs:
 ### 7. Re-run metrics or correctness locally
 
 ```bash
-# Regenerate comparison table (two-way or three-way)
+# Regenerate comparison table (two-way by default)
 python3 gem5-sim/scripts/compare_metrics.py \
   gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt \
   gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt \
-  --cpu-lmul gem5-sim/lmul_vs_ieee_comparison/cpu_lmul/stats.txt \
   --cpu-dyn-energy-per-cycle-pj 500 --cpu-dyn-energy-per-inst-pj 50 --cpu-static-power-mw 200
+
+# Three-way (add CPU LMUL stats if you ran with --include-cpu-lmul):
+# python3 gem5-sim/scripts/compare_metrics.py ... --cpu-lmul gem5-sim/lmul_vs_ieee_comparison/cpu_lmul/stats.txt
 
 # Correctness: compare simulation output to software reference (requires inputs.bin + result.bin)
 python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/lmul --mode lmul
-python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/cpu_lmul --mode lmul
 python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/ieee --mode ieee
+# When using --include-cpu-lmul: python3 gem5-sim/scripts/validate_result_against_reference.py .../cpu_lmul --mode lmul
 ```
 
 ---
