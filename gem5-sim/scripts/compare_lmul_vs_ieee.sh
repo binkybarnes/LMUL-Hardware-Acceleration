@@ -26,6 +26,7 @@ LOG_FILE=""
 EXTRACT_OUTPUTS="${EXTRACT_OUTPUTS:-1}"  # 1: write inputs/result files + run correctness checks
 REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-0}"  # 0: allow performance-only runs; 1: fail if result.bin missing
 RUN_CPU_LMUL="${RUN_CPU_LMUL:-0}"  # 0: two-way (LMUL accel vs IEEE); 1: three-way (+ CPU LMUL)
+ACCEL_CLOCK="${ACCEL_CLOCK:-2GHz}"
 DISABLE_CPU_POWER_MODEL=0
 CPU_DYN_ENERGY_PER_CYCLE_PJ="${CPU_DYN_ENERGY_PER_CYCLE_PJ:-500.0}"
 CPU_DYN_ENERGY_PER_INST_PJ="${CPU_DYN_ENERGY_PER_INST_PJ:-50.0}"
@@ -44,6 +45,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --pe-cols)
             PE_COLS="$2"
+            shift 2
+            ;;
+        --accel-clock)
+            ACCEL_CLOCK="$2"
             shift 2
             ;;
         --output-dir)
@@ -83,7 +88,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE] [--no-output-extraction] [--include-cpu-lmul] [--disable-cpu-power-model]"
+            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--accel-clock FREQ] [--output-dir DIR] [--log-file FILE] [--no-output-extraction] [--include-cpu-lmul] [--disable-cpu-power-model]"
             echo
             echo "Compares LMUL accelerator vs IEEE BF16 (CPU):"
             echo "  - Default: two-way (LMUL accel, IEEE). Use --include-cpu-lmul for three-way (+ CPU LMUL)."
@@ -91,6 +96,7 @@ while [[ $# -gt 0 ]]; do
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
             echo "  - --no-output-extraction: skip writing inputs/result files and correctness checks"
+            echo "  - --accel-clock FREQ: LMUL accelerator clock (default: ${ACCEL_CLOCK})"
             echo "  - --disable-cpu-power-model: disable gem5 CPU power-model stats (report still uses first-order CPU energy model)"
             echo "  - --cpu-dyn-energy-per-cycle-pj N: CPU dynamic energy per cycle (default: ${CPU_DYN_ENERGY_PER_CYCLE_PJ})"
             echo "  - --cpu-dyn-energy-per-inst-pj N: CPU dynamic energy per instruction (default: ${CPU_DYN_ENERGY_PER_INST_PJ})"
@@ -100,6 +106,7 @@ while [[ $# -gt 0 ]]; do
             echo "  - Env: EXTRACT_OUTPUTS=0 is equivalent to --no-output-extraction"
             echo "  - Env: REQUIRE_RESULT_BIN=1 fails when result.bin is missing (default: 0)"
             echo "  - Env: RUN_CPU_LMUL=1 is equivalent to --include-cpu-lmul (default: 0)"
+            echo "  - Env: ACCEL_CLOCK=1GHz is equivalent to --accel-clock 1GHz"
             exit 0
             ;;
         *)
@@ -299,6 +306,7 @@ rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
       "$PERF_COMPARISON_FILE"
 [ "$RUN_CPU_LMUL" -eq 1 ] && rm -f "$CPU_LMUL_OUTPUT/stats.txt" "$CPU_LMUL_OUTPUT/result.bin" "$CPU_LMUL_OUTPUT/inputs.bin"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
+echo "Accelerator clock: ${ACCEL_CLOCK}"
 echo "CPU power model: $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo OFF || echo ON)"
 if [ "$DISABLE_CPU_POWER_MODEL" -eq 0 ]; then
     echo "CPU power params: cycle=${CPU_DYN_ENERGY_PER_CYCLE_PJ}pJ inst=${CPU_DYN_ENERGY_PER_INST_PJ}pJ static=${CPU_STATIC_POWER_MW}mW"
@@ -325,6 +333,7 @@ if "$GEM5_BINARY" \
     --output-dir="$LMUL_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --accel-clock="$ACCEL_CLOCK" \
     --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
     --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
     --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
@@ -384,6 +393,7 @@ if [ "$RUN_CPU_LMUL" -eq 1 ]; then
         --output-dir="$CPU_LMUL_OUTPUT" \
         --pe-rows="$PE_ROWS" \
         --pe-cols="$PE_COLS" \
+        --accel-clock="$ACCEL_CLOCK" \
         --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
         --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
         --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
@@ -440,6 +450,7 @@ if "$GEM5_BINARY" \
     --output-dir="$IEEE_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --accel-clock="$ACCEL_CLOCK" \
     --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
     --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
     --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \

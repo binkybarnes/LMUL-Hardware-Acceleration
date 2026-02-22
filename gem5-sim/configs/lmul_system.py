@@ -168,8 +168,21 @@ def createSystem(args):
     # Set memory controller range to match system memory range
     system.mem_ctrl.dram.range = system.mem_ranges[0]
     
-    # Set clock domain (must be set before creating processes)
-    system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
+    # Set CPU/system clock domain.
+    system.clk_domain = SrcClockDomain(
+        clock=args.cpu_clock,
+        voltage_domain=VoltageDomain()
+    )
+    system.cpu.clk_domain = system.clk_domain
+
+    # TODO #6: separate accelerator clock from CPU clock.
+    # Keep both on the same voltage domain for now and allow independent frequency.
+    if "lmul_accel" in system._children:
+        system.accel_clk_domain = SrcClockDomain(
+            clock=args.accel_clock,
+            voltage_domain=system.clk_domain.voltage_domain,
+        )
+        system.lmul_accel.clk_domain = system.accel_clk_domain
     
     # Note: Process creation and workload setup will be done in main()
     # after the system is created but before Root is created
@@ -196,6 +209,8 @@ def main():
                        help='Use IEEE BF16 instead of LMUL')
     parser.add_argument('--cpu-clock', type=str, default='2GHz',
                        help='CPU clock frequency (default: 2GHz)')
+    parser.add_argument('--accel-clock', type=str, default='2GHz',
+                       help='LMUL accelerator clock frequency (default: 2GHz)')
     parser.add_argument('--disable-cpu-power-model', action='store_true',
                        help='Disable first-order CPU power model stats')
     parser.add_argument('--cpu-dyn-energy-per-cycle-pj', type=float, default=500.0,
@@ -294,9 +309,12 @@ def main():
     
     # Run simulation
     if "lmul_accel" in system._children:
-        print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array (LMUL Accelerator)")
+        print(
+            f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array "
+            f"(LMUL Accelerator, CPU={args.cpu_clock}, ACCEL={args.accel_clock})"
+        )
     else:
-        print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator)")
+        print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator, CPU={args.cpu_clock})")
     if args.cmd:
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     

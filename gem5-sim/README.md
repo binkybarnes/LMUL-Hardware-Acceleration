@@ -156,6 +156,7 @@ cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_4.txt
 
 - `--size N` — N×N matrices  
 - `--pe-rows N`, `--pe-cols N` — PE array dimensions  
+- `--accel-clock FREQ` — accelerator clock frequency (default: `2GHz`)  
 - `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)  
 - `--include-cpu-lmul` — also run CPU LMUL simulation for three-way comparison (default: off)
 
