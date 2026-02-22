@@ -198,6 +198,36 @@ The IEEE path uses an optimized but still realistic software implementation: BF1
 
 ---
 
+## Energy and Clock Parameters (References)
+
+Energy- and speed-related hyperparameters and their grounding in literature or the lack thereof:
+
+### Accelerator (LMulAccelerator)
+
+| Parameter | Default | Source / Notes |
+|-----------|---------|----------------|
+| `energy_per_op_pj` | 0.5 pJ | **Referenced.** State-of-the-art DNN accelerators report ~0.1 pJ/op (NVIDIA 16nm multi-chip DNN accelerator, 8-bit: 0.11 pJ/op; DiP systolic array: ~0.1 pJ/op). Our 0.5 pJ is a conservative estimate for BF16 matmul (higher precision than 8-bit). See [NVIDIA DNN accelerator (0.11 pJ/op, 16nm)](https://research.nvidia.com/publication/2019-06_011-pjop-032-128-tops-scalable-multi-chip-module-based-deep-neural-network), [DiP systolic array (arXiv:2412.09709)](https://arxiv.org/abs/2412.09709). |
+| `dma_energy_per_byte_pj` | 0.05 pJ | **No reliable source found.** Literature reports DRAM access energy per byte as highly variable (bank activation dominates). On-chip SRAM access is on the order of 0.1 pJ/byte. Our value is a placeholder; consider calibrating to hardware if available. |
+| `leakage_power_mw` | 1.0 mW | **No reliable source found.** Small systolic array (e.g. 4×4 PE); leakage scales with area. Placeholder for relative comparison. |
+| `--accel-clock` | 2 GHz | **Referenced.** TPU systolic arrays operate around 1.5 GHz; modern systolic/GEMM accelerators often run 1–2+ GHz. 2 GHz is a reasonable default for a small PE array. See [TPU v1 (Jouppi et al.)](https://dl.acm.org/doi/10.1145/3079856.3080246), [DiP (arXiv:2412.09709)](https://arxiv.org/abs/2412.09709). |
+
+### CPU (first-order model)
+
+| Parameter | Default | Source / Notes |
+|-----------|---------|----------------|
+| `--cpu-dyn-energy-per-cycle-pj` | 500 pJ | **No specific hardware source.** First-order model for gem5 TimingSimpleCPU. ARM Cortex-M0 studies report ~170 µW/MHz; at 2 GHz that implies order-of-magnitude hundreds of pJ per effective cycle depending on activity. 500 pJ is a plausible placeholder for a simple in-order core. |
+| `--cpu-dyn-energy-per-inst-pj` | 50 pJ | **No specific hardware source.** Extra energy attributed per committed instruction (e.g. pipeline overhead). Calibrate to target CPU if needed. |
+| `--cpu-static-power-mw` | 200 mW | **No specific hardware source.** Placeholder for static/leakage power of a small CPU core. |
+
+### Summary
+
+- **With references:** `energy_per_op_pj`, `--accel-clock`
+- **Without references (placeholder):** `dma_energy_per_byte_pj`, `leakage_power_mw`, all CPU power parameters
+
+To calibrate parameters for a specific target, consult vendor datasheets or measured power/energy studies for your CPU and accelerator.
+
+---
+
 ## Troubleshooting
 
 | Problem | What to do |
