@@ -62,3 +62,11 @@ gem5/
 
 # Local-only cluster scripts (keep locally, do not commit)
 gem5-sim/scripts/sbatch_compare_lmul_vs_ieee.slurm
+
+# .pt's (these exceed 100MB)
+*.ptNNs/core
+NNs/core
+*.pt
+*.pth
+*.bin
+
