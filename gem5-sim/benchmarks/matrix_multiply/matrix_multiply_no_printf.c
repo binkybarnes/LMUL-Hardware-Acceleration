@@ -62,11 +62,6 @@ static int write_all(int fd, const void *buf, size_t bytes);
 static int write_result_bin(const char *path, uint32_t M, uint32_t P, const bf16_t *C);
 static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P,
                            const bf16_t *A, const bf16_t *B);
-static inline uint32_t lmul_pack_operand(bf16_t x);
-static void init_bf16_to_float_lut(void);
-
-static float g_bf16_to_float_lut[1u << 16];
-static int g_bf16_to_float_lut_ready = 0;
 
 static int write_all(int fd, const void *buf, size_t bytes)
 {
@@ -126,28 +121,6 @@ static int write_inputs_bin(const char *path, uint32_t M, uint32_t N, uint32_t P
         status = -1;
     }
     return status;
-}
-
-/* Pack reusable LMUL operand fields:
- * bits [14:0] field, bit 15 sign, bit 16 exponent-nonzero flag. */
-static inline uint32_t lmul_pack_operand(bf16_t x)
-{
-    const uint32_t field = (uint32_t)(x & 0x7FFFu);
-    const uint32_t sign = ((uint32_t)x >> 15) & 0x1u;
-    const uint32_t exp_nz = ((field & 0x7F80u) != 0u) ? 0x10000u : 0u;
-    return field | (sign << 15) | exp_nz;
-}
-
-/* Cached BF16->float conversion to avoid per-MAC bit-cast overhead. */
-static void init_bf16_to_float_lut(void)
-{
-    if (g_bf16_to_float_lut_ready) {
-        return;
-    }
-    for (uint32_t i = 0; i < (1u << 16); i++) {
-        g_bf16_to_float_lut[i] = bf16_to_float((bf16_t)i);
-    }
-    g_bf16_to_float_lut_ready = 1;
 }
 
 int main(int argc, char *argv[])
@@ -375,18 +348,9 @@ static bf16_t lmul_bf16_rtl(bf16_t a, bf16_t b)
 void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
                               uint32_t M, uint32_t N, uint32_t P)
 {
-    const size_t a_elems = (size_t)M * (size_t)N;
-    const size_t b_elems = (size_t)N * (size_t)P;
     const size_t c_elems = (size_t)M * (size_t)P;
     float *C_f32 = (float *)calloc(c_elems, sizeof(float));
-    uint32_t *A_desc = (uint32_t *)malloc(a_elems * sizeof(uint32_t));
-    uint32_t *B_t_desc = (uint32_t *)malloc(b_elems * sizeof(uint32_t));  // B transposed: P x N
-
-    // Fallback keeps behavior correct if scratch allocation fails.
-    if (!C_f32 || !A_desc || !B_t_desc) {
-        if (C_f32) free(C_f32);
-        if (A_desc) free(A_desc);
-        if (B_t_desc) free(B_t_desc);
+    if (!C_f32) {
         for (uint32_t i = 0; i < M; i++) {
             for (uint32_t j = 0; j < P; j++) {
                 float sum = 0.0f;
@@ -400,20 +364,7 @@ void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
         return;
     }
 
-    init_bf16_to_float_lut();
-    for (size_t idx = 0; idx < a_elems; idx++) {
-        A_desc[idx] = lmul_pack_operand(A[idx]);
-    }
-    for (uint32_t k = 0; k < N; k++) {
-        for (uint32_t j = 0; j < P; j++) {
-            B_t_desc[(size_t)j * N + k] = lmul_pack_operand(B[(size_t)k * P + j]);
-        }
-    }
-
     const uint32_t tile = 32;
-    const uint32_t exp_nz_mask = 0x10000u;
-    const uint32_t field_mask = 0x7FFFu;
-    const uint32_t offset_mod = 0x4080u;
     for (uint32_t ii = 0; ii < M; ii += tile) {
         const uint32_t i_end = (ii + tile < M) ? (ii + tile) : M;
         for (uint32_t jj = 0; jj < P; jj += tile) {
@@ -422,36 +373,14 @@ void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
                 const uint32_t k_end = (kk + tile < N) ? (kk + tile) : N;
                 for (uint32_t i = ii; i < i_end; i++) {
                     float *c_row = &C_f32[(size_t)i * P];
-                    const uint32_t *a_row = &A_desc[(size_t)i * N];
                     for (uint32_t j = jj; j < j_end; j++) {
-                        const uint32_t *b_row = &B_t_desc[(size_t)j * N];
                         float sum = c_row[j];
                         for (uint32_t k = kk; k < k_end; k++) {
-                            const uint32_t a_desc = a_row[k];
-                            const uint32_t b_desc = b_row[k];
-
-                            // Match lmul_bf16_rtl zero/subnormal behavior.
-                            if ((a_desc & b_desc & exp_nz_mask) == 0u) {
-                                continue;
-                            }
-
-                            const uint32_t sum_full =
-                                (a_desc & field_mask) + (b_desc & field_mask) + offset_mod;
-                            const uint32_t carry2 = (sum_full >> 15) & 0x3u;
-                            if (carry2 == 0u) {
-                                continue;
-                            }
-
-                            const uint16_t field_sel = (carry2 >= 2u)
-                                ? (uint16_t)field_mask
-                                : (uint16_t)(sum_full & field_mask);
-                            if (field_sel == 0u) {
-                                continue;
-                            }
-
-                            const uint16_t sign = (uint16_t)(((a_desc ^ b_desc) >> 15) & 0x1u);
-                            const uint16_t prod = (uint16_t)((sign << 15) | field_sel);
-                            sum += g_bf16_to_float_lut[prod];
+                            bf16_t prod = lmul_bf16_rtl(
+                                A[(size_t)i * N + k],
+                                B[(size_t)k * P + j]
+                            );
+                            sum += bf16_to_float(prod);
                         }
                         c_row[j] = sum;
                     }
@@ -463,9 +392,6 @@ void cpu_lmul_matrix_multiply(bf16_t *A, bf16_t *B, bf16_t *C,
     for (size_t idx = 0; idx < c_elems; idx++) {
         C[idx] = float_to_bf16(C_f32[idx]);
     }
-
-    free(A_desc);
-    free(B_t_desc);
     free(C_f32);
 }
 
