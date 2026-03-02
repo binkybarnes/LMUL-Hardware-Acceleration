@@ -9,9 +9,9 @@ Performance Comparison: LMUL Accel vs CPU LMUL vs IEEE CPU
 Final Metrics
 --------------------------------------------------------------------------------
 Metric                       LMUL Accel         CPU LMUL           IEEE              
-Simulation Time (s)          0.000598           0.000771           0.000735          
-CPU Cycles                   1,196,738          1,541,464          1,470,049         
-Estimated total energy (µJ)  1447.268           1866.391           1779.739          
+Simulation Time (s)          0.000558           0.000731           0.000695          
+CPU Cycles                   1,116,025          1,461,464          1,390,385         
+Estimated total energy (µJ)  1349.731           1768.679           1683.884          
 
   Algorithm (CPU LMUL vs IEEE): same hardware, different math
     → Time ratio (IEEE/CPU_LMUL): 0.95x
@@ -19,21 +19,21 @@ Estimated total energy (µJ)  1447.268           1866.391           1779.739
     → Total energy ratio (IEEE/CPU_LMUL): 0.95x
 
   Hardware (CPU LMUL vs ACCEL LMUL): same algorithm, CPU vs accelerator
-    → Time speedup (ACCEL vs CPU_LMUL): 1.29x
-    → Cycle speedup (ACCEL vs CPU_LMUL): 1.29x
-    → Total energy ratio (CPU_LMUL/ACCEL): 1.29x (>1 = accel used less)
+    → Time speedup (ACCEL vs CPU_LMUL): 1.31x
+    → Cycle speedup (ACCEL vs CPU_LMUL): 1.31x
+    → Total energy ratio (CPU_LMUL/ACCEL): 1.31x (>1 = accel used less)
 
 Performance Details
 --------------------------------------------------------------------------------
 Metric                       LMUL Accel         CPU LMUL           IEEE              
-Instructions                 8,879              11,833             10,881            
-CPI                          134.6768           130.1912           135.0155          
-IPC                          0.007425           0.007681           0.007407          
+Instructions                 8,307              11,261             10,309            
+CPI                          134.2344           129.7004           134.7795          
+IPC                          0.007450           0.007710           0.007420          
 
 Cycle Categorization
 --------------------------------------------------------------------------------
 Metric                       LMUL Accel         CPU LMUL           IEEE              
-CPU total cycles             1,196,738          1,541,464          1,470,049         
+CPU total cycles             1,116,025          1,461,464          1,390,385         
 Accel total cycles           249                0                  0                 
   - MMIO I/O cycles          1,800              -                  -                 
   - DMA read + compute + write 249                -                  -                 
@@ -41,9 +41,9 @@ Accel total cycles           249                0                  0
 Energy Breakdown
 --------------------------------------------------------------------------------
 Metric                       LMUL Accel         CPU LMUL           IEEE              
-DRAM energy (µJ)             728.855            940.867            897.171           
+DRAM energy (µJ)             679.703            891.184            849.176           
 Accel energy (µJ)            0.000              0                  0                 
-CPU energy (µJ)              718.413            925.524            882.569           
+CPU energy (µJ)              670.028            877.495            834.708           
   (Estimated total = DRAM + CPU first-order + accelerator where present)
 ================================================================================
 
