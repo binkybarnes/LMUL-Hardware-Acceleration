@@ -198,6 +198,50 @@ The IEEE path uses an optimized but still realistic software implementation: BF1
 
 ---
 
+## Toward a more realistic IEEE CPU baseline
+
+The default setup uses **TimingSimpleCPU** (in-order, no caches, scalar code), so the IEEE path is intentionally conservative and the reported speedup (e.g. 100–200×) is high. To get closer to “realistic” IEEE performance (and a lower, more defensible speedup), you can apply these steps in order.
+
+| Step | What | Impact | Effort |
+|------|------|--------|--------|
+| **1** | **Compiler flags** | Enables auto-vectorization of the float inner loop. | Low |
+| **2** | **Add L1 (and optionally L2) caches** | Tiled IEEE code benefits from locality; fewer memory stalls. | Low–medium |
+| **3** | **Vectorize the IEEE kernel (NEON)** | 4× (or more) fewer instructions in the inner loop. | Medium |
+| **4** | **Switch to O3 CPU** | Out-of-order execution; much higher IPC. | Medium (slower sim) |
+| **5** | **Document both baselines** | Report “conservative” vs “optimized CPU” so the story is clear. | Low |
+
+### Step 1: Compiler flags
+
+In `gem5-sim/benchmarks/matrix_multiply/Makefile`:
+
+- Use **`-O3`** instead of `-O2`.
+- Add an architecture flag so the compiler can use SIMD:
+  - For **ARM 64-bit** (gem5 ARMv8): e.g. `-march=armv8-a+simd` (or whatever your cross-compiler supports).
+  - For **ARM 32-bit** (gem5 ARMv7): e.g. `-march=armv7-a -mfpu=neon -mfloat-abi=hard`.
+
+Rebuild the benchmark and re-run the IEEE path; check `simInsts` and `numCycles` — they should drop if the inner loop is vectorized.
+
+### Step 2: Add L1 (and optionally L2) caches
+
+Currently the CPU is wired directly to the memory bus (no cache objects). Add an L1 I-cache and L1 D-cache between the CPU and the bus (standard gem5 pattern: create `Cache` objects, connect `cpu.icache_port` → `l1_icache.cpu_side`, `l1_icache.mem_side` → `membus`, and similarly for D-cache). Optionally add an L2. The tiled IEEE matmul will benefit from locality; the accelerator path is mostly DMA so its behavior stays similar. Re-run and compare cycles.
+
+### Step 3: Vectorize the IEEE kernel (NEON)
+
+In `cpu_matrix_multiply`, the inner loop over `k` is scalar (`sum += a_row[k] * b_row[k]`). Implement a NEON version (e.g. `float32x4_t`, `vld1q_f32`, `vmlaq_f32`, `vaddvq_f32` / horizontal add) so each iteration does 4 float multiply-adds. Keep the same tiling and BF16↔float conversion; only the inner dot product is vectorized. This gives a substantial reduction in instructions and cycles for the IEEE path.
+
+### Step 4: Switch to O3 CPU
+
+In `gem5-sim/configs/lmul_system.py`, replace `TimingSimpleCPU()` with `DerivO3CPU()` (or the appropriate O3 class for your gem5 version). Out-of-order execution will increase IPC (e.g. from ~0.01 to 0.5 or higher), so the same instruction stream will complete in fewer cycles. Note: O3 simulation is slower and uses more memory; large sizes (e.g. 1024) may require more host RAM and time.
+
+### Step 5: Document both baselines
+
+When reporting results, you can:
+
+- Keep the current setup as the **“conservative CPU baseline”** (simple core, scalar or lightly optimized code) and report that the speedup is relative to that.
+- Add an **“optimized CPU baseline”** (O3 + caches + NEON, or a subset) and report speedup vs both, so the audience sees that the accelerator still wins by a large margin even when the CPU is more realistic.
+
+---
+
 ## Energy and Clock Parameters (References)
 
 Energy- and speed-related hyperparameters and their grounding in literature or the lack thereof:
