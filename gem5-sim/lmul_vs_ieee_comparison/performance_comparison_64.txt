@@ -1,87 +1,49 @@
-Loading LMUL stats from: lmul_vs_ieee_comparison/lmul/stats.txt
-Loading IEEE stats from: lmul_vs_ieee_comparison/ieee/stats.txt
+Loading LMUL (accel) stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt
+Loading IEEE stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt
+Loading CPU LMUL stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/cpu_lmul/stats.txt
 
-======================================================================
-Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
-======================================================================
+================================================================================
+Performance Comparison: LMUL Accel vs CPU LMUL vs IEEE CPU
+================================================================================
 
 Final Metrics
-----------------------------------------------------------------------
-Metric                         LMUL                 IEEE                
-Simulation Time (s)            0.010000             0.130230            
-  → Speedup: 13.02x
-CPU Cycles                     19,999,590           260,460,724         
-  → Speedup: 13.02x
-Estimated total energy (µJ)    23675.877            314500.202          
-  → Total energy ratio (IEEE/LMUL): 13.28x (>1 = LMUL used less)
+--------------------------------------------------------------------------------
+Metric                       LMUL Accel         CPU LMUL           IEEE              
+Simulation Time (s)          0.009969           0.489043           0.130199          
+CPU Cycles                   19,938,925         978,086,011        260,397,405       
+Estimated total energy (µJ)  23602.373          1166332.164        314422.902        
+
+  Algorithm (CPU LMUL vs IEEE): same hardware, different math
+    → Time ratio (IEEE/CPU_LMUL): 0.27x
+    → Cycle ratio (IEEE/CPU_LMUL): 0.27x
+    → Total energy ratio (IEEE/CPU_LMUL): 0.27x
+
+  Hardware (CPU LMUL vs ACCEL LMUL): same algorithm, CPU vs accelerator
+    → Time speedup (ACCEL vs CPU_LMUL): 49.06x
+    → Cycle speedup (ACCEL vs CPU_LMUL): 49.05x
+    → Total energy ratio (CPU_LMUL/ACCEL): 49.42x (>1 = accel used less)
 
 Performance Details
-----------------------------------------------------------------------
-Metric                         LMUL                 IEEE                
-Instructions                   142,107              1,616,032           
-CPI                            140.7292             161.1723            
-  → Improvement: 1.15x
-IPC                            0.007106             0.006205            
-  → Improvement: 1.15x
+--------------------------------------------------------------------------------
+Metric                       LMUL Accel         CPU LMUL           IEEE              
+Instructions                 141,698            8,672,647          1,615,599         
+CPI                          140.7073           112.7782           161.1763          
+IPC                          0.007107           0.008867           0.006204          
 
 Cycle Categorization
-----------------------------------------------------------------------
-Metric                         LMUL                 IEEE                
-CPU total cycles               19,999,590           260,460,724         
-Accel total cycles             21,525               0                   
-  - MMIO I/O cycles            9,400                0                   
-  - DMA read cycles            3,718                0                   
-  - Compute cycles             16,384               0                   
-  - DMA write cycles           1,423                0                   
-  - Other accel cycles         0                    0                   
-  - DMA+compute share (%)      100.00               0.00                
+--------------------------------------------------------------------------------
+Metric                       LMUL Accel         CPU LMUL           IEEE              
+CPU total cycles             19,938,925         978,086,011        260,397,405       
+Accel total cycles           20,895             0                  0                 
+  - MMIO I/O cycles          9,400              -                  -                 
+  - DMA read + compute + write 20,895             -                  -                 
 
 Energy Breakdown
-----------------------------------------------------------------------
-Metric                         LMUL                 IEEE                
-DRAM energy (µJ)               11668.834            158143.039          
-  → DRAM energy ratio (IEEE/LMUL): 13.55x (>1 = LMUL used less)
-DRAM avg power (mW)            1166.907             1214.333            
-Accel total energy (µJ)        0.143                0.000               
-Accel compute energy (µJ)      0.131                0.000               
-Accel DMA energy (µJ)          0.001                0.000               
-Accel leakage energy (µJ)      0.011                0.000               
-Accel avg power (mW)           0.014                0.000               
-CPU dyn power (mW)             1000.690             1000.623            
-CPU static power (mW)          200.000              200.000             
-CPU total power (mW)           1200.690             1200.623            
-CPU energy (µJ)                12006.900            156357.164          
-  → CPU energy ratio (IEEE/LMUL): 13.02x (>1 = LMUL used less)
-  (CPU energy model: 500.000 pJ/cycle + 50.000 pJ/instruction + 200.000 mW static)
-Estimated total avg power (mW) 2367.588             2414.960            
-  (Estimated total = DRAM + CPU first-order model + accelerator first-order model)
-
-
-Accelerator Metrics (summary) 
-----------------------------------------------------------------------
-Numcompletions                 1                    0                   
-Numstarts                      1                    0                   
-Numreads                       39                   0                   
-Numwrites                      8                    0                   
-Totalcycles                    21525                0                   
-Totalops                       262144               0                   
-Mmioreadcycles                 7800                 0                   
-Mmiowritecycles                1600                 0                   
-Mmiototalcycles                9400                 0                   
-Dmareadcycles                  3718                 0                   
-Computecycles                  16384                0                   
-Dmawritecycles                 1423                 0                   
-Memorytransfercycles           5141                 0                   
-Dmareadreqs                    2                    0                   
-Dmawritereqs                   1                    0                   
-Dmareadbytes                   16384                0                   
-Dmawritebytes                  8192                 0                   
-Estimatedcomputeenergyj        1.31072e-07          0.0                 
-Estimateddmaenergyj            1.229e-09            0.0                 
-Estimatedleakageenergyj        1.0763e-08           0.0                 
-Estimatedtotalenergyj          1.43063e-07          0.0                 
-Oplatency::Mean                10762500             nan                 
-Oplatency::Gmean               10762500.0           nan                 
-Oplatency::Samples             1                    0                   
-======================================================================
+--------------------------------------------------------------------------------
+Metric                       LMUL Accel         CPU LMUL           IEEE              
+DRAM energy (µJ)             11631.883          579046.926         158103.620        
+Accel energy (µJ)            0.143              0                  0                 
+CPU energy (µJ)              11970.347          587285.238         156319.282        
+  (Estimated total = DRAM + CPU first-order + accelerator where present)
+================================================================================
 

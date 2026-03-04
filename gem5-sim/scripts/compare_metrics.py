@@ -407,13 +407,85 @@ def print_comparison(lmul_metrics, ieee_metrics, speedup):
     """Print formatted comparison to stdout."""
     print(format_comparison(lmul_metrics, ieee_metrics, speedup))
 
+
+def format_comparison_three_way(accel_metrics, cpu_lmul_metrics, ieee_metrics):
+    """Three-way report: LMUL Accel, CPU LMUL, IEEE. Includes algorithm (CPU LMUL vs IEEE) and hardware (CPU LMUL vs Accel) comparisons."""
+    def pct(part, whole):
+        return (100.0 * part / whole) if whole > 0 else 0.0
+
+    speedup_algo = calculate_speedup(cpu_lmul_metrics, ieee_metrics)   # CPU LMUL vs IEEE (algorithm)
+    # Hardware: accel as "baseline" so ratio = CPU_LMUL/Accel; >1 time = accel faster, >1 energy = accel used less
+    speedup_hw = calculate_speedup(accel_metrics, cpu_lmul_metrics)
+
+    lines = []
+    lines.append("\n" + "="*80)
+    lines.append("Performance Comparison: LMUL Accel vs CPU LMUL vs IEEE CPU")
+    lines.append("="*80)
+    lines.append("")
+    lines.append("Final Metrics")
+    lines.append("-"*80)
+    lines.append(f"{'Metric':<28s} {'LMUL Accel':<18s} {'CPU LMUL':<18s} {'IEEE':<18s}")
+    lines.append(f"{'Simulation Time (s)':<28s} {accel_metrics['sim_seconds']:<18.6f} {cpu_lmul_metrics['sim_seconds']:<18.6f} {ieee_metrics['sim_seconds']:<18.6f}")
+    lines.append(f"{'CPU Cycles':<28s} {accel_metrics['cpu_cycles']:<18,} {cpu_lmul_metrics['cpu_cycles']:<18,} {ieee_metrics['cpu_cycles']:<18,}")
+    lines.append(f"{'Estimated total energy (µJ)':<28s} {accel_metrics.get('estimated_total_energy_uJ', 0):<18.3f} {cpu_lmul_metrics.get('estimated_total_energy_uJ', 0):<18.3f} {ieee_metrics.get('estimated_total_energy_uJ', 0):<18.3f}")
+    lines.append("")
+    lines.append("  Algorithm (CPU LMUL vs IEEE): same hardware, different math")
+    if speedup_algo.get('time'):
+        lines.append(f"    → Time ratio (IEEE/CPU_LMUL): {speedup_algo['time']:.2f}x")
+    if speedup_algo.get('cycles'):
+        lines.append(f"    → Cycle ratio (IEEE/CPU_LMUL): {speedup_algo['cycles']:.2f}x")
+    if speedup_algo.get('total_energy'):
+        lines.append(f"    → Total energy ratio (IEEE/CPU_LMUL): {speedup_algo['total_energy']:.2f}x")
+    lines.append("")
+    lines.append("  Hardware (CPU LMUL vs ACCEL LMUL): same algorithm, CPU vs accelerator")
+    if speedup_hw.get('time'):
+        lines.append(f"    → Time speedup (ACCEL vs CPU_LMUL): {speedup_hw['time']:.2f}x")
+    if speedup_hw.get('cycles'):
+        lines.append(f"    → Cycle speedup (ACCEL vs CPU_LMUL): {speedup_hw['cycles']:.2f}x")
+    if speedup_hw.get('total_energy'):
+        lines.append(f"    → Total energy ratio (CPU_LMUL/ACCEL): {speedup_hw['total_energy']:.2f}x (>1 = accel used less)")
+    lines.append("")
+
+    lines.append("Performance Details")
+    lines.append("-"*80)
+    lines.append(f"{'Metric':<28s} {'LMUL Accel':<18s} {'CPU LMUL':<18s} {'IEEE':<18s}")
+    lines.append(f"{'Instructions':<28s} {accel_metrics['instructions']:<18,} {cpu_lmul_metrics['instructions']:<18,} {ieee_metrics['instructions']:<18,}")
+    lines.append(f"{'CPI':<28s} {accel_metrics['cpi']:<18.4f} {cpu_lmul_metrics['cpi']:<18.4f} {ieee_metrics['cpi']:<18.4f}")
+    lines.append(f"{'IPC':<28s} {accel_metrics['ipc']:<18.6f} {cpu_lmul_metrics['ipc']:<18.6f} {ieee_metrics['ipc']:<18.6f}")
+    lines.append("")
+
+    lines.append("Cycle Categorization")
+    lines.append("-"*80)
+    lines.append(f"{'Metric':<28s} {'LMUL Accel':<18s} {'CPU LMUL':<18s} {'IEEE':<18s}")
+    lines.append(f"{'CPU total cycles':<28s} {accel_metrics.get('cpu_cycles', 0):<18,} {cpu_lmul_metrics.get('cpu_cycles', 0):<18,} {ieee_metrics.get('cpu_cycles', 0):<18,}")
+    accel_total = accel_metrics.get('accel_total_cycles', 0)
+    if accel_total > 0:
+        lines.append(f"{'Accel total cycles':<28s} {accel_total:<18,} {'0':<18s} {'0':<18s}")
+        lines.append(f"{'  - MMIO I/O cycles':<28s} {accel_metrics.get('accel_mmio_total_cycles', 0):<18,} {'-':<18s} {'-':<18s}")
+        lines.append(f"{'  - DMA read + compute + write':<28s} {(accel_metrics.get('accel_dma_read_cycles',0)+accel_metrics.get('accel_compute_cycles',0)+accel_metrics.get('accel_dma_write_cycles',0)):<18,} {'-':<18s} {'-':<18s}")
+    lines.append("")
+
+    lines.append("Energy Breakdown")
+    lines.append("-"*80)
+    lines.append(f"{'Metric':<28s} {'LMUL Accel':<18s} {'CPU LMUL':<18s} {'IEEE':<18s}")
+    lines.append(f"{'DRAM energy (µJ)':<28s} {accel_metrics.get('dram_energy_uJ', 0):<18.3f} {cpu_lmul_metrics.get('dram_energy_uJ', 0):<18.3f} {ieee_metrics.get('dram_energy_uJ', 0):<18.3f}")
+    if accel_metrics.get('accel_total_energy_j', 0) > 0:
+        lines.append(f"{'Accel energy (µJ)':<28s} {accel_metrics.get('accel_total_energy_uJ', 0):<18.3f} {'0':<18s} {'0':<18s}")
+    lines.append(f"{'CPU energy (µJ)':<28s} {accel_metrics.get('cpu_energy_uJ', 0):<18.3f} {cpu_lmul_metrics.get('cpu_energy_uJ', 0):<18.3f} {ieee_metrics.get('cpu_energy_uJ', 0):<18.3f}")
+    lines.append("  (Estimated total = DRAM + CPU first-order + accelerator where present)")
+    lines.append("="*80 + "\n")
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Compare LMUL vs IEEE gem5 stats",
+        description="Compare LMUL vs IEEE gem5 stats; optional three-way with CPU LMUL",
         epilog="Example: python3 compare_metrics.py lmul/stats.txt ieee/stats.txt -o comparison.txt"
     )
-    parser.add_argument("lmul_file", help="Path to LMUL run stats.txt")
+    parser.add_argument("lmul_file", help="Path to LMUL (accelerator) run stats.txt")
     parser.add_argument("ieee_file", help="Path to IEEE run stats.txt")
+    parser.add_argument("--cpu-lmul", metavar="FILE",
+                        help="Path to CPU LMUL run stats.txt for three-way comparison (algorithm vs hardware)")
     parser.add_argument("-o", "--output", metavar="FILE",
                         help="Also write comparison to FILE")
     parser.add_argument("--cpu-dyn-energy-per-cycle-pj", type=float, default=500.0,
@@ -427,7 +499,7 @@ def main():
     lmul_file = args.lmul_file
     ieee_file = args.ieee_file
     
-    print(f"Loading LMUL stats from: {lmul_file}")
+    print(f"Loading LMUL (accel) stats from: {lmul_file}")
     lmul_stats = parse_stats(lmul_file)
     lmul_metrics = extract_key_metrics(
         lmul_stats,
@@ -444,9 +516,22 @@ def main():
         cpu_dyn_energy_per_inst_pj=args.cpu_dyn_energy_per_inst_pj,
         cpu_static_power_mw=args.cpu_static_power_mw,
     )
-    
-    speedup = calculate_speedup(lmul_metrics, ieee_metrics)
-    out_text = format_comparison(lmul_metrics, ieee_metrics, speedup)
+
+    cpu_lmul_metrics = None
+    if getattr(args, 'cpu_lmul', None):
+        print(f"Loading CPU LMUL stats from: {args.cpu_lmul}")
+        cpu_lmul_stats = parse_stats(args.cpu_lmul)
+        cpu_lmul_metrics = extract_key_metrics(
+            cpu_lmul_stats,
+            cpu_dyn_energy_per_cycle_pj=args.cpu_dyn_energy_per_cycle_pj,
+            cpu_dyn_energy_per_inst_pj=args.cpu_dyn_energy_per_inst_pj,
+            cpu_static_power_mw=args.cpu_static_power_mw,
+        )
+        out_text = format_comparison_three_way(lmul_metrics, cpu_lmul_metrics, ieee_metrics)
+    else:
+        speedup = calculate_speedup(lmul_metrics, ieee_metrics)
+        out_text = format_comparison(lmul_metrics, ieee_metrics, speedup)
+
     print(out_text)
     
     if args.output:

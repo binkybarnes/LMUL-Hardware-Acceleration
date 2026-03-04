@@ -23,7 +23,7 @@
         "m5ops_base": 0,
         "mem_mode": "timing",
         "mem_ranges": [
-            "0:536870912"
+            "0:1073741824"
         ],
         "memories": [
             "system.mem_ctrl.dram"
@@ -632,7 +632,56 @@
             },
             "numThreads": 1,
             "power_gating_on_idle": false,
-            "power_model": [],
+            "power_model": [
+                {
+                    "type": "PowerModel",
+                    "cxx_class": "gem5::PowerModel",
+                    "name": "power_model",
+                    "path": "system.cpu.power_model",
+                    "ambient_temp": 298.15,
+                    "eventq_index": 0,
+                    "pm": [
+                        {
+                            "type": "MathExprPowerModel",
+                            "cxx_class": "gem5::MathExprPowerModel",
+                            "name": "pm0",
+                            "path": "system.cpu.power_model.pm0",
+                            "dyn": "((<orphan LMulSystem>.cpu.numCycles / simSeconds) * 5.000000000000e-10) + ((simInsts / simSeconds) * 5.000000000000e-11)",
+                            "eventq_index": 0,
+                            "st": "2.000000000000e-01"
+                        },
+                        {
+                            "type": "MathExprPowerModel",
+                            "cxx_class": "gem5::MathExprPowerModel",
+                            "name": "pm1",
+                            "path": "system.cpu.power_model.pm1",
+                            "dyn": "0",
+                            "eventq_index": 0,
+                            "st": "0"
+                        },
+                        {
+                            "type": "MathExprPowerModel",
+                            "cxx_class": "gem5::MathExprPowerModel",
+                            "name": "pm2",
+                            "path": "system.cpu.power_model.pm2",
+                            "dyn": "0",
+                            "eventq_index": 0,
+                            "st": "0"
+                        },
+                        {
+                            "type": "MathExprPowerModel",
+                            "cxx_class": "gem5::MathExprPowerModel",
+                            "name": "pm3",
+                            "path": "system.cpu.power_model.pm3",
+                            "dyn": "0",
+                            "eventq_index": 0,
+                            "st": "0"
+                        }
+                    ],
+                    "pm_type": "All",
+                    "subsystem": "system.cpu_power_subsystem"
+                }
+            ],
             "power_state": {
                 "type": "PowerState",
                 "cxx_class": "gem5::PowerState",
@@ -641,7 +690,7 @@
                 "clk_gate_bins": 20,
                 "clk_gate_max": 1000000000000,
                 "clk_gate_min": 1000,
-                "default_state": "UNDEFINED",
+                "default_state": "ON",
                 "eventq_index": 0,
                 "leaders": [],
                 "possible_states": [
@@ -678,15 +727,15 @@
                     "name": "workload",
                     "path": "system.cpu.workload",
                     "cmd": [
-                        "/LMUL-Hardware-Acceleration/workspace/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm",
-                        "64",
-                        "64",
-                        "64",
+                        "/workspace/LMUL-Hardware-Acceleration/gem5-sim/benchmarks/matrix_multiply/matrix_multiply_no_printf.arm",
+                        "4",
+                        "4",
+                        "4",
                         "1",
                         "result.bin",
                         "inputs.bin"
                     ],
-                    "cwd": "/LMUL-Hardware-Acceleration/workspace/gem5-sim/lmul_vs_ieee_comparison/lmul",
+                    "cwd": "/workspace/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul",
                     "drivers": [],
                     "egid": 100,
                     "env": [],
@@ -721,6 +770,14 @@
                 "is_source": "True"
             }
         },
+        "cpu_power_subsystem": {
+            "type": "SubSystem",
+            "cxx_class": "gem5::SubSystem",
+            "name": "cpu_power_subsystem",
+            "path": "system.cpu_power_subsystem",
+            "eventq_index": 0,
+            "thermal_domain": null
+        },
         "dvfs_handler": {
             "type": "DVFSHandler",
             "cxx_class": "gem5::DVFSHandler",
@@ -739,7 +796,10 @@
             "path": "system.lmul_accel",
             "clk_domain": "system.clk_domain",
             "compute_latency": 1,
+            "dma_energy_per_byte_pj": 0.05,
+            "energy_per_op_pj": 0.5,
             "eventq_index": 0,
+            "leakage_power_mw": 1.0,
             "memory_latency": 100,
             "pe_array_cols": 4,
             "pe_array_rows": 4,
@@ -760,7 +820,14 @@
                 "leaders": [],
                 "possible_states": []
             },
+            "sid": null,
+            "ssid": null,
             "system": "system",
+            "dma": {
+                "role": "GEM5 REQUESTOR",
+                "peer": "system.membus.cpu_side_ports[2]",
+                "is_source": "True"
+            },
             "pio": {
                 "role": "GEM5 RESPONDER",
                 "peer": "system.membus.mem_side_ports[0]",
@@ -841,7 +908,7 @@
                     "leaders": [],
                     "possible_states": []
                 },
-                "range": "0:536870912",
+                "range": "0:1073741824",
                 "ranks_per_channel": 2,
                 "read_buffer_size": 32,
                 "tAAD": 1250,
@@ -978,6 +1045,7 @@
                 "peer": [
                     "system.cpu.icache_port",
                     "system.cpu.dcache_port",
+                    "system.lmul_accel.dma",
                     "system.system_port"
                 ],
                 "is_source": "False"
@@ -993,7 +1061,7 @@
         },
         "system_port": {
             "role": "GEM5 REQUESTOR",
-            "peer": "system.membus.cpu_side_ports[2]",
+            "peer": "system.membus.cpu_side_ports[3]",
             "is_source": "True"
         }
     }

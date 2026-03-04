@@ -1,4 +1,4 @@
-Loading LMUL stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt
+Loading LMUL (accel) stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt
 Loading IEEE stats from: /expanse/lustre/projects/uci157/ashi1/lmul_accel/LMUL-Hardware-Acceleration/gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt
 
 ======================================================================
@@ -8,80 +8,80 @@ Performance Comparison: LMUL Accelerator vs Native IEEE BF16 (CPU)
 Final Metrics
 ----------------------------------------------------------------------
 Metric                         LMUL                 IEEE                
-Simulation Time (s)            0.607152             61.026341           
-  → Speedup: 100.51x
-CPU Cycles                     1,214,303,066        122,052,682,312     
-  → Speedup: 100.51x
-Estimated total energy (µJ)    1435148.256          147851450.069       
-  → Total energy ratio (IEEE/LMUL): 103.02x (>1 = LMUL used less)
+Simulation Time (s)            0.604008             61.026467           
+  → Speedup: 101.04x
+CPU Cycles                     1,208,015,097        122,052,933,416     
+  → Speedup: 101.04x
+Estimated total energy (µJ)    1427933.397          147851828.190       
+  → Total energy ratio (IEEE/LMUL): 103.54x (>1 = LMUL used less)
 
 Performance Details
 ----------------------------------------------------------------------
 Metric                         LMUL                 IEEE                
-Instructions                   8,596,276            724,973,568         
-CPI                            141.2591             168.3547            
+Instructions                   8,558,108            724,973,566         
+CPI                            141.1543             168.3550            
   → Improvement: 1.19x
-IPC                            0.007079             0.005940            
+IPC                            0.007084             0.005940            
   → Improvement: 1.19x
 
 Cycle Categorization
 ----------------------------------------------------------------------
 Metric                         LMUL                 IEEE                
-CPU total cycles               1,214,303,066        122,052,682,312     
-Accel total cycles             8,711,956            0                   
-  - MMIO I/O cycles            3,459,800            0                   
-  - DMA read cycles            213,300              0                   
-  - Compute cycles             8,388,608            0                   
-  - DMA write cycles           110,048              0                   
+CPU total cycles               1,208,015,097        122,052,933,416     
+Accel total cycles             2,421,067            0                   
+  - MMIO I/O cycles            913,800              0                   
+  - DMA read cycles            212,870              0                   
+  - Compute cycles             2,097,152            0                   
+  - DMA write cycles           111,045              0                   
   - Other accel cycles         0                    0                   
   - DMA+compute share (%)      100.00               0.00                
 
 Energy Breakdown
 ----------------------------------------------------------------------
 Metric                         LMUL                 IEEE                
-DRAM energy (µJ)               706064.966           74583592.034        
-  → DRAM energy ratio (IEEE/LMUL): 105.63x (>1 = LMUL used less)
-DRAM avg power (mW)            1162.914             1222.154            
-Accel total energy (µJ)        71.543               0.000               
+DRAM energy (µJ)               702627.945           74583819.404        
+  → DRAM energy ratio (IEEE/LMUL): 106.15x (>1 = LMUL used less)
+DRAM avg power (mW)            1163.277             1222.155            
+Accel total energy (µJ)        68.398               0.000               
 Accel compute energy (µJ)      67.109               0.000               
 Accel DMA energy (µJ)          0.079                0.000               
-Accel leakage energy (µJ)      4.356                0.000               
-Accel avg power (mW)           0.118                0.000               
-CPU dyn power (mW)             1000.707             1000.594            
+Accel leakage energy (µJ)      1.211                0.000               
+Accel avg power (mW)           0.113                0.000               
+CPU dyn power (mW)             1000.708             1000.594            
 CPU static power (mW)          200.000              200.000             
-CPU total power (mW)           1200.707             1200.594            
-CPU energy (µJ)                729011.747           73267858.034        
-  → CPU energy ratio (IEEE/LMUL): 100.50x (>1 = LMUL used less)
+CPU total power (mW)           1200.708             1200.594            
+CPU energy (µJ)                725237.054           73268008.786        
+  → CPU energy ratio (IEEE/LMUL): 101.03x (>1 = LMUL used less)
   (CPU energy model: 500.000 pJ/cycle + 50.000 pJ/instruction + 200.000 mW static)
-Estimated total avg power (mW) 2363.738             2422.748            
+Estimated total avg power (mW) 2364.097             2422.749            
   (Estimated total = DRAM + CPU first-order model + accelerator first-order model)
 
 
 Accelerator Metrics (summary) 
 ----------------------------------------------------------------------
-Numcompletions                 1                    0                   
-Numstarts                      1                    0                   
-Numreads                       17291                0                   
-Numwrites                      8                    0                   
-Totalcycles                    8711956              0                   
-Totalops                       134217728            0                   
-Mmioreadcycles                 3458200              0                   
-Mmiowritecycles                1600                 0                   
-Mmiototalcycles                3459800              0                   
-Dmareadcycles                  213300               0                   
-Computecycles                  8388608              0                   
-Dmawritecycles                 110048               0                   
-Memorytransfercycles           323348               0                   
-Dmareadreqs                    2                    0                   
-Dmawritereqs                   1                    0                   
-Dmareadbytes                   1048576              0                   
-Dmawritebytes                  524288               0                   
-Estimatedcomputeenergyj        6.7108864e-05        0.0                 
-Estimateddmaenergyj            7.8643e-08           0.0                 
-Estimatedleakageenergyj        4.355978e-06         0.0                 
-Estimatedtotalenergyj          7.1543485e-05        0.0                 
-Oplatency::Mean                4355978000           nan                 
-Oplatency::Gmean               4355978000           nan                 
-Oplatency::Samples             1                    0                   
+Numcompletions                 1                    N/A                 
+Numstarts                      1                    N/A                 
+Numreads                       4561                 N/A                 
+Numwrites                      8                    N/A                 
+Totalcycles                    2421067              N/A                 
+Totalops                       134217728            N/A                 
+Mmioreadcycles                 912200               N/A                 
+Mmiowritecycles                1600                 N/A                 
+Mmiototalcycles                913800               N/A                 
+Dmareadcycles                  212870               N/A                 
+Computecycles                  2097152              N/A                 
+Dmawritecycles                 111045               N/A                 
+Memorytransfercycles           323915               N/A                 
+Dmareadreqs                    2                    N/A                 
+Dmawritereqs                   1                    N/A                 
+Dmareadbytes                   1048576              N/A                 
+Dmawritebytes                  524288               N/A                 
+Estimatedcomputeenergyj        6.7108864e-05        N/A                 
+Estimateddmaenergyj            7.8643e-08           N/A                 
+Estimatedleakageenergyj        1.210533e-06         N/A                 
+Estimatedtotalenergyj          6.8398041e-05        N/A                 
+Oplatency::Mean                1210533500           N/A                 
+Oplatency::Gmean               1210533499.999999    N/A                 
+Oplatency::Samples             1                    N/A                 
 ======================================================================
 

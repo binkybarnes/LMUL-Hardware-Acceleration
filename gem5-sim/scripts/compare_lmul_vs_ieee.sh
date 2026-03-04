@@ -25,6 +25,8 @@ USE_SIMPLE_TEST=0  # Use simple_test instead of matrix_multiply to avoid syscall
 LOG_FILE=""
 EXTRACT_OUTPUTS="${EXTRACT_OUTPUTS:-1}"  # 1: write inputs/result files + run correctness checks
 REQUIRE_RESULT_BIN="${REQUIRE_RESULT_BIN:-0}"  # 0: allow performance-only runs; 1: fail if result.bin missing
+RUN_CPU_LMUL="${RUN_CPU_LMUL:-0}"  # 0: two-way (LMUL accel vs IEEE); 1: three-way (+ CPU LMUL)
+ACCEL_CLOCK="${ACCEL_CLOCK:-2GHz}"
 DISABLE_CPU_POWER_MODEL=0
 CPU_DYN_ENERGY_PER_CYCLE_PJ="${CPU_DYN_ENERGY_PER_CYCLE_PJ:-500.0}"
 CPU_DYN_ENERGY_PER_INST_PJ="${CPU_DYN_ENERGY_PER_INST_PJ:-50.0}"
@@ -45,6 +47,10 @@ while [[ $# -gt 0 ]]; do
             PE_COLS="$2"
             shift 2
             ;;
+        --accel-clock)
+            ACCEL_CLOCK="$2"
+            shift 2
+            ;;
         --output-dir)
             OUTPUT_DIR="$2"
             shift 2
@@ -59,6 +65,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --no-output-extraction)
             EXTRACT_OUTPUTS=0
+            shift
+            ;;
+        --include-cpu-lmul)
+            RUN_CPU_LMUL=1
             shift
             ;;
         --disable-cpu-power-model)
@@ -78,21 +88,25 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -h|--help)
-            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--output-dir DIR] [--log-file FILE] [--no-output-extraction] [--disable-cpu-power-model]"
+            echo "Usage: $0 [--size N] [--pe-rows R] [--pe-cols C] [--accel-clock FREQ] [--output-dir DIR] [--log-file FILE] [--no-output-extraction] [--include-cpu-lmul] [--disable-cpu-power-model]"
             echo
-            echo "Compares LMUL accelerator vs IEEE BF16 accelerator:"
-            echo "  - Runs both simulations"
+            echo "Compares LMUL accelerator vs IEEE BF16 (CPU):"
+            echo "  - Default: two-way (LMUL accel, IEEE). Use --include-cpu-lmul for three-way (+ CPU LMUL)."
             echo "  - Verifies output accuracy"
             echo "  - Compares performance metrics"
             echo "  - --log-file FILE: save all script output to FILE (and still show on terminal)"
             echo "  - --no-output-extraction: skip writing inputs/result files and correctness checks"
+            echo "  - --accel-clock FREQ: LMUL accelerator clock (default: ${ACCEL_CLOCK})"
             echo "  - --disable-cpu-power-model: disable gem5 CPU power-model stats (report still uses first-order CPU energy model)"
             echo "  - --cpu-dyn-energy-per-cycle-pj N: CPU dynamic energy per cycle (default: ${CPU_DYN_ENERGY_PER_CYCLE_PJ})"
             echo "  - --cpu-dyn-energy-per-inst-pj N: CPU dynamic energy per instruction (default: ${CPU_DYN_ENERGY_PER_INST_PJ})"
             echo "  - --cpu-static-power-mw N: CPU static power in mW (default: ${CPU_STATIC_POWER_MW})"
             echo "  - Requires matrix_multiply_no_printf.arm (set ALLOW_PRINTF_FALLBACK=1 to force printf binary)"
+            echo "  - --include-cpu-lmul: also run CPU LMUL (BF16 LMUL on CPU) for three-way comparison"
             echo "  - Env: EXTRACT_OUTPUTS=0 is equivalent to --no-output-extraction"
             echo "  - Env: REQUIRE_RESULT_BIN=1 fails when result.bin is missing (default: 0)"
+            echo "  - Env: RUN_CPU_LMUL=1 is equivalent to --include-cpu-lmul (default: 0)"
+            echo "  - Env: ACCEL_CLOCK=1GHz is equivalent to --accel-clock 1GHz"
             exit 0
             ;;
         *)
@@ -102,9 +116,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Normalize EXTRACT_OUTPUTS values to 0/1
+# Normalize EXTRACT_OUTPUTS and RUN_CPU_LMUL to 0/1
 if [ "${EXTRACT_OUTPUTS}" != "0" ]; then
     EXTRACT_OUTPUTS=1
+fi
+if [ "${RUN_CPU_LMUL}" != "1" ]; then
+    RUN_CPU_LMUL=0
 fi
 
 # Optionally tee all output to a log file
@@ -266,17 +283,20 @@ if [ "${#RESULT_FILE_ARGS[@]}" -gt 0 ] && [ "${USING_NO_PRINTF:-0}" -eq 1 ]; the
     fi
 fi
 
-# Create output directories
+# Create output directories (LMUL accel, CPU LMUL, IEEE CPU)
 LMUL_OUTPUT="${OUTPUT_DIR}/lmul"
+CPU_LMUL_OUTPUT="${OUTPUT_DIR}/cpu_lmul"
 IEEE_OUTPUT="${OUTPUT_DIR}/ieee"
 mkdir -p "$LMUL_OUTPUT" "$IEEE_OUTPUT"
+[ "$RUN_CPU_LMUL" -eq 1 ] && mkdir -p "$CPU_LMUL_OUTPUT"
 
 echo "Debug: Output directories created"
-echo "  LMUL: $LMUL_OUTPUT"
-echo "  IEEE: $IEEE_OUTPUT"
+echo "  LMUL (accel): $LMUL_OUTPUT"
+[ "$RUN_CPU_LMUL" -eq 1 ] && echo "  CPU LMUL:     $CPU_LMUL_OUTPUT"
+echo "  IEEE (CPU):   $IEEE_OUTPUT"
 
 echo "=========================================="
-echo "LMUL Accelerator vs Native IEEE BF16 (CPU)"
+echo "LMUL Accel vs IEEE CPU$([ "$RUN_CPU_LMUL" -eq 1 ] && echo " (incl. CPU LMUL)")"
 echo "=========================================="
 echo "Matrix Size: ${MATRIX_SIZE}x${MATRIX_SIZE}"
 PERF_COMPARISON_FILE="$OUTPUT_DIR/performance_comparison_${MATRIX_SIZE}.txt"
@@ -284,7 +304,9 @@ rm -f "$LMUL_OUTPUT/stats.txt" "$IEEE_OUTPUT/stats.txt" \
       "$LMUL_OUTPUT/result.bin" "$IEEE_OUTPUT/result.bin" \
       "$LMUL_OUTPUT/inputs.bin" "$IEEE_OUTPUT/inputs.bin" \
       "$PERF_COMPARISON_FILE"
+[ "$RUN_CPU_LMUL" -eq 1 ] && rm -f "$CPU_LMUL_OUTPUT/stats.txt" "$CPU_LMUL_OUTPUT/result.bin" "$CPU_LMUL_OUTPUT/inputs.bin"
 echo "PE Array: ${PE_ROWS}x${PE_COLS}"
+echo "Accelerator clock: ${ACCEL_CLOCK}"
 echo "CPU power model: $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo OFF || echo ON)"
 if [ "$DISABLE_CPU_POWER_MODEL" -eq 0 ]; then
     echo "CPU power params: cycle=${CPU_DYN_ENERGY_PER_CYCLE_PJ}pJ inst=${CPU_DYN_ENERGY_PER_INST_PJ}pJ static=${CPU_STATIC_POWER_MW}mW"
@@ -295,6 +317,7 @@ if [ "$EXTRACT_OUTPUTS" -eq 1 ]; then
 else
     echo "Output extraction: OFF (performance-only run)"
 fi
+echo "CPU LMUL run: $([ "$RUN_CPU_LMUL" -eq 1 ] && echo 'ON (three-way)' || echo 'OFF (two-way, default)')"
 echo "=========================================="
 echo
 
@@ -310,6 +333,7 @@ if "$GEM5_BINARY" \
     --output-dir="$LMUL_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --accel-clock="$ACCEL_CLOCK" \
     --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
     --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
     --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
@@ -352,9 +376,69 @@ else
     echo "⚠ LMUL simulation completed but no stats generated"
 fi
 
-# Step 2: Run Native IEEE BF16 (CPU-based) simulation
+# Step 2: Run CPU LMUL (BF16 matmul on CPU, no accelerator) - optional, for algorithm vs hardware comparison
+CPU_LMUL_EXIT_CODE=0
+CPU_LMUL_STATS_OK=0
+if [ "$RUN_CPU_LMUL" -eq 1 ]; then
+    echo
+    echo "Step 2: Running CPU LMUL simulation..."
+    echo "  BF16 matmul on CPU only (same numerics as accelerator, no accelerator used)"
+    echo "  This may take a few minutes..."
+    echo
+
+    if "$GEM5_BINARY" \
+        --outdir="$CPU_LMUL_OUTPUT" \
+        "$CONFIG" \
+        --use-ieee \
+        --output-dir="$CPU_LMUL_OUTPUT" \
+        --pe-rows="$PE_ROWS" \
+        --pe-cols="$PE_COLS" \
+        --accel-clock="$ACCEL_CLOCK" \
+        --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
+        --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
+        --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
+        $([ "$DISABLE_CPU_POWER_MODEL" -eq 1 ] && echo --disable-cpu-power-model) \
+        --cmd="$BENCHMARK_BIN" \
+        --cmd-args "${BENCHMARK_ARGS[@]}" "2" "${RESULT_FILE_ARGS[@]}" \
+        > "$CPU_LMUL_OUTPUT/simulation.log" 2>&1; then
+        CPU_LMUL_EXIT_CODE=0
+    else
+        CPU_LMUL_EXIT_CODE=$?
+        echo "⚠ CPU LMUL simulation failed (exit code: $CPU_LMUL_EXIT_CODE)"
+        echo "  Check log: $CPU_LMUL_OUTPUT/simulation.log"
+        if [ -f "$CPU_LMUL_OUTPUT/simulation.log" ]; then
+            echo "  Last 30 lines:"
+            tail -30 "$CPU_LMUL_OUTPUT/simulation.log"
+        fi
+        echo
+    fi
+
+    if [ -f "$CPU_LMUL_OUTPUT/stats.txt" ] && [ -s "$CPU_LMUL_OUTPUT/stats.txt" ]; then
+        CPU_LMUL_STATS_OK=1
+    fi
+
+    if [ $CPU_LMUL_EXIT_CODE -ne 0 ] && [ $CPU_LMUL_STATS_OK -eq 0 ]; then
+        echo "⚠ CPU LMUL simulation failed (exit code: $CPU_LMUL_EXIT_CODE)"
+        echo "  Check log: $CPU_LMUL_OUTPUT/simulation.log"
+        tail -20 "$CPU_LMUL_OUTPUT/simulation.log"
+        echo
+        echo "  This may be due to syscall 403. Consider using simple_test benchmark."
+        exit 1
+    fi
+
+    if [ $CPU_LMUL_STATS_OK -eq 1 ]; then
+        echo "✓ CPU LMUL simulation complete (stats generated)"
+    else
+        echo "⚠ CPU LMUL simulation completed but no stats generated"
+    fi
+else
+    echo
+    echo "Step 2: Skipping CPU LMUL (use --include-cpu-lmul or RUN_CPU_LMUL=1 to enable)"
+fi
+
+# Step 3: Run Native IEEE BF16 (CPU-based) simulation
 echo
-echo "Step 2: Running Native IEEE BF16 (CPU) simulation..."
+echo "Step 3: Running Native IEEE BF16 (CPU) simulation..."
 echo "  This uses CPU for standard IEEE multiplication (not accelerator)"
 echo "  This may take a few minutes..."
 echo
@@ -362,9 +446,11 @@ echo
 if "$GEM5_BINARY" \
     --outdir="$IEEE_OUTPUT" \
     "$CONFIG" \
+    --use-ieee \
     --output-dir="$IEEE_OUTPUT" \
     --pe-rows="$PE_ROWS" \
     --pe-cols="$PE_COLS" \
+    --accel-clock="$ACCEL_CLOCK" \
     --cpu-dyn-energy-per-cycle-pj="$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
     --cpu-dyn-energy-per-inst-pj="$CPU_DYN_ENERGY_PER_INST_PJ" \
     --cpu-static-power-mw="$CPU_STATIC_POWER_MW" \
@@ -407,39 +493,50 @@ else
     echo "⚠ IEEE simulation completed but no stats generated"
 fi
 
-# Step 3: Correctness validation (simulation output vs software references)
+# Step 4: Correctness validation (simulation output vs software references)
 echo
-echo "Step 3: Correctness validation (using saved inputs + software references)..."
+echo "Step 4: Correctness validation (using saved inputs + software references)..."
 LMUL_RESULT_FILE="$LMUL_OUTPUT/result.bin"
+CPU_LMUL_RESULT_FILE="$CPU_LMUL_OUTPUT/result.bin"
 IEEE_RESULT_FILE="$IEEE_OUTPUT/result.bin"
 LMUL_INPUTS_FILE="$LMUL_OUTPUT/inputs.bin"
+CPU_LMUL_INPUTS_FILE="$CPU_LMUL_OUTPUT/inputs.bin"
 IEEE_INPUTS_FILE="$IEEE_OUTPUT/inputs.bin"
 if [ "$EXTRACT_OUTPUTS" -eq 0 ]; then
     echo "  Skipped (--no-output-extraction / EXTRACT_OUTPUTS=0)"
 elif [ "${#RESULT_FILE_ARGS[@]}" -eq 0 ]; then
     echo "  Skipped (current benchmark mode does not emit result.bin)"
 elif [ -f "$LMUL_RESULT_FILE" ] && [ -f "$IEEE_RESULT_FILE" ] && \
-     [ -f "$LMUL_INPUTS_FILE" ] && [ -f "$IEEE_INPUTS_FILE" ]; then
+     [ -f "$LMUL_INPUTS_FILE" ] && [ -f "$IEEE_INPUTS_FILE" ] && \
+     { [ "$RUN_CPU_LMUL" -eq 0 ] || { [ -f "$CPU_LMUL_RESULT_FILE" ] && [ -f "$CPU_LMUL_INPUTS_FILE" ]; }; }; then
     if python3 "$SCRIPT_DIR/validate_result_against_reference.py" "$LMUL_OUTPUT" --mode lmul; then
-        echo "✓ LMUL output matches LMUL software reference"
+        echo "✓ LMUL (accel) output matches LMUL software reference"
     else
         echo "⚠ LMUL correctness check reported differences (see above)"
     fi
-
+    if [ "$RUN_CPU_LMUL" -eq 1 ] && [ -f "$CPU_LMUL_RESULT_FILE" ]; then
+        if python3 "$SCRIPT_DIR/validate_result_against_reference.py" "$CPU_LMUL_OUTPUT" --mode lmul; then
+            echo "✓ CPU LMUL output matches LMUL software reference"
+        else
+            echo "⚠ CPU LMUL correctness check reported differences (see above)"
+        fi
+    fi
     if python3 "$SCRIPT_DIR/validate_result_against_reference.py" "$IEEE_OUTPUT" --mode ieee; then
         echo "✓ IEEE output matches IEEE software reference"
     else
         echo "⚠ IEEE correctness check reported differences (see above)"
     fi
 else
-    echo "⚠ Missing correctness artifacts from one or both runs"
+    echo "⚠ Missing correctness artifacts from one or more runs"
     echo "  Expected LMUL result: $LMUL_RESULT_FILE"
+    [ "$RUN_CPU_LMUL" -eq 1 ] && echo "  Expected CPU LMUL result: $CPU_LMUL_RESULT_FILE"
     echo "  Expected IEEE result: $IEEE_RESULT_FILE"
-    echo "  Expected LMUL inputs: $LMUL_INPUTS_FILE"
-    echo "  Expected IEEE inputs: $IEEE_INPUTS_FILE"
+    echo "  Expected inputs: $LMUL_INPUTS_FILE, $IEEE_INPUTS_FILE$([ "$RUN_CPU_LMUL" -eq 1 ] && echo ", $CPU_LMUL_INPUTS_FILE")"
     [ -f "$LMUL_RESULT_FILE" ] || echo "  - LMUL result missing"
+    [ "$RUN_CPU_LMUL" -eq 1 ] && { [ -f "$CPU_LMUL_RESULT_FILE" ] || echo "  - CPU LMUL result missing"; }
     [ -f "$IEEE_RESULT_FILE" ] || echo "  - IEEE result missing"
     [ -f "$LMUL_INPUTS_FILE" ] || echo "  - LMUL inputs missing"
+    [ "$RUN_CPU_LMUL" -eq 1 ] && { [ -f "$CPU_LMUL_INPUTS_FILE" ] || echo "  - CPU LMUL inputs missing"; }
     [ -f "$IEEE_INPUTS_FILE" ] || echo "  - IEEE inputs missing"
     echo
     echo "  Common causes:"
@@ -452,28 +549,30 @@ else
     echo
     echo "  Log markers (should show RESULT_WRITE_OK and INPUTS_WRITE_OK):"
     echo "    LMUL log: $LMUL_OUTPUT/simulation.log"
+    [ "$RUN_CPU_LMUL" -eq 1 ] && echo "    CPU LMUL log: $CPU_LMUL_OUTPUT/simulation.log"
     echo "    IEEE log: $IEEE_OUTPUT/simulation.log"
     if [ "$REQUIRE_RESULT_BIN" -eq 1 ]; then
         echo
-        echo "Error: correctness validation requires result.bin and inputs.bin for both runs."
+        echo "Error: correctness validation requires result.bin and inputs.bin for LMUL and IEEE runs."
         echo "Set REQUIRE_RESULT_BIN=0 only if you want performance-only runs."
         exit 1
     fi
 fi
 
-# Step 4: Compare performance metrics
+# Step 5: Compare performance metrics
 echo
-echo "Step 4: Comparing performance metrics..."
-if [ $LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
-    echo "  Running comparison..."
+echo "Step 5: Comparing performance metrics..."
+if [ $LMUL_STATS_OK -eq 1 ] && [ $CPU_LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
+    echo "  Running three-way comparison (LMUL accel, CPU LMUL, IEEE)..."
     python3 "$SCRIPT_DIR/compare_metrics.py" \
         "$LMUL_OUTPUT/stats.txt" \
         "$IEEE_OUTPUT/stats.txt" \
+        --cpu-lmul "$CPU_LMUL_OUTPUT/stats.txt" \
         --cpu-dyn-energy-per-cycle-pj "$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
         --cpu-dyn-energy-per-inst-pj "$CPU_DYN_ENERGY_PER_INST_PJ" \
         --cpu-static-power-mw "$CPU_STATIC_POWER_MW" \
         > "$PERF_COMPARISON_FILE" 2>&1
-    
+
     if [ $? -eq 0 ]; then
         echo "✓ Performance comparison complete"
         echo
@@ -482,13 +581,32 @@ if [ $LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
         echo "⚠ Performance comparison failed"
         cat "$PERF_COMPARISON_FILE"
     fi
+elif [ $LMUL_STATS_OK -eq 1 ] && [ $IEEE_STATS_OK -eq 1 ]; then
+    echo "  Running two-way comparison (LMUL vs IEEE; CPU LMUL stats missing)..."
+    python3 "$SCRIPT_DIR/compare_metrics.py" \
+        "$LMUL_OUTPUT/stats.txt" \
+        "$IEEE_OUTPUT/stats.txt" \
+        --cpu-dyn-energy-per-cycle-pj "$CPU_DYN_ENERGY_PER_CYCLE_PJ" \
+        --cpu-dyn-energy-per-inst-pj "$CPU_DYN_ENERGY_PER_INST_PJ" \
+        --cpu-static-power-mw "$CPU_STATIC_POWER_MW" \
+        > "$PERF_COMPARISON_FILE" 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo "✓ Performance comparison complete (two-way)"
+        echo
+        cat "$PERF_COMPARISON_FILE"
+    else
+        echo "⚠ Performance comparison failed"
+        cat "$PERF_COMPARISON_FILE"
+    fi
 else
     echo "⚠ Cannot compare metrics - missing stats files"
-    echo "  LMUL stats: $([ $LMUL_STATS_OK -eq 1 ] && echo 'OK' || echo 'MISSING')"
-    echo "  IEEE stats: $([ $IEEE_STATS_OK -eq 1 ] && echo 'OK' || echo 'MISSING')"
+    echo "  LMUL (accel) stats: $([ $LMUL_STATS_OK -eq 1 ] && echo 'OK' || echo 'MISSING')"
+    echo "  CPU LMUL stats:     $([ $CPU_LMUL_STATS_OK -eq 1 ] && echo 'OK' || echo 'MISSING')"
+    echo "  IEEE stats:         $([ $IEEE_STATS_OK -eq 1 ] && echo 'OK' || echo 'MISSING')"
 fi
 
-# Step 5: Summary
+# Step 6: Summary
 echo
 echo "=========================================="
 echo "Comparison Complete!"
@@ -496,20 +614,29 @@ echo "=========================================="
 echo "Results saved to: $OUTPUT_DIR/"
 echo
 echo "Files:"
-echo "  - LMUL stats: $LMUL_OUTPUT/stats.txt"
-echo "  - IEEE stats: $IEEE_OUTPUT/stats.txt"
+echo "  - LMUL (accel) stats: $LMUL_OUTPUT/stats.txt"
+[ "$RUN_CPU_LMUL" -eq 1 ] && echo "  - CPU LMUL stats:     $CPU_LMUL_OUTPUT/stats.txt"
+echo "  - IEEE stats:         $IEEE_OUTPUT/stats.txt"
 if [ -f "$PERF_COMPARISON_FILE" ]; then
     echo "  - Performance comparison: $PERF_COMPARISON_FILE"
 fi
-if [ -f "$LMUL_OUTPUT/result.bin" ] && [ -f "$IEEE_OUTPUT/result.bin" ]; then
-    echo "  - LMUL result matrix: $LMUL_OUTPUT/result.bin"
-    echo "  - IEEE result matrix: $IEEE_OUTPUT/result.bin"
+if [ -f "$LMUL_OUTPUT/result.bin" ]; then
+    echo "  - LMUL result: $LMUL_OUTPUT/result.bin"
 fi
-if [ -f "$LMUL_OUTPUT/inputs.bin" ] && [ -f "$IEEE_OUTPUT/inputs.bin" ]; then
-    echo "  - LMUL input matrices: $LMUL_OUTPUT/inputs.bin"
-    echo "  - IEEE input matrices: $IEEE_OUTPUT/inputs.bin"
+[ "$RUN_CPU_LMUL" -eq 1 ] && [ -f "$CPU_LMUL_OUTPUT/result.bin" ] && echo "  - CPU LMUL result: $CPU_LMUL_OUTPUT/result.bin"
+if [ -f "$IEEE_OUTPUT/result.bin" ]; then
+    echo "  - IEEE result: $IEEE_OUTPUT/result.bin"
 fi
+if [ -f "$LMUL_OUTPUT/inputs.bin" ]; then
+    echo "  - Inputs (per run): $LMUL_OUTPUT/inputs.bin$([ "$RUN_CPU_LMUL" -eq 1 ] && echo ", $CPU_LMUL_OUTPUT/inputs.bin"), $IEEE_OUTPUT/inputs.bin"
+fi
+[ "$RUN_CPU_LMUL" -eq 1 ] && {
 echo
+echo "Comparisons (three-way):"
+echo "  - Algorithm: CPU LMUL vs IEEE (same hardware, different math)"
+echo "  - Hardware:  CPU LMUL vs ACCEL LMUL (same algorithm, CPU vs accelerator)"
+echo
+}
 echo "Next Steps:"
 echo "==========="
 echo
@@ -518,17 +645,24 @@ echo "   cat $PERF_COMPARISON_FILE"
 echo
 echo "2. Re-run correctness checks (if inputs/result files present):"
 echo "   python3 $SCRIPT_DIR/validate_result_against_reference.py $LMUL_OUTPUT --mode lmul"
+[ "$RUN_CPU_LMUL" -eq 1 ] && echo "   python3 $SCRIPT_DIR/validate_result_against_reference.py $CPU_LMUL_OUTPUT --mode lmul"
 echo "   python3 $SCRIPT_DIR/validate_result_against_reference.py $IEEE_OUTPUT --mode ieee"
 echo
 echo "3. Compare stats manually:"
-echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt"
+if [ "$RUN_CPU_LMUL" -eq 1 ]; then
+    echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt --cpu-lmul $CPU_LMUL_OUTPUT/stats.txt"
+else
+    echo "   python3 $SCRIPT_DIR/compare_metrics.py $LMUL_OUTPUT/stats.txt $IEEE_OUTPUT/stats.txt"
+fi
 echo
 echo "4. View simulation logs:"
 echo "   tail -50 $LMUL_OUTPUT/simulation.log"
+[ "$RUN_CPU_LMUL" -eq 1 ] && echo "   tail -50 $CPU_LMUL_OUTPUT/simulation.log"
 echo "   tail -50 $IEEE_OUTPUT/simulation.log"
 echo
 echo "5. Extract detailed metrics:"
 echo "   python3 $SCRIPT_DIR/extract_stats.py $LMUL_OUTPUT/stats.txt"
+[ "$RUN_CPU_LMUL" -eq 1 ] && echo "   python3 $SCRIPT_DIR/extract_stats.py $CPU_LMUL_OUTPUT/stats.txt"
 echo "   python3 $SCRIPT_DIR/extract_stats.py $IEEE_OUTPUT/stats.txt"
 echo
 echo "=========================================="

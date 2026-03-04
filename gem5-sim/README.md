@@ -121,9 +121,14 @@ ls -la gem5-sim/m5out/
 head -50 gem5-sim/m5out/stats.txt
 ```
 
-### 6. Run the full comparison (LMUL vs IEEE)
+### 6. Run the full comparison (LMUL Accel vs IEEE)
 
-This runs **both** simulations (LMUL accelerator and native IEEE BF16 on CPU), then compares metrics and optionally checks correctness:
+By default this runs **two** simulations, then compares metrics and optionally checks correctness:
+
+1. **LMUL accelerator** — BF16 matmul on the hardware accelerator  
+2. **IEEE CPU** — native IEEE BF16 matmul on the CPU (no accelerator)  
+
+Add `--include-cpu-lmul` (or `RUN_CPU_LMUL=1`) for three-way (adds CPU LMUL: same numerics as accel but on CPU only).
 
 ```bash
 ./gem5-sim/scripts/compare_lmul_vs_ieee.sh
@@ -131,9 +136,10 @@ This runs **both** simulations (LMUL accelerator and native IEEE BF16 on CPU), t
 
 Defaults: 4×4 matrices, 4×4 PE array. Outputs go to `gem5-sim/lmul_vs_ieee_comparison/`:
 
-- `lmul/stats.txt`, `ieee/stats.txt` — simulation stats
-- `performance_comparison_4.txt` — comparison report (speedup, cycles, DRAM energy, etc.)
-- With output extraction on (default): `lmul/result.bin`, `ieee/result.bin`, `lmul/inputs.bin`, `ieee/inputs.bin` for correctness checks
+- `lmul/stats.txt`, `ieee/stats.txt` — simulation stats (and `cpu_lmul/` when `--include-cpu-lmul`)  
+- `performance_comparison_4.txt` — two-way or three-way comparison  
+- With output extraction on (default): `result.bin` and `inputs.bin` per run for correctness checks  
+- Benchmark mode: argv[4] = 1 (accel), 2 (CPU LMUL), 0 (IEEE)
 
 View the report:
 
@@ -150,7 +156,9 @@ cat gem5-sim/lmul_vs_ieee_comparison/performance_comparison_4.txt
 
 - `--size N` — N×N matrices  
 - `--pe-rows N`, `--pe-cols N` — PE array dimensions  
-- `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)
+- `--accel-clock FREQ` — accelerator clock frequency (default: `2GHz`)  
+- `--no-output-extraction` — skip writing `result.bin`/`inputs.bin` and correctness validation (faster, for performance-only)  
+- `--include-cpu-lmul` — also run CPU LMUL simulation for three-way comparison (default: off)
 
 CPU energy model knobs:
 - `--cpu-dyn-energy-per-cycle-pj` — dynamic energy per CPU cycle (used by `compare_metrics.py`)
@@ -161,17 +169,19 @@ CPU energy model knobs:
 ### 7. Re-run metrics or correctness locally
 
 ```bash
-# Regenerate comparison table from two stats files
+# Regenerate comparison table (two-way by default)
 python3 gem5-sim/scripts/compare_metrics.py \
   gem5-sim/lmul_vs_ieee_comparison/lmul/stats.txt \
   gem5-sim/lmul_vs_ieee_comparison/ieee/stats.txt \
-  --cpu-dyn-energy-per-cycle-pj 500 \
-  --cpu-dyn-energy-per-inst-pj 50 \
-  --cpu-static-power-mw 200
+  --cpu-dyn-energy-per-cycle-pj 500 --cpu-dyn-energy-per-inst-pj 50 --cpu-static-power-mw 200
+
+# Three-way (add CPU LMUL stats if you ran with --include-cpu-lmul):
+# python3 gem5-sim/scripts/compare_metrics.py ... --cpu-lmul gem5-sim/lmul_vs_ieee_comparison/cpu_lmul/stats.txt
 
 # Correctness: compare simulation output to software reference (requires inputs.bin + result.bin)
 python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/lmul --mode lmul
 python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_ieee_comparison/ieee --mode ieee
+# When using --include-cpu-lmul: python3 gem5-sim/scripts/validate_result_against_reference.py .../cpu_lmul --mode lmul
 ```
 
 ---
@@ -185,6 +195,80 @@ python3 gem5-sim/scripts/validate_result_against_reference.py gem5-sim/lmul_vs_i
 CPU energy in the comparison report is a first-order model derived from cycle count, instruction count, and static power parameters. It does not require `system.cpu.power_model.dynamicPower` and avoids unit/path issues in gem5 power-model stats.
 
 The IEEE path uses an optimized but still realistic software implementation: BF16 inputs are converted once to float32, matrix multiply is cache-friendly (tiled), and outputs are rounded back to BF16. This keeps the comparison "realistic LMUL accelerator vs realistic IEEE software."
+
+---
+
+## Toward a more realistic IEEE CPU baseline
+
+The default setup uses **TimingSimpleCPU** (in-order, no caches, scalar code), so the IEEE path is intentionally conservative and the reported speedup (e.g. 100–200×) is high. To get closer to “realistic” IEEE performance (and a lower, more defensible speedup), you can apply these steps in order.
+
+| Step | What | Impact | Effort |
+|------|------|--------|--------|
+| **1** | **Compiler flags** | Enables auto-vectorization of the float inner loop. | Low |
+| **2** | **Add L1 (and optionally L2) caches** | Tiled IEEE code benefits from locality; fewer memory stalls. | Low–medium |
+| **3** | **Vectorize the IEEE kernel (NEON)** | 4× (or more) fewer instructions in the inner loop. | Medium |
+| **4** | **Switch to O3 CPU** | Out-of-order execution; much higher IPC. | Medium (slower sim) |
+| **5** | **Document both baselines** | Report “conservative” vs “optimized CPU” so the story is clear. | Low |
+
+### Step 1: Compiler flags
+
+In `gem5-sim/benchmarks/matrix_multiply/Makefile`:
+
+- Use **`-O3`** instead of `-O2`.
+- Add an architecture flag so the compiler can use SIMD:
+  - For **ARM 64-bit** (gem5 ARMv8): e.g. `-march=armv8-a+simd` (or whatever your cross-compiler supports).
+  - For **ARM 32-bit** (gem5 ARMv7): e.g. `-march=armv7-a -mfpu=neon -mfloat-abi=hard`.
+
+Rebuild the benchmark and re-run the IEEE path; check `simInsts` and `numCycles` — they should drop if the inner loop is vectorized.
+
+### Step 2: Add L1 (and optionally L2) caches
+
+Currently the CPU is wired directly to the memory bus (no cache objects). Add an L1 I-cache and L1 D-cache between the CPU and the bus (standard gem5 pattern: create `Cache` objects, connect `cpu.icache_port` → `l1_icache.cpu_side`, `l1_icache.mem_side` → `membus`, and similarly for D-cache). Optionally add an L2. The tiled IEEE matmul will benefit from locality; the accelerator path is mostly DMA so its behavior stays similar. Re-run and compare cycles.
+
+### Step 3: Vectorize the IEEE kernel (NEON)
+
+In `cpu_matrix_multiply`, the inner loop over `k` is scalar (`sum += a_row[k] * b_row[k]`). Implement a NEON version (e.g. `float32x4_t`, `vld1q_f32`, `vmlaq_f32`, `vaddvq_f32` / horizontal add) so each iteration does 4 float multiply-adds. Keep the same tiling and BF16↔float conversion; only the inner dot product is vectorized. This gives a substantial reduction in instructions and cycles for the IEEE path.
+
+### Step 4: Switch to O3 CPU
+
+In `gem5-sim/configs/lmul_system.py`, replace `TimingSimpleCPU()` with `DerivO3CPU()` (or the appropriate O3 class for your gem5 version). Out-of-order execution will increase IPC (e.g. from ~0.01 to 0.5 or higher), so the same instruction stream will complete in fewer cycles. Note: O3 simulation is slower and uses more memory; large sizes (e.g. 1024) may require more host RAM and time.
+
+### Step 5: Document both baselines
+
+When reporting results, you can:
+
+- Keep the current setup as the **“conservative CPU baseline”** (simple core, scalar or lightly optimized code) and report that the speedup is relative to that.
+- Add an **“optimized CPU baseline”** (O3 + caches + NEON, or a subset) and report speedup vs both, so the audience sees that the accelerator still wins by a large margin even when the CPU is more realistic.
+
+---
+
+## Energy and Clock Parameters (References)
+
+Energy- and speed-related hyperparameters and their grounding in literature or the lack thereof:
+
+### Accelerator (LMulAccelerator)
+
+| Parameter | Default | Source / Notes |
+|-----------|---------|----------------|
+| `energy_per_op_pj` | 0.5 pJ | **Referenced.** State-of-the-art DNN accelerators report ~0.1 pJ/op (NVIDIA 16nm multi-chip DNN accelerator, 8-bit: 0.11 pJ/op; DiP systolic array: ~0.1 pJ/op). Our 0.5 pJ is a conservative estimate for BF16 matmul (higher precision than 8-bit). See [NVIDIA DNN accelerator (0.11 pJ/op, 16nm)](https://research.nvidia.com/publication/2019-06_011-pjop-032-128-tops-scalable-multi-chip-module-based-deep-neural-network), [DiP systolic array (arXiv:2412.09709)](https://arxiv.org/abs/2412.09709). |
+| `dma_energy_per_byte_pj` | 0.05 pJ | **No reliable source found.** Literature reports DRAM access energy per byte as highly variable (bank activation dominates). On-chip SRAM access is on the order of 0.1 pJ/byte. Our value is a placeholder; consider calibrating to hardware if available. |
+| `leakage_power_mw` | 1.0 mW | **No reliable source found.** Small systolic array (e.g. 4×4 PE); leakage scales with area. Placeholder for relative comparison. |
+| `--accel-clock` | 2 GHz | **Referenced.** TPU systolic arrays operate around 1.5 GHz; modern systolic/GEMM accelerators often run 1–2+ GHz. 2 GHz is a reasonable default for a small PE array. See [TPU v1 (Jouppi et al.)](https://dl.acm.org/doi/10.1145/3079856.3080246), [DiP (arXiv:2412.09709)](https://arxiv.org/abs/2412.09709). |
+
+### CPU (first-order model)
+
+| Parameter | Default | Source / Notes |
+|-----------|---------|----------------|
+| `--cpu-dyn-energy-per-cycle-pj` | 500 pJ | **No specific hardware source.** First-order model for gem5 TimingSimpleCPU. ARM Cortex-M0 studies report ~170 µW/MHz; at 2 GHz that implies order-of-magnitude hundreds of pJ per effective cycle depending on activity. 500 pJ is a plausible placeholder for a simple in-order core. |
+| `--cpu-dyn-energy-per-inst-pj` | 50 pJ | **No specific hardware source.** Extra energy attributed per committed instruction (e.g. pipeline overhead). Calibrate to target CPU if needed. |
+| `--cpu-static-power-mw` | 200 mW | **No specific hardware source.** Placeholder for static/leakage power of a small CPU core. |
+
+### Summary
+
+- **With references:** `energy_per_op_pj`, `--accel-clock`
+- **Without references (placeholder):** `dma_energy_per_byte_pj`, `leakage_power_mw`, all CPU power parameters
+
+To calibrate parameters for a specific target, consult vendor datasheets or measured power/energy studies for your CPU and accelerator.
 
 ---
 

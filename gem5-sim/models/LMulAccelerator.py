@@ -1,9 +1,9 @@
 # Python wrapper for LMUL Accelerator gem5 model
 
 from m5.params import *
-from m5.objects.Device import DmaDevice
+from m5.objects.Device import DmaVirtDevice
 
-class LMulAccelerator(DmaDevice):
+class LMulAccelerator(DmaVirtDevice):
     """
     LMUL Hardware Accelerator for BF16 Matrix Multiplication
     
