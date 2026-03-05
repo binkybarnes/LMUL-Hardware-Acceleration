@@ -1,0 +1,57 @@
+OpenSTA 2.0.17 GITDIR-NOT Copyright (c) 2019, Parallax Software, Inc.
+License GPLv3: GNU GPL version 3 <http://gnu.org/licenses/gpl.html>
+
+This is free software, and you are free to change and redistribute it
+under certain conditions; type `show_copying' for details. 
+This program comes with ABSOLUTELY NO WARRANTY; for details type `show_warranty'.
+Error: synthesis/out/lmul_synth.v, line 187 syntax error, unexpected REG.
+Error: synthesis/out/lmul_synth.v, line 188 syntax error, unexpected REG.
+Error: synthesis/out/lmul_synth.v, line 1086 syntax error, unexpected $undefined, expecting ID.
+Error: synthesis/out/lmul_synth.v, line 1089 syntax error, unexpected $undefined, expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1093 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1097 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1101 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1105 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1109 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1113 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1117 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1121 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1125 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1129 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1133 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1137 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1141 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1145 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1149 syntax error, unexpected '[', expecting '('.
+Error: synthesis/out/lmul_synth.v, line 1153 syntax error, unexpected '[', expecting '('.
+Startpoint: o_ready (input port clocked by CLK)
+Endpoint: i_ready (output port clocked by CLK)
+Path Group: CLK
+Path Type: max
+
+      Cap      Slew     Delay      Time   Description
+-------------------------------------------------------------------------------
+             0.0000    0.0000    0.0000   clock CLK (rise edge)
+                       0.0000    0.0000   clock network delay (ideal)
+                       0.0500    0.0500 v input external delay
+   1.8591    0.0000    0.0000    0.0500 v o_ready (in)
+   1.9739    0.0067    0.0092    0.0592 ^ _163_/ZN (INV_X1)
+   6.1692    0.0142    0.0223    0.0815 v _165_/ZN (NAND2_X1)
+             0.0142    0.0000    0.0815 v i_ready (out)
+                                 0.0815   data arrival time
+
+             0.0000    1.0000    1.0000   clock CLK (rise edge)
+                       0.0000    1.0000   clock network delay (ideal)
+                       0.0000    1.0000   clock reconvergence pessimism
+                      -0.0500    0.9500   output external delay
+                                 0.9500   data required time
+-------------------------------------------------------------------------------
+                                 0.9500   data required time
+                                -0.0815   data arrival time
+-------------------------------------------------------------------------------
+                                 0.8685   slack (MET)
+
+
+tns 0.00
+wns 0.00
+OpenSTA> Saving command history

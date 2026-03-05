@@ -1,0 +1,57 @@
+{
+  "area": {
+    "lmul_unit": 180.88,
+    "ieee_unit": 545.034,
+    "lmul_array": 2822.526,
+    "ieee_array": 8540.994,
+    "unit_reduction_pct": 66.81,
+    "array_reduction_pct": 66.95,
+    "unit_ratio": 3.013,
+    "source": "MEASURED \u2014 Yosys stat from synthesis logs"
+  },
+  "architecture": {
+    "lmul_unit_multipliers": 0,
+    "ieee_unit_multipliers": 1,
+    "lmul_array_multipliers": 0,
+    "ieee_array_multipliers": 16,
+    "lmul_core_op": "1x 17-bit addition",
+    "ieee_core_ops": "8x8 multiply + 5 other ops",
+    "lmul_avg_inputs_per_cell": 2.47,
+    "ieee_avg_inputs_per_cell": 2.544,
+    "source": "MEASURED \u2014 alumacc log + synthesized netlists"
+  },
+  "power": {
+    "method": "liberty capacitance (dynamic) + liberty leakage (static)",
+    "vdd_v": 1.1,
+    "freq_hz": 500000000.0,
+    "alpha": 0.3,
+    "lmul_cap_ff": 689.7,
+    "ieee_cap_ff": 1997.5,
+    "cap_reduction_pct": 65.5,
+    "lmul_dyn_uw": 125.19,
+    "ieee_dyn_uw": 362.55,
+    "lmul_leak_uw": 4.084,
+    "ieee_leak_uw": 12.227,
+    "dyn_reduction_pct": 65.5,
+    "leak_reduction_pct": 66.6,
+    "total_reduction_pct": 65.5,
+    "uncertainty": "pm30-50pct absolute; ratio uncertainty pm10pct",
+    "source": "ESTIMATED \u2014 NangateOpenCellLibrary_typical.lib"
+  },
+  "timing": {
+    "lmul_cp_best_ps": 67.0,
+    "lmul_cp_typ_ps": 113.4,
+    "ieee_cp_best_ps": 420.9,
+    "ieee_cp_typ_ps": 535.4,
+    "timing_ratio_typ": 4.72,
+    "sta_status": "parse errors \u2014 data path not analyzed by OpenSTA",
+    "source": "ESTIMATED \u2014 liberty cell delays + architectural logic depth"
+  },
+  "system_speedup": {
+    "hardware_ratio": 3.013,
+    "amdahl_f65pct": 1.768,
+    "amdahl_f75pct": 2.004,
+    "amdahl_f85pct": 2.314,
+    "source": "DERIVED \u2014 Amdahl's Law from measured area ratio"
+  }
+}

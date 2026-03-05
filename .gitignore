@@ -45,11 +45,18 @@ report/report.toc
 
 # Synthesis library files (downloaded during Docker build)
 lib/*.lib
+!lib/NangateOpenCellLibrary_typical.lib
 
 # Synthesis output files (can be regenerated)
 synthesis/out/*
 !synthesis/out/.gitkeep
 !synthesis/out/README.md
+!synthesis/out/netlists/
+!synthesis/out/netlists/*.v
+!synthesis/out/logs/
+!synthesis/out/logs/*.log
+!synthesis/out/reports/
+!synthesis/out/reports/verified_results.json
 
 # Documentation files (ignore .md files except README.md)
 *.md
