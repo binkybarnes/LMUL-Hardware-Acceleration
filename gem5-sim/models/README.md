@@ -12,7 +12,7 @@ This directory contains the gem5 device model for the LMUL hardware accelerator.
 ## Architecture
 
 ### Device Type
-The LMUL accelerator is implemented as a `BasicPioDevice` (memory-mapped I/O device).
+The LMUL accelerator is implemented as a `DmaDevice` with a memory-mapped control plane and a DMA data path.
 
 **Base Address**: 0x10000000 (configurable)
 **Register Space**: 4KB (0x1000 bytes)
@@ -209,11 +209,10 @@ assert abs(gem5_cycles - expected_cycles) / expected_cycles < 0.1
 
 ## Future Enhancements
 
-- [ ] DMA engine implementation
 - [ ] Interrupt support
 - [ ] Cache coherence
 - [ ] Pipeline modeling (more detailed)
-- [ ] Power modeling
+- [ ] Replace first-order power model with calibrated RTL or gate-level model
 - [ ] Multiple outstanding operations
 - [ ] AXI interface (instead of simple PIO)
 

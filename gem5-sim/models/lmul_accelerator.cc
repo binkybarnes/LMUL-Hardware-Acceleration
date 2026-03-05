@@ -4,6 +4,7 @@
 
 #include "dev/lmul_accel/lmul_accelerator.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -11,18 +12,28 @@
 #include "debug/LMulAccel.hh"
 #include "mem/packet.hh"
 #include "mem/packet_access.hh"
+#include "sim/core.hh"
+#include "sim/full_system.hh"
+#include "sim/process.hh"
 
 namespace gem5
 {
 
 LMulAccelerator::LMulAccelerator(const Params &p)
-    : BasicPioDevice(p, p.pio_size),
+    : DmaVirtDevice(p),
+      pioAddr(p.pio_addr),
+      pioSize(p.pio_size),
+      pioDelay(p.pio_latency),
       peArrayRows(p.pe_array_rows),
       peArrayCols(p.pe_array_cols),
       computeLatency(p.compute_latency),
       memoryLatency(p.memory_latency),
+      energyPerOpPJ(p.energy_per_op_pj),
+      dmaEnergyPerBytePJ(p.dma_energy_per_byte_pj),
+      leakagePowerMW(p.leakage_power_mw),
       stats(this),
       currentJob(nullptr),
+      nextJobId(0),
       computeEvent([this]{ completeComputation(); }, name())
 {
     // Initialize device state
@@ -43,6 +54,24 @@ LMulAccelerator::LMulAccelerator(const Params &p)
             peArrayRows, peArrayCols);
 }
 
+AddrRangeList
+LMulAccelerator::getAddrRanges() const
+{
+    return {RangeSize(pioAddr, pioSize)};
+}
+
+TranslationGenPtr
+LMulAccelerator::translate(Addr vaddr, Addr size)
+{
+    if (!FullSystem) {
+        auto process = sys->threads[0]->getProcessPtr();
+        fatal_if(!process, "LMulAccelerator: no process for DMA translation");
+        return process->pTable->translateRange(vaddr, size);
+    }
+
+    fatal("LMulAccelerator: Full-system DMA translation is not implemented");
+}
+
 LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
     : statistics::Group(accel),
       ADD_STAT(numReads, statistics::units::Count::get(),
@@ -57,10 +86,46 @@ LMulAccelerator::Stats::Stats(LMulAccelerator *accel)
                "Total compute cycles"),
       ADD_STAT(totalOps, statistics::units::Count::get(),
                "Total operations performed"),
+      ADD_STAT(dmaReadReqs, statistics::units::Count::get(),
+               "Number of DMA read requests issued"),
+      ADD_STAT(dmaWriteReqs, statistics::units::Count::get(),
+               "Number of DMA write requests issued"),
+      ADD_STAT(dmaReadBytes, statistics::units::Byte::get(),
+               "Total DMA read bytes"),
+      ADD_STAT(dmaWriteBytes, statistics::units::Byte::get(),
+               "Total DMA write bytes"),
+      ADD_STAT(mmioReadCycles, statistics::units::Cycle::get(),
+               "Estimated MMIO read service cycles"),
+      ADD_STAT(mmioWriteCycles, statistics::units::Cycle::get(),
+               "Estimated MMIO write service cycles"),
+      ADD_STAT(mmioTotalCycles, statistics::units::Cycle::get(),
+               "Estimated total MMIO service cycles"),
+      ADD_STAT(dmaReadCycles, statistics::units::Cycle::get(),
+               "DMA-read phase cycles"),
+      ADD_STAT(computeCycles, statistics::units::Cycle::get(),
+               "Compute phase cycles"),
+      ADD_STAT(dmaWriteCycles, statistics::units::Cycle::get(),
+               "DMA-write phase cycles"),
+      ADD_STAT(memoryTransferCycles, statistics::units::Cycle::get(),
+               "Total memory-transfer cycles (DMA read + DMA write)"),
+      ADD_STAT(estimatedComputeEnergyJ, statistics::units::Joule::get(),
+               "Estimated compute dynamic energy (J)"),
+      ADD_STAT(estimatedDmaEnergyJ, statistics::units::Joule::get(),
+               "Estimated DMA transfer energy (J)"),
+      ADD_STAT(estimatedLeakageEnergyJ, statistics::units::Joule::get(),
+               "Estimated leakage/static energy during active periods (J)"),
+      ADD_STAT(estimatedTotalEnergyJ, statistics::units::Joule::get(),
+               "Estimated total accelerator energy (J)"),
       ADD_STAT(opLatency, statistics::units::Tick::get(),
                "Latency distribution for operations")
 {
     opLatency.init(32);  // 32 bins for histogram
+    // Energy values are often sub-microjoule for small matrices; increase
+    // dump precision so stats.txt does not round them to 0.000000.
+    estimatedComputeEnergyJ.precision(12);
+    estimatedDmaEnergyJ.precision(12);
+    estimatedLeakageEnergyJ.precision(12);
+    estimatedTotalEnergyJ.precision(12);
 }
 
 Tick
@@ -150,6 +215,10 @@ LMulAccelerator::read(PacketPtr pkt)
     pkt->makeResponse();
     pkt->setUintX(value, ByteOrder::little);
     stats.numReads++;
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const uint64_t pioCycles = static_cast<uint64_t>((pioDelay + clk - 1) / clk);
+    stats.mmioReadCycles += pioCycles;
+    stats.mmioTotalCycles += pioCycles;
 
     DPRINTF(LMulAccel, "Read offset=0x%x, value=0x%x\n", offset, value);
 
@@ -181,6 +250,16 @@ LMulAccelerator::write(PacketPtr pkt)
                 startComputation();
             }
             if (value & CTRL_RESET) {
+                if (computeEvent.scheduled()) {
+                    deschedule(computeEvent);
+                }
+                if (dmaPending()) {
+                    dmaPort.abortPending();
+                }
+                if (currentJob) {
+                    delete currentJob;
+                    currentJob = nullptr;
+                }
                 state.status = STAT_IDLE;
                 state.cycles = 0;
                 state.opsCount = 0;
@@ -264,6 +343,10 @@ LMulAccelerator::write(PacketPtr pkt)
     // Convert request to response (required by PioPort)
     pkt->makeResponse();
     stats.numWrites++;
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const uint64_t pioCycles = static_cast<uint64_t>((pioDelay + clk - 1) / clk);
+    stats.mmioWriteCycles += pioCycles;
+    stats.mmioTotalCycles += pioCycles;
     return pioDelay;
 }
 
@@ -289,6 +372,7 @@ LMulAccelerator::startComputation()
 
     // Create compute job
     currentJob = new ComputeJob;
+    currentJob->jobId = ++nextJobId;
     currentJob->m = state.mSize;
     currentJob->n = state.nSize;
     currentJob->p = state.pSize;
@@ -296,16 +380,18 @@ LMulAccelerator::startComputation()
     currentJob->bAddr = state.bAddr;
     currentJob->cAddr = state.cAddr;
     currentJob->startTick = curTick();
+    currentJob->useDma = (state.control & CTRL_DMA_EN) != 0;
 
     // Allocate matrices
     currentJob->matrixA.resize(state.mSize * state.nSize);
     currentJob->matrixB.resize(state.nSize * state.pSize);
     currentJob->matrixC.resize(state.mSize * state.pSize, 0);
 
-    // If benchmark streamed inputs over MMIO, use them directly.
+    // If benchmark streamed inputs over MMIO, use them directly in non-DMA mode.
     const uint64_t expectedA = static_cast<uint64_t>(state.mSize) * state.nSize;
     const uint64_t expectedB = static_cast<uint64_t>(state.nSize) * state.pSize;
-    if (stagedA.size() == expectedA && stagedB.size() == expectedB) {
+    if (!currentJob->useDma &&
+        stagedA.size() == expectedA && stagedB.size() == expectedB) {
         currentJob->matrixA = stagedA;
         currentJob->matrixB = stagedB;
         currentJob->useStreamedInputs = true;
@@ -314,31 +400,77 @@ LMulAccelerator::startComputation()
                 static_cast<unsigned long long>(stagedB.size()));
     } else {
         currentJob->useStreamedInputs = false;
-        DPRINTF(LMulAccel,
-                "No full streamed inputs (A=%llu/%llu, B=%llu/%llu), using fallback pattern\n",
-                static_cast<unsigned long long>(stagedA.size()),
-                static_cast<unsigned long long>(expectedA),
-                static_cast<unsigned long long>(stagedB.size()),
-                static_cast<unsigned long long>(expectedB));
+        if (!currentJob->useDma) {
+            DPRINTF(LMulAccel,
+                    "No full streamed inputs (A=%llu/%llu, B=%llu/%llu), using fallback pattern\n",
+                    static_cast<unsigned long long>(stagedA.size()),
+                    static_cast<unsigned long long>(expectedA),
+                    static_cast<unsigned long long>(stagedB.size()),
+                    static_cast<unsigned long long>(expectedB));
+        }
     }
 
     // Update state
     state.status = STAT_BUSY;
     state.cycles = 0;
+    state.opsCount = 0;
+    state.error = 0;
     lastResult.clear();
     stagedA.clear();
     stagedB.clear();
     stats.numStarts++;
 
-    // Schedule computation completion
-    // In a real implementation, we would do DMA transfers here
-    // For now, we'll do functional simulation with timing model
+    if (currentJob->useDma) {
+        if (currentJob->aAddr == 0 || currentJob->bAddr == 0 || currentJob->cAddr == 0) {
+            warn("LMulAccelerator: DMA mode requested but one or more matrix addresses are zero\n");
+            state.error = 5;
+            state.status = STAT_ERROR;
+            delete currentJob;
+            currentJob = nullptr;
+            return;
+        }
+
+        const uint64_t bytesA = expectedA * sizeof(uint16_t);
+        const uint64_t bytesB = expectedB * sizeof(uint16_t);
+        const uint64_t bytesC =
+            static_cast<uint64_t>(state.mSize) * state.pSize * sizeof(uint16_t);
+        currentJob->dmaReadBytes = bytesA + bytesB;
+        currentJob->dmaWriteBytes = bytesC;
+
+        stats.dmaReadReqs += 2;
+        stats.dmaWriteReqs += 1;
+        stats.dmaReadBytes += currentJob->dmaReadBytes;
+        stats.dmaWriteBytes += currentJob->dmaWriteBytes;
+        currentJob->dmaReadStartTick = curTick();
+
+        DPRINTF(LMulAccel, "DMA read A: addr=0x%x bytes=%llu\n",
+                currentJob->aAddr,
+                static_cast<unsigned long long>(bytesA));
+
+        const uint64_t job_id = currentJob->jobId;
+        auto *readACb = new DmaVirtDevice::DmaVirtCallback<int>(
+            [this, job_id](const int &) {
+                if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                    return;
+                }
+                onDmaReadAComplete();
+            });
+        dmaReadVirt(currentJob->aAddr, static_cast<unsigned>(bytesA), readACb,
+                    reinterpret_cast<void *>(currentJob->matrixA.data()));
+        return;
+    }
+
+    // Non-DMA mode: use the synthetic memory-time model.
     Tick computeTime = estimateComputeTime(state.mSize, state.nSize, state.pSize);
-    Tick memoryTime = estimateMemoryTime(state.mSize, state.nSize, state.pSize);
+    Tick memoryTime = currentJob->useStreamedInputs
+        ? 0
+        : estimateMemoryTime(state.mSize, state.nSize, state.pSize);
     Tick totalTime = computeTime + memoryTime;
+    currentJob->dmaReadTicks = memoryTime;
+    currentJob->computeTicks = computeTime;
+    currentJob->dmaWriteTicks = 0;
 
     DPRINTF(LMulAccel, "Scheduling completion in %d ticks\n", totalTime);
-    
     schedule(computeEvent, curTick() + totalTime);
 }
 
@@ -352,10 +484,82 @@ LMulAccelerator::completeComputation()
     // Perform matrix multiplication (functional model)
     processCompute();
 
+    if (currentJob->useDma) {
+        currentJob->computeTicks = curTick() - currentJob->computeStartTick;
+        currentJob->dmaWriteStartTick = curTick();
+        const uint64_t bytesC =
+            static_cast<uint64_t>(currentJob->m) * currentJob->p * sizeof(uint16_t);
+        DPRINTF(LMulAccel, "DMA write C: addr=0x%x bytes=%llu\n",
+                currentJob->cAddr,
+                static_cast<unsigned long long>(bytesC));
+        const uint64_t job_id = currentJob->jobId;
+        auto *writeCCb = new DmaVirtDevice::DmaVirtCallback<int>(
+            [this, job_id](const int &) {
+                if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                    return;
+                }
+                onDmaWriteCComplete();
+            });
+        dmaWriteVirt(currentJob->cAddr, static_cast<unsigned>(bytesC), writeCCb,
+                     reinterpret_cast<void *>(currentJob->matrixC.data()));
+        return;
+    }
+
+    finalizeComputation();
+}
+
+void
+LMulAccelerator::onDmaReadAComplete()
+{
+    assert(currentJob != nullptr && currentJob->useDma);
+
+    const uint64_t bytesB =
+        static_cast<uint64_t>(currentJob->n) * currentJob->p * sizeof(uint16_t);
+    DPRINTF(LMulAccel, "DMA read B: addr=0x%x bytes=%llu\n",
+            currentJob->bAddr,
+            static_cast<unsigned long long>(bytesB));
+
+    const uint64_t job_id = currentJob->jobId;
+    auto *readBCb = new DmaVirtDevice::DmaVirtCallback<int>(
+        [this, job_id](const int &) {
+            if (!currentJob || !currentJob->useDma || currentJob->jobId != job_id) {
+                return;
+            }
+            onDmaReadBComplete();
+        });
+    dmaReadVirt(currentJob->bAddr, static_cast<unsigned>(bytesB), readBCb,
+                reinterpret_cast<void *>(currentJob->matrixB.data()));
+}
+
+void
+LMulAccelerator::onDmaReadBComplete()
+{
+    assert(currentJob != nullptr && currentJob->useDma);
+
+    currentJob->dmaReadTicks = curTick() - currentJob->dmaReadStartTick;
+    currentJob->computeStartTick = curTick();
+
+    Tick computeTime = estimateComputeTime(currentJob->m, currentJob->n, currentJob->p);
+    DPRINTF(LMulAccel, "DMA inputs ready, scheduling compute in %d ticks\n", computeTime);
+    schedule(computeEvent, curTick() + computeTime);
+}
+
+void
+LMulAccelerator::onDmaWriteCComplete()
+{
+    assert(currentJob != nullptr && currentJob->useDma);
+    currentJob->dmaWriteTicks = curTick() - currentJob->dmaWriteStartTick;
+    finalizeComputation();
+}
+
+void
+LMulAccelerator::finalizeComputation()
+{
+    assert(currentJob != nullptr);
+
     // Update statistics
     Tick latency = curTick() - currentJob->startTick;
-    uint32_t totalOps = currentJob->m * currentJob->n * currentJob->p;
-    
+    const uint32_t totalOps = currentJob->m * currentJob->n * currentJob->p;
     state.cycles = latency / clockPeriod();
     state.opsCount = totalOps;
     state.status = STAT_DONE;
@@ -364,10 +568,40 @@ LMulAccelerator::completeComputation()
     stats.totalCycles += state.cycles;
     stats.totalOps += totalOps;
     stats.opLatency.sample(latency);
+    const Tick clk = std::max<Tick>(clockPeriod(), 1);
+    const auto ticksToCycles = [clk](Tick ticks) -> uint64_t {
+        return static_cast<uint64_t>((ticks + clk - 1) / clk);
+    };
+    const uint64_t dmaReadCycles = ticksToCycles(currentJob->dmaReadTicks);
+    const uint64_t computeCycles = ticksToCycles(currentJob->computeTicks);
+    const uint64_t dmaWriteCycles = ticksToCycles(currentJob->dmaWriteTicks);
+    stats.dmaReadCycles += dmaReadCycles;
+    stats.computeCycles += computeCycles;
+    stats.dmaWriteCycles += dmaWriteCycles;
+    stats.memoryTransferCycles += (dmaReadCycles + dmaWriteCycles);
 
-    DPRINTF(LMulAccel, "Completed: %d ops in %d cycles (%.2f GOPS)\n",
-            totalOps, state.cycles, 
-            (double)totalOps / state.cycles);
+    // Estimated accelerator energy metrics (simple first-order model).
+    const double latencySeconds =
+        static_cast<double>(latency) / static_cast<double>(sim_clock::as_int::s);
+    const double computeEnergyJ =
+        static_cast<double>(totalOps) * energyPerOpPJ * 1.0e-12;
+    const double dmaEnergyJ =
+        static_cast<double>(currentJob->dmaReadBytes + currentJob->dmaWriteBytes) *
+        dmaEnergyPerBytePJ * 1.0e-12;
+    const double leakageEnergyJ =
+        (leakagePowerMW * 1.0e-3) * latencySeconds;
+    const double totalEnergyJ = computeEnergyJ + dmaEnergyJ + leakageEnergyJ;
+
+    stats.estimatedComputeEnergyJ += computeEnergyJ;
+    stats.estimatedDmaEnergyJ += dmaEnergyJ;
+    stats.estimatedLeakageEnergyJ += leakageEnergyJ;
+    stats.estimatedTotalEnergyJ += totalEnergyJ;
+
+    const double gops_per_cycle = state.cycles ?
+        static_cast<double>(totalOps) / static_cast<double>(state.cycles) : 0.0;
+    DPRINTF(LMulAccel,
+            "Completed: %d ops in %d cycles (%.2f GOPS/cycle), E=%.4e J\n",
+            totalOps, state.cycles, gops_per_cycle, totalEnergyJ);
 
     // Keep completed results available for MMIO readback after job teardown.
     lastResult = currentJob->matrixC;
@@ -391,8 +625,7 @@ LMulAccelerator::processCompute()
     // B: N x P
     // C: M x P
 
-    if (!currentJob->useStreamedInputs) {
-        // TODO: Implement true DMA path from aAddr/bAddr/cAddr.
+    if (!currentJob->useDma && !currentJob->useStreamedInputs) {
         // Fallback for compatibility when no streamed inputs are provided.
         for (uint32_t i = 0; i < currentJob->m; i++) {
             for (uint32_t j = 0; j < currentJob->n; j++) {
@@ -470,40 +703,38 @@ LMulAccelerator::estimateMemoryTime(uint32_t m, uint32_t n, uint32_t p)
 uint16_t
 LMulAccelerator::lmulBF16(uint16_t a, uint16_t b)
 {
-    // Simplified LMUL implementation
-    // In reality, this would match your Verilog RTL exactly
-    
-    // Extract fields
-    uint8_t a_sign = (a >> 15) & 0x1;
-    uint8_t b_sign = (b >> 15) & 0x1;
-    uint16_t a_fld = a & 0x7FFF;  // exp + mantissa
-    uint16_t b_fld = b & 0x7FFF;
-    
-    // Check for zero
-    uint8_t a_exp = (a_fld >> 7) & 0xFF;
-    uint8_t b_exp = (b_fld >> 7) & 0xFF;
-    if (a_exp == 0 || b_exp == 0) {
-        return 0;
+    // Match CPU RTL-compatible helper used by cpu_lmul_matrix_multiply().
+    const uint16_t field_mask = 0x7FFFu;
+    const uint16_t offset_mod = 0x4080u;
+    const uint8_t mantissa_bits = 7u;
+
+    const uint16_t a_fld = static_cast<uint16_t>(a & field_mask);
+    const uint16_t b_fld = static_cast<uint16_t>(b & field_mask);
+    const uint8_t a_exp =
+        static_cast<uint8_t>((a_fld >> mantissa_bits) & 0xFFu);
+    const uint8_t b_exp =
+        static_cast<uint8_t>((b_fld >> mantissa_bits) & 0xFFu);
+
+    uint16_t field_sel = 0u;
+    if (a_exp != 0u && b_exp != 0u) {
+        const uint32_t sum_full =
+            static_cast<uint32_t>(a_fld) + static_cast<uint32_t>(b_fld) +
+            static_cast<uint32_t>(offset_mod);
+        const uint32_t carry2 = (sum_full >> 15) & 0x3u;
+        const uint16_t low_bits = static_cast<uint16_t>(sum_full & field_mask);
+        if (carry2 == 1u) {
+            field_sel = low_bits;
+        } else if (carry2 >= 2u) {
+            field_sel = field_mask;
+        }
     }
-    
-    // LMUL: add exponent+mantissa fields
-    uint32_t sum = (uint32_t)a_fld + b_fld + ((1 << 15) - (127 << 7));
-    
-    // Check overflow/underflow
-    uint16_t result_fld;
-    if (sum >= (1 << 17)) {
-        result_fld = 0x7FFF;  // Overflow: saturate
-    } else if (sum < (1 << 15)) {
-        result_fld = 0x0000;  // Underflow: zero
-    } else {
-        result_fld = (sum - (1 << 15)) & 0x7FFF;
+
+    uint16_t sign = static_cast<uint16_t>(((a ^ b) >> 15) & 0x1u);
+    if (field_sel == 0u) {
+        sign = 0u;
     }
-    
-    // Combine sign
-    uint8_t result_sign = a_sign ^ b_sign;
-    if (result_fld == 0) result_sign = 0;
-    
-    return (result_sign << 15) | result_fld;
+
+    return static_cast<uint16_t>((sign << 15) | field_sel);
 }
 
 float

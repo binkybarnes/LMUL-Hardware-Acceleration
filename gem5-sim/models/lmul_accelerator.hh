@@ -11,7 +11,7 @@
 #include <queue>
 #include <vector>
 
-#include "dev/io_device.hh"
+#include "dev/dma_virt_device.hh"
 #include "params/LMulAccelerator.hh"
 #include "sim/eventq.hh"
 
@@ -30,11 +30,13 @@ namespace gem5
  * - Interrupt on completion
  * - Cycle-accurate timing model
  */
-class LMulAccelerator : public BasicPioDevice
+class LMulAccelerator : public DmaVirtDevice
 {
   public:
     typedef LMulAcceleratorParams Params;
     LMulAccelerator(const Params &p);
+    AddrRangeList getAddrRanges() const override;
+    TranslationGenPtr translate(Addr vaddr, Addr size) override;
 
     /**
      * Read from device registers
@@ -47,11 +49,19 @@ class LMulAccelerator : public BasicPioDevice
     Tick write(PacketPtr pkt) override;
 
   protected:
+    // MMIO configuration
+    const Addr pioAddr;
+    const Addr pioSize;
+    const Tick pioDelay;
+
     // Configuration parameters
     const uint32_t peArrayRows;      // PE array rows (e.g., 4)
     const uint32_t peArrayCols;      // PE array cols (e.g., 4)
     const Tick computeLatency;       // Cycles per PE operation
     const Tick memoryLatency;        // Memory access latency
+    const double energyPerOpPJ;      // Estimated compute energy per op (pJ)
+    const double dmaEnergyPerBytePJ; // Estimated DMA energy per byte (pJ)
+    const double leakagePowerMW;     // Estimated leakage power during active time (mW)
     
     // Register map (memory-mapped I/O)
     enum Registers {
@@ -117,21 +127,47 @@ class LMulAccelerator : public BasicPioDevice
         statistics::Scalar numCompletions;
         statistics::Scalar totalCycles;
         statistics::Scalar totalOps;
+        statistics::Scalar dmaReadReqs;
+        statistics::Scalar dmaWriteReqs;
+        statistics::Scalar dmaReadBytes;
+        statistics::Scalar dmaWriteBytes;
+        statistics::Scalar mmioReadCycles;
+        statistics::Scalar mmioWriteCycles;
+        statistics::Scalar mmioTotalCycles;
+        statistics::Scalar dmaReadCycles;
+        statistics::Scalar computeCycles;
+        statistics::Scalar dmaWriteCycles;
+        statistics::Scalar memoryTransferCycles;
+        statistics::Scalar estimatedComputeEnergyJ;
+        statistics::Scalar estimatedDmaEnergyJ;
+        statistics::Scalar estimatedLeakageEnergyJ;
+        statistics::Scalar estimatedTotalEnergyJ;
         statistics::Histogram opLatency;
     } stats;
 
     // Computation state
     struct ComputeJob {
+        uint64_t jobId = 0;
         Tick startTick;
         uint32_t m, n, p;
         Addr aAddr, bAddr, cAddr;
+        bool useDma = false;
         bool useStreamedInputs = false;
+        uint64_t dmaReadBytes = 0;
+        uint64_t dmaWriteBytes = 0;
+        Tick dmaReadStartTick = 0;
+        Tick computeStartTick = 0;
+        Tick dmaWriteStartTick = 0;
+        Tick dmaReadTicks = 0;
+        Tick computeTicks = 0;
+        Tick dmaWriteTicks = 0;
         std::vector<uint16_t> matrixA;
         std::vector<uint16_t> matrixB;
         std::vector<uint16_t> matrixC;
     };
     
     ComputeJob *currentJob;
+    uint64_t nextJobId;
     std::vector<uint16_t> lastResult;  // Completed result buffer for MMIO readback
     std::vector<uint16_t> stagedA;      // Input A streamed over MMIO
     std::vector<uint16_t> stagedB;      // Input B streamed over MMIO
@@ -142,6 +178,10 @@ class LMulAccelerator : public BasicPioDevice
     // Internal methods
     void startComputation();
     void completeComputation();
+    void onDmaReadAComplete();
+    void onDmaReadBComplete();
+    void onDmaWriteCComplete();
+    void finalizeComputation();
     void processCompute();
     
     // BF16 operations

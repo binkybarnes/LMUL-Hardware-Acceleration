@@ -18,17 +18,95 @@ from m5.util import addToPath
 # Add common config paths
 addToPath('../')
 
+
+class CpuPowerOn(MathExprPowerModel):
+    """First-order CPU power model for ON state."""
+
+    def __init__(
+        self,
+        cpu_path,
+        dyn_energy_per_cycle_pj=500.0,
+        dyn_energy_per_inst_pj=50.0,
+        static_power_mw=200.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        cycle_energy_j = dyn_energy_per_cycle_pj * 1.0e-12
+        inst_energy_j = dyn_energy_per_inst_pj * 1.0e-12
+        static_power_w = static_power_mw * 1.0e-3
+        # Power = rate * energy_per_event.
+        self.dyn = (
+            f"(({cpu_path}.numCycles / simSeconds) * {cycle_energy_j:.12e}) + "
+            f"((simInsts / simSeconds) * {inst_energy_j:.12e})"
+        )
+        self.st = f"{static_power_w:.12e}"
+
+
+class CpuPowerOff(MathExprPowerModel):
+    dyn = "0"
+    st = "0"
+
+
+class CpuPowerModel(PowerModel):
+    """Power model wrapper for CPU power states."""
+
+    def __init__(
+        self,
+        cpu_path,
+        dyn_energy_per_cycle_pj=500.0,
+        dyn_energy_per_inst_pj=50.0,
+        static_power_mw=200.0,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.pm = [
+            CpuPowerOn(
+                cpu_path,
+                dyn_energy_per_cycle_pj=dyn_energy_per_cycle_pj,
+                dyn_energy_per_inst_pj=dyn_energy_per_inst_pj,
+                static_power_mw=static_power_mw,
+            ),  # ON
+            CpuPowerOff(),  # CLK_GATED
+            CpuPowerOff(),  # SRAM_RETENTION
+            CpuPowerOff(),  # OFF
+        ]
+
+
 class LMulSystem(System):
     """
     Simple system with LMUL accelerator attached
     """
     
-    def __init__(self, pe_rows=4, pe_cols=4, use_accelerator=True, **kwargs):
+    def __init__(
+        self,
+        pe_rows=4,
+        pe_cols=4,
+        use_accelerator=True,
+        enable_cpu_power_model=True,
+        cpu_dyn_energy_per_cycle_pj=500.0,
+        cpu_dyn_energy_per_inst_pj=50.0,
+        cpu_static_power_mw=200.0,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
         
         # CPU - must be created as a child of System (not an attribute)
         # This ensures proper parenting in the SimObject hierarchy
         self.cpu = TimingSimpleCPU()
+
+        # Optional first-order CPU power model (emits system.cpu.power_model.* stats).
+        if enable_cpu_power_model:
+            # PowerModel requires an attached SubSystem. In this simple SE setup
+            # there is no CPU cluster SubSystem, so create a local one.
+            self.cpu_power_subsystem = SubSystem()
+            self.cpu.power_state.default_state = "ON"
+            self.cpu.power_model = CpuPowerModel(
+                self.cpu.path(),
+                dyn_energy_per_cycle_pj=cpu_dyn_energy_per_cycle_pj,
+                dyn_energy_per_inst_pj=cpu_dyn_energy_per_inst_pj,
+                static_power_mw=cpu_static_power_mw,
+                subsystem=self.cpu_power_subsystem,
+            )
         
         # Memory
         self.membus = SystemXBar()
@@ -47,8 +125,7 @@ class LMulSystem(System):
             )
             # Connect accelerator to memory bus
             self.lmul_accel.pio = self.membus.mem_side_ports
-        else:
-            self.lmul_accel = None
+            self.lmul_accel.dma = self.membus.cpu_side_ports
         
         # Interrupt controller
         self.cpu.createInterruptController()
@@ -75,19 +152,37 @@ def createSystem(args):
         pe_rows=args.pe_rows,
         pe_cols=args.pe_cols,
         use_accelerator=not args.use_ieee,
+        enable_cpu_power_model=not args.disable_cpu_power_model,
+        cpu_dyn_energy_per_cycle_pj=args.cpu_dyn_energy_per_cycle_pj,
+        cpu_dyn_energy_per_inst_pj=args.cpu_dyn_energy_per_inst_pj,
+        cpu_static_power_mw=args.cpu_static_power_mw,
         mem_mode='timing'
     )
     
     # Set memory ranges (must be set after creation, not in constructor)
-    # Accelerator is at 0x40000000 (1GB), which is outside normal memory
-    # This is fine - MMIO devices can be at any address
-    system.mem_ranges = [AddrRange('512MB')]
+    # Use 1GB so guest stack/high addresses (e.g. 0x3ffdf008) are mapped; 512MB caused
+    # "Unable to find destination for [0x3ffdf008:...] on system.membus" (syscall 403).
+    # Accelerator MMIO is at 0x40000000, outside this range.
+    system.mem_ranges = [AddrRange('1GB')]
     
     # Set memory controller range to match system memory range
     system.mem_ctrl.dram.range = system.mem_ranges[0]
     
-    # Set clock domain (must be set before creating processes)
-    system.clk_domain = SrcClockDomain(clock=args.cpu_clock, voltage_domain=VoltageDomain())
+    # Set CPU/system clock domain.
+    system.clk_domain = SrcClockDomain(
+        clock=args.cpu_clock,
+        voltage_domain=VoltageDomain()
+    )
+    system.cpu.clk_domain = system.clk_domain
+
+    # TODO #6: separate accelerator clock from CPU clock.
+    # Keep both on the same voltage domain for now and allow independent frequency.
+    if "lmul_accel" in system._children:
+        system.accel_clk_domain = SrcClockDomain(
+            clock=args.accel_clock,
+            voltage_domain=system.clk_domain.voltage_domain,
+        )
+        system.lmul_accel.clk_domain = system.accel_clk_domain
     
     # Note: Process creation and workload setup will be done in main()
     # after the system is created but before Root is created
@@ -114,6 +209,16 @@ def main():
                        help='Use IEEE BF16 instead of LMUL')
     parser.add_argument('--cpu-clock', type=str, default='2GHz',
                        help='CPU clock frequency (default: 2GHz)')
+    parser.add_argument('--accel-clock', type=str, default='2GHz',
+                       help='LMUL accelerator clock frequency (default: 2GHz)')
+    parser.add_argument('--disable-cpu-power-model', action='store_true',
+                       help='Disable first-order CPU power model stats')
+    parser.add_argument('--cpu-dyn-energy-per-cycle-pj', type=float, default=500.0,
+                       help='CPU dynamic energy per cycle (pJ), default: 500')
+    parser.add_argument('--cpu-dyn-energy-per-inst-pj', type=float, default=50.0,
+                       help='CPU dynamic energy per committed instruction (pJ), default: 50')
+    parser.add_argument('--cpu-static-power-mw', type=float, default=200.0,
+                       help='CPU static/leakage power (mW), default: 200')
     
     # Benchmark configuration
     parser.add_argument('--cmd', type=str, default=None,
@@ -179,7 +284,7 @@ def main():
         
         # Map accelerator MMIO region AFTER instantiation (only if accelerator exists)
         # The process is now fully instantiated and we can safely access it
-        if args.cmd and system.lmul_accel is not None:
+        if args.cmd and "lmul_accel" in system._children:
             accel_addr = system.lmul_accel.pio_addr
             accel_size = system.lmul_accel.pio_size
             try:
@@ -203,10 +308,13 @@ def main():
         return 1
     
     # Run simulation
-    if system.lmul_accel is not None:
-        print(f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array (LMUL Accelerator)")
+    if "lmul_accel" in system._children:
+        print(
+            f"Starting simulation with {args.pe_rows}x{args.pe_cols} PE array "
+            f"(LMUL Accelerator, CPU={args.cpu_clock}, ACCEL={args.accel_clock})"
+        )
     else:
-        print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator)")
+        print(f"Starting simulation (Native CPU IEEE BF16 - no accelerator, CPU={args.cpu_clock})")
     if args.cmd:
         print(f"Running: {args.cmd} {' '.join(args.cmd_args)}")
     

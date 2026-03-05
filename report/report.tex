@@ -3,13 +3,14 @@
 \documentclass[12pt,letterpaper]{article}
 \usepackage{style/dsc180reportstyle} % import 
 \usepackage{footmisc}
+\usepackage{pdfpages}
 % dsc180reportstyle.sty
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Title and Authors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{DSC Capstone | Hardware Accelerators}
+\title{Hardware Acceleration for Tensor Multiplication in Neural Networks}
 
 \author{Owen Shi \\
   {\tt a4shi@ucsd.edu} \\\And
@@ -34,7 +35,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-    We investigate the integration of an approximate linear-complexity multiplication algorithm (L-Mul) for neural network inference, evaluating its accuracy and performance characteristics across multiple software implementations and neural network architectures. We developed comprehensive software implementations of L-Mul in Python, NumPy, and PyTorch, enabling both scalar and matrix-level operations for testing and integration. Our evaluation demonstrates that L-Mul maintains accuracy within 1\% of standard floating-point multiplication across multilayer perceptron (MLP), convolutional neural network (CNN), and long short-term memory (LSTM) architectures, with 96.6\% prediction agreement in LSTM experiments. We implemented a Verilog hardware design and conducted simulation-based performance analysis, revealing that software optimizations cannot compete with native BLAS-optimized operations, highlighting the need for hardware acceleration to realize L-Mul's theoretical efficiency advantages. Our synthesis results demonstrate a 66.8\% area reduction compared to standard IEEE multipliers, validating L-Mul's hardware efficiency claims. Our results suggest that L-Mul can serve as an energy-efficient alternative to traditional floating-point multiplication for neural network inference, with future work focusing on theoretical performance analysis using Amdahl's law, evaluation of Transformer architectures, and comprehensive analysis of implementation costs and system integration challenges.
+This checkpoint report describes our progress evaluating the linear-complexity multiplication algorithm (L-Mul) as an approximate alternative to standard floating-point multiplication for neural network inference. We implement L-Mul in Python, NumPy, and PyTorch and assess accuracy on multilayer perceptrons (MLPs), convolutional neural networks (CNNs), and long short-term memory networks (LSTMs); preliminary runs suggest L-Mul stays within 1\% of standard multiplication with high prediction agreement (e.g., 96.6\% in LSTM experiments). Ablations extend to nanoGPT, with perplexity on trained-from-scratch and pretrained models intended to characterize L-Mul's impact on autoregressive language modeling. At the system level, we integrate a custom L-Mul accelerator into the gem5 simulator and compare it to native IEEE BF16 matrix multiplication, with simulation time, cycle counts, and DRAM energy to be reported across matrix sizes and outputs validated against software references. We design and synthesize RTL for neural network linear layers in Vivado (with projected substantial area reduction versus IEEE multipliers while meeting timing) and target a tiled block matrix multiplication kernel for Qwen~2.5~0.5B on FPGA using BRAM-resident blocks to limit DRAM traffic. Projected outcomes, consistent with prior work, are that L-Mul preserves accuracy in software without surpassing optimized numerical libraries while hardware realizations yield meaningful efficiency gains; full results and discussion will follow in the final report.
 \end{abstract}
 
 \begin{center}
@@ -50,11 +51,14 @@ Code: \url{https://github.com/oowenn/LMUL-Hardware-Acceleration}
 
 \section{Introduction}
 
-As artificial intelligence systems continue to scale in complexity and computational demand, speed and energy efficiency has emerged as a critical constraint. Neural networks require billions of floating-point operations during inference, with traditional IEEE 754 multiplication incurring substantial computational overhead. The \textit{L-Mul} (Linear-complexity Multiplication) algorithm presents an alternative approach: replacing expensive mantissa multiplication with addition-based operations to achieve $O(m)$ time complexity compared to the $O(m^2)$ time complexity of IEEE.
+As artificial intelligence systems continue to scale in complexity and computational demand, speed and energy efficiency have emerged as critical constraints. Neural networks require billions of floating-point operations during inference, with traditional IEEE 754 multiplication incurring substantial computational overhead. The \textit{L-Mul} (Linear-complexity Multiplication) algorithm presents an alternative approach: replacing expensive mantissa multiplication with addition-based operations to achieve $O(m)$ time complexity compared to the $O(m^2)$ time complexity of IEEE.
 
-This report presents our implementation and validation of the L-Mul algorithm for neural network inference. We focus specifically on BFloat16 (BF16) arithmetic, a 16-bit floating-point format widely adopted in machine learning due to its compatibility with FP32 exponents while requiring only half the storage. Building upon theoretical foundations established by prior work, we address three primary objectives. First, we develop a functionally correct Verilog implementation of L-Mul for BF16 arithmetic along with test bench simulations. Next, we implement and test software implementations of L-Mul via Python, NumPy, and PyTorch. Finally, we implement and observe the accuracy tradeoffs of L-Mul in MLPs, CNNs, and LSTMs on classification tasks such as MNIST and Fashion MNIST.
+This report presents our implementation and validation of the L-Mul algorithm for neural network inference. We focus specifically on BFloat16 (BF16) arithmetic, a 16-bit floating-point format widely adopted in machine learning due to its compatibility with FP32 exponents while requiring only half the storage. While algorithmic efficiency motivates L-Mul at the numerical level, its most compelling advantages emerge when considered in hardware. Conventional floating-point multipliers require complex mantissa multiplication units, normalization logic, and rounding circuitry, all of which contribute significantly to silicon area, power consumption, and design complexity. By replacing mantissa multiplication with addition-based operations, L-Mul enables a substantially simpler datapath that is better aligned with the resource and energy constraints of FPGA and accelerator-based systems. This architectural simplification creates an opportunity to co-design arithmetic, memory movement, and dataflow around neural network workloads, allowing us to explore how approximate multiplication can translate into system-level efficiency gains beyond software-only implementations.
 
-\section{Methods}
+On the software side, we investigate whether L-Mul is a practical substitute for standard floating-point multiplication in modern neural networks. We implement BF16 L-Mul in Python, NumPy, and PyTorch and compare results at both the scalar and tensor level, tracking approximation error and perplexity and analyzing how they affect model accuracy and stability during inference. By integrating L-Mul into linear and recurrent layers, we observe how these arithmetic changes propagate through full model computations. This is a checkpoint report; results and discussion will be presented in the final report. The remainder is organized as follows. Section~\ref{sec:background} reviews BF16 arithmetic, the L-Mul algorithm, and hardware tooling. Section~3 describes our methods: gem5 system simulation, Vivado RTL and synthesis, and ablations including nanoGPT. We summarize contributions and context at the end.
+
+\section{Background}
+\label{sec:background}
 
 \subsection{Standard BFloat16 Multiplication}
 
@@ -144,303 +148,338 @@ a_{sign} \oplus b_{sign} & \text{otherwise}
 
 \paragraph{Why This Works.}
 
-The key insight is that the exponent field already represents a logarithm (base 2), and the mantissa can be approximated as part of this logarithmic representation. When we add these combined fields, we're essentially performing multiplication in log space. The approximation comes from treating the mantissa bits as part of a continuous logarithmic scale rather than as a separate fractional multiplier. For neural network inference, this approximation is remarkably accurate—accurate enough that we see virtually no loss in classification accuracy, as we'll show in the results.
+The key insight is that the exponent field already represents a logarithm (base 2), and the mantissa can be approximated as part of this logarithmic representation. When we add these combined fields, we're essentially performing multiplication in log space. The approximation comes from treating the mantissa bits as part of a continuous logarithmic scale rather than as a separate fractional multiplier. For neural network inference, this approximation can be accurate enough to preserve classification accuracy in practice.
+
+\subsection{Multi Layer Perceptron}
+
+To investigate the integration of approximate arithmetic operations within neural networks, we implement a modified Multi Layer Perceptron (MLP) in PyTorch. This MLP is designed to operate under both conventional floating-point modes and an approximate mode utilizing L-Mul, which models hardware-efficient multiplication. The primary goal was to directly replace the standard floating-point multiply operation in the network's forward pass with an approximate function that more accurately reflects the behavior of the custom hardware multiplier, thereby enabling an evaluation of the impact on model accuracy and inference speed.
+
+\subsubsection{Model Architecture}
+
+The architecture of the MLP used in our experiments comprises two fully connected (dense) layers interleaved with ReLU activation functions, culminating in a log-softmax output layer. Specifically, the model performs the following transformations:
+
+\begin{itemize}
+    \item \textbf{Input Layer}: Accepts a flattened 28 $\times$ 28 pixel grayscale image, resulting in a 784-dimensional input vector.
+    \item \textbf{First Fully Connected Layer}: Maps the 784-dimensional input to a 128-dimensional hidden feature vector. This layer performs a matrix-vector multiplication with weight matrix $\mathbf{W}_1 \in \mathbb{R}^{128 \times 784}$ and bias vector $\mathbf{b}_1 \in \mathbb{R}^{128}$.
+    \item \textbf{ReLU Activation}: Applies a rectified linear unit to introduce non-linearity.
+    \item \textbf{Second Fully Connected Layer}: Projects the 128-dimensional hidden features onto a 10-dimensional output vector corresponding to class logits, via weight matrix $\mathbf{W}_2 \in \mathbb{R}^{10 \times 128}$ and bias vector $\mathbf{b}_2 \in \mathbb{R}^{10}$.
+    \item \textbf{Log-Softmax Layer}: Converts the output logits into log-probabilities suitable for the negative log-likelihood loss.
+\end{itemize}
+
+\subsubsection{Mathematical Foundations}  
+The core mathematical operations implemented in hardware replicate standard neural network computations. The linear layers perform dot products as follows:  
+\begin{equation}
+\mathbf{z} = \mathbf{W} \mathbf{x} + \mathbf{b}
+\end{equation}  
+where $\mathbf{W}$ is the weight matrix, $\mathbf{x}$ is the input vector, and $\mathbf{b}$ is the bias vector. The activation function used is ReLU, which is defined as:  
+\begin{equation}
+\text{ReLU}(x) = \max(0, x)
+\end{equation}  
+This ensures non-linearity and sparsity in activations before passing to subsequent layers.
+
+\subsection{Hardware Integration}
+
+In this subsection, we discuss the various hardware tools, simulation environments, and methodologies employed to develop, verify, and optimize our hardware acceleration modules for neural network computations, specifically focusing on tensor multiplication operations.
+
+\subsubsection{gem5}
+gem5 is a modular, open-source computer-architecture simulator widely used in research and industry to model full systems or syscall-emulation environments. It supports multiple ISAs (e.g., ARM, x86), detailed CPU and memory models, and custom devices, making it suitable for evaluating how an accelerator interacts with the rest of the system, including CPU, caches, and main memory, rather than in isolation. In our project we use gem5 to integrate a custom LMUL accelerator as a memory-mapped device, run the same BF16 matrix-multiplication workload on the accelerator and on the CPU (native IEEE), and compare simulation time, cycle counts, and DRAM energy; see Section~\ref{subsec:gem5} for the experimental setup and workflow.
+
+
+\subsubsection{Icarus Verilog}
+
+Icarus Verilog (iVerilog) is an open-source HDL simulation and synthesis tool that allows for the simulation of Verilog designs without requiring expensive proprietary software. It provides a lightweight environment suitable for rapid design iteration and testing \cite{iverilog}. The primary simulation tool associated with iVerilog is \texttt{vvp}, which executes compiled Verilog code (via \texttt{iverilog} compiler) and produces logs and debug information.
+
+For our project, iVerilog and \texttt{vvp} served as accessible platforms for initial verification of test bench modules such as the multiplier (\texttt{lmul\_bf16.v}) and the Design Under Test (\texttt{top\_lmul.v}). Its python-like scripting capabilities make it suitable for engineers who are unfamiliar with high-level hardware design languages. iVerilog supports behavioral simulation, allowing us to test the correctness of our modules in a controlled environment before progressing to more advanced FPGA synthesis tools.
+
+\subsubsection{Vivado}
+
+AMD Xilinx Vivado Design Suite is an integrated development environment (IDE) tailored for FPGA synthesis, implementation, and debugging \cite{vivado}. Unlike iVerilog, which focuses on simulation, Vivado enables the compilation of HDL designs into FPGA bitstreams, providing a pathway from test bench simulation to RTL code to actual hardware deployment.
+
+The advantages of Vivado in our work are manifold: it offers advanced synthesis optimizations, resource utilization analysis, and the ability to generate programming files for Xilinx FPGAs. Its graphical user interface facilitates design visualization and optimization through its analog waveform signal graphs. Employing Vivado allows us to validate both test bench and RTL modules within the context of actual FPGA hardware, enabling performance benchmarking, hardware debugging, and eventual deployment of the neural network acceleration modules.
+
+\subsubsection{Test Bench Simulation}
+
+Test Bench simulation is a fundamental step in verifying HDL modules, where a dedicated test environment (test bench) stimulates the RTL with input signals and monitors the outputs. Our test bench, \texttt{tb\_lmul.v}, simulates the behavior of the floating-point multiplier and the neural network accelerator modules.
+
+The benefits of test bench simulation include the ability to perform comprehensive verification of logic correctness, timing analysis, and protocol adherence in a controlled setting. Additionally, simulation waveforms generated during test bench runs allow engineers to visualize signal transitions, identify glitches, and troubleshoot issues effectively. This process is essential for optimizing performance and ensuring the reliability of the hardware modules before hardware synthesis, minimizing costly iterations on physical FPGA devices.
+
+\subsubsection{Register-Transfer Level (RTL)}
+
+Register-Transfer Level (RTL) is an abstraction level used to describe digital circuits, focusing on the flow of data between registers and the logical operations performed on that data. RTL descriptions are typically written in hardware description languages such as Verilog or VHDL and serve as the primary input for synthesis tools.
+
+In our project, RTL modules like \texttt{lmul\_bf16.v} and \texttt{fc\_accel.v} define the core computational units (multipliers, adders, and control logic) at a detailed hardware level. Using RTL allows us to specify precise hardware behavior, optimize resource utilization, and facilitate synthesis into FPGA fabric. The RTL approach ensures that the hardware implementation aligns with the intended data flow and control sequences necessary for efficient neural network acceleration.
+
+\vspace{1em}
+In summary, these tools enable us to validate correctness, optimize performance, and smoothly transition from HDL code to real hardware deployment, ultimately contributing to faster and more efficient neural network computations.
+
+\section{Methods}
 
 \subsection{Development Environment and Docker Configuration}
 
-Docker was used for containerization to ensure consistent package reliability across different machines. Using the relevant files, a VS Code pipeline was developed to automate the installation of necessary Python and Verilog dependencies, while ensuring compatibility, as well as relevant VS Code extensions such as Python and Jupyter.
+Docker was used for containerization to ensure consistent package reliability across different machines. Using the relevant files, a VS Code pipeline was developed to automate the installation of necessary Python, Verilog, and gem5 dependencies, while ensuring compatibility, as well as relevant VS Code extensions such as Python and Jupyter.
 
-\subsection{Verilog Simulation}
+\subsection{Gem5 System Simulation}
+\label{subsec:gem5}
 
-\label{subsec:simulation_infrastructure}
+To evaluate the practicality of an LMUL accelerator as a separate hardware component in a full-system context, we integrated a custom device model into the gem5 simulator and compared its performance to a native IEEE BF16 implementation on the same workload. The goal is to run identical BF16 matrix multiplications then compare simulation time, CPU cycles, and DRAM energy, and optionally validate outputs against software references.
 
-To validate our LMUL hardware design and enable integration with machine learning workloads, we developed a simulation pipeline that bridges Verilog hardware descriptions with Python-based testing and neural network frameworks. This infrastructure allows us to verify correctness, measure performance characteristics, and ultimately test LMUL on real ML tasks without requiring physical hardware.
+Simulation mode, ISA, and workload (dense BF16 matrix multiply $C = A \times B$) are summarized in Tables~\ref{tab:gem5_config} and~\ref{tab:gem5_workflow}. The LMUL path programs the accelerator, streams $A$ and $B$ via memory-mapped I/O, polls for completion, and reads $C$ back. The IEEE path runs a naive scalar triple-loop on the CPU, performing each multiply in single precision by converting BF16 operands to float before multiplying and converting the result back to BF16. The same benchmark executable and dimensions are used for both runs, with identical initialization of $A$ and $B$, so results are comparable.
 
-\paragraph{Simulation Approach.}
+\paragraph{Data path: MMIO (LMUL) vs.\ main memory (IEEE).}
+Currently our accelerator communicates using \emph{memory-mapped I/O} (MMIO): the device is exposed at fixed addresses, and the CPU streams $A$ and $B$ to the device and reads $C$ back by executing a load or store for each word, so the accelerator never touches main memory. To capture more realistic performance, a production design would use \emph{direct memory access} (DMA), where the CPU programs a transfer once and the accelerator or a DMA engine moves blocks between main memory and the device without the CPU touching every word. Meanwhile, the IEEE path uses no accelerator and only needs main memory: the CPU performs the matmul in software and accesses $A$, $B$, and $C$ via normal loads and stores through the memory system.
 
-We use Icarus Verilog (iverilog), an open-source Verilog simulator, to compile and execute our hardware descriptions. The simulation flow works as follows: our Verilog modules are compiled into an executable simulation model, which we then run using the \texttt{vvp} (Verilog VVP) runtime. This generates cycle-accurate behavior that matches what the actual hardware would do, including all timing, handshaking protocols, and pipeline stages.
+\begin{table}[H]
+\centering
+\caption{gem5 simulation and accelerator configuration.}
+\label{tab:gem5_config}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Item} & \textbf{Setting} \\
+\midrule
+Simulation mode & Syscall emulation (SE), ARM \\
+CPU & TimingSimpleCPU (single core) \\
+Memory & Coherent bus, DDR3-style controller \\
+Address space & 512\,MB \\
+Accelerator interface & Memory-mapped I/O (MMIO) \\
+PE array & Configurable (e.g.\ 4$\times$4, 8$\times$8) \\
+LMUL data path & CPU streams $A$/$B$ in, reads $C$ via MMIO \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\paragraph{Batch Testing Architecture.}
+\begin{table}[H]
+\centering
+\caption{Benchmark and comparison workflow.}
+\label{tab:gem5_workflow}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Item} & \textbf{Setting} \\
+\midrule
+Workload & Dense BF16 matrix multiply $C = A \times B$ \\
+Matrix dimensions & Configurable (e.g.\ 4$\times$4 to 512$\times$512) \\
+Runs per comparison & Two: LMUL (accelerator) and IEEE (CPU) \\
+Performance metrics & Sim time, CPU cycles, instructions, CPI, IPC, DRAM energy \\
+Accelerator stats & Total cycles, total ops, completions \\
+Correctness (optional) & Compare outputs to \texttt{rtl.numpy\_lmul} (LMUL) or IEEE matmul (CPU) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Rather than spawning a new simulation process for every single multiplication (which would be prohibitively slow), we developed a batch testing system. Our \texttt{BatchLMULTester} class generates a complete Verilog testbench that includes:
+\subsection{Simulation and RTL Design in Vivado}
 
+\subsubsection{Input Data Preparation}  
+Our approach begins with generating the input data using a pretrained PyTorch classifier trained on the MNIST dataset. Specifically, we utilize a simple multi-layer perceptron (MLP) model with one hidden layer of 128 units. The trained model's weights and biases are extracted directly from PyTorch and formatted as 16-bit floating-point BF16 representations. These model parameters are then written into memory initialization files compatible with Vivado, residing in the designated simulation folders.  
+
+Concurrently, MNIST test images and labels are processed using a Python script that converts each pixel value into BF16 format. The images, originally in 8-bit grayscale, are normalized to [0, 1], then converted into BF16 and stored sequentially in text files \texttt{test\_x.mem}. Labels are similarly stored in separate files \texttt{test\_y.mem}. These data files serve as inputs for both simulation and RTL implementation, ensuring consistency across the hardware and software components.
+
+\subsubsection{Simulation Files}  
+The simulation environment employs three key Verilog files:  
 \begin{itemize}
-    \item Arrays of pre-loaded test input pairs ($a$, $b$)
-    \item Clock generation and reset logic
-    \item Ready/valid handshaking to properly interface with our LMUL module's pipeline
-    \item Result capture logic that stores outputs as they become available
-    \item Automatic result printing for parsing by Python
+    \item \textbf{\texttt{lmul\_bf16.v}}: Implements a pipelined BF16 multiplier. It accepts two BF16 inputs, performs the multiplication, and produces a BF16 output, handling handshakes for flow control.
+    \item \textbf{\texttt{bf16\_adder.v}}: Performs addition of two BF16 operands, producing a BF16 result. This module models the core arithmetic operation of the dot product accumulations.
+    \item \textbf{\texttt{tb\_lmul.v}}: A test bench that interfaces with the multiplier, feeding in input pairs, capturing output, and orchestrating the sequence of operations to simulate the neural network's linear layers. The logits generated are written to memory files for subsequent classification steps.
+\end{itemize}  
+These files collectively emulate the core computations of the neural network's fully connected layers in a behavioral simulation.
+
+\subsubsection{Test Bench Integration}  
+Implementing the test bench within Vivado offers significant advantages over traditional iVerilog simulations. Vivado facilitates timing analysis and resource utilization reports, essential for assessing the hardware acceleration potential. Viewing waveform graphs is crucial because it provides a detailed timeline of signal behavior, allowing verification that each clock cycle aligns with design specifications. It helps identify the precise moments when inputs are active or changing, ensuring correct sequencing and timing relationships. This visual insight is essential for diagnosing timing issues, bottlenecks, and confirming that the design operates as intended before implementation.
+
+\subsubsection{RTL Implementation}  
+To transition from behavioral simulation to hardware synthesis, we employ the \textbf{\texttt{fc\_accel.v}} module. This RTL block encapsulates the entire inference process, including storing input images, weights, biases, and performing the matrix-vector multiplications via instantiated multiplier and adder modules.  
+
+The RTL design reorganizes the test bench into a synthesizable dataflow graph, implementing control logic to orchestrate data movement, multiplication, accumulation, and bias addition. This conversion allows us to synthesize the design in Vivado, enabling analysis of power consumption, processing speed, and resource utilization. The resultant logits are exported to software for final classification, maintaining the integrity of the inference pipeline. 
+
+\subsection{Hardware Synthesis and System-Level Evaluation}
+
+Building on the RTL design and simulation infrastructure described in previous sections, this work focuses on synthesizing both L-Mul and IEEE BF16 multipliers to obtain quantitative hardware metrics and extending the analysis to system-level accelerator configurations. The primary objectives are to measure area, timing, power, and throughput characteristics that validate L-Mul's efficiency advantages and establish a methodology for scaling from unit-level to accelerator-level evaluation.
+
+\subsubsection{Synthesis Toolchain and Library}
+Hardware synthesis is performed using \textbf{Yosys}, an open-source synthesis tool, in conjunction with the \textbf{Nangate 45nm Open Cell Library}. Yosys converts the RTL Verilog descriptions into gate-level netlists, mapping high-level operations to standard cells such as AND gates, OR gates, flip-flops, and adders. The synthesis process follows a structured flow:
+\begin{enumerate}
+    \item \textbf{RTL Elaboration}: Verilog modules (\texttt{lmul\_bf16.v} and \texttt{bf16\_mul.v}) are read and elaborated.
+    \item \textbf{Optimization Passes}: Generic optimization passes (\texttt{proc}, \texttt{opt}, \texttt{fsm}, \texttt{memory}, \texttt{flatten}) are applied to simplify the design.
+    \item \textbf{Technology Mapping}: The \texttt{abc} command maps combinational logic to standard cells, targeting a 1\,ns clock period (1\,GHz) to push timing limits.
+    \item \textbf{Statistics Extraction}: Area and cell count statistics are extracted from the synthesis log using the \texttt{stat} command.
+\end{enumerate}
+
+Timing analysis is performed using \textbf{OpenSTA} (Open Static Timing Analyzer), which verifies that both designs meet the target clock constraint of 2.0\,ns (500\,MHz). Critical path delays, worst negative slack (WNS), and total negative slack (TNS) are extracted to ensure timing closure.
+
+The L-Mul and IEEE BF16 multipliers are synthesized independently to establish baseline metrics. The synthesis scripts (\texttt{synth\_lmul.ys} and \texttt{synth\_bf16.ys}) apply identical optimization and mapping strategies to both designs. Key metrics extracted include:
+\begin{itemize}
+    \item \textbf{Chip Area}: Measured in library-specific units, representing the physical silicon footprint.
+    \item \textbf{Cell Count}: Total number of standard cells instantiated, indicating design complexity.
+    \item \textbf{Cell Breakdown}: Distribution of cell types (adders, logic gates, flip-flops, multipliers) to understand resource composition.
+    \item \textbf{Timing Metrics}: Maximum clock frequency, critical path delay, and slack values.
 \end{itemize}
 
-This approach means we compile and run the simulator once per batch, rather than once per operation. For testing 1000 multiplications, this reduces overhead from roughly 50 seconds to about 30 milliseconds, a speedup of over 1500x compared to naive per-operation simulation.
+\subsubsection{System-Level Design: PE Array}
+To evaluate the scalability of L-Mul in a realistic accelerator context, we design a processing element (PE) array for both L-Mul and IEEE multipliers. The PE array is a 4$\times$4 systolic-style grid, where each PE performs a multiply-accumulate (MAC) operation. The Verilog module \texttt{pe\_array\_simple.v} instantiates 16 multipliers and 16 accumulators, along with control logic for data routing and synchronization.
+
+The PE array design includes:
+\begin{itemize}
+    \item \textbf{Data Buffers}: Simple memory elements to store input matrices and partial results.
+    \item \textbf{Control FSM}: A finite state machine that orchestrates the flow of data through the array, handles handshakes, and triggers accumulation.
+    \item \textbf{Interconnect}: Routing logic to connect PEs and enable data reuse across columns and rows.
+\end{itemize}
+
+This subsystem-level design is synthesized using the same Yosys flow, and total area, cell count, and timing are measured. The goal is to understand how the unit-level area savings translate to system-level resource utilization and to estimate the number of PEs that can fit within a fixed silicon budget.
+
+\subsubsection{Power Analysis Methodology}
+While synthesis provides area and timing metrics, power consumption must be estimated through activity-aware analysis. Our power estimation methodology involves:
+\begin{enumerate}
+    \item \textbf{Workload Simulation}: The synthesized netlist is simulated using representative neural network workloads (e.g., MNIST inference, matrix multiplications) in a Verilog simulator (Icarus Verilog or Vivado).
+    \item \textbf{VCD Generation}: During simulation, switching activity for all signals is recorded in a Value Change Dump (VCD) file. This captures the dynamic behavior of the circuit under real operating conditions.
+    \item \textbf{Power Estimation}: The VCD file, along with the synthesized netlist and library power models, is analyzed using power estimation tools (e.g., Yosys power estimation, Synopsys PrimeTime PX, or open-source alternatives like \texttt{vcd2power}). Both dynamic power (due to switching activity) and leakage power (static) are estimated.
+    \item \textbf{Comparison}: Identical workloads are used for both L-Mul and IEEE designs to ensure a fair comparison. Power per operation and total energy consumption are calculated.
+\end{enumerate}
 
-\paragraph{Parallelized Testing Architecture.}
+This approach provides a realistic estimate of power efficiency, accounting for the reduced switching activity expected from L-Mul's simpler logic.
 
-To further enhance our simulation performance and diagnostic capabilities, we explored a parallelized approach by instantiating multiple Designs Under Test (DUT) to operate on multiple numbers in one clock cycle. This yielded minimal speed gains due to the serial nature of our DUT instantiation and the single-threaded execution of Icarus Verilog and vvp. We shifted our simulation environment from Icarus Verilog to Vivado, a dedicated FPGA development tool, which enables detailed waveform generation for precise bottleneck identification and correctness verification. Additionally, we optimized input signals by removing unnecessary handshaking logic, reducing input signal latency from 20ns to 10ns and effectively halving the simulation runtime associated with positive clock edges.
-
-\subsection{Hardware Synthesis Methodology}
-
-\label{subsec:synthesis_methodology}
-
-While our simulation work (Section~\ref{subsec:simulation_infrastructure}) validated the functional correctness of our L-Mul hardware design, synthesis provides concrete hardware metrics that quantify the efficiency advantages. To validate the hardware efficiency claims of L-Mul and obtain quantitative metrics for comparison with standard IEEE BF16 multiplication, we synthesized both designs using industry-standard EDA tools. This synthesis process converts our Verilog RTL descriptions into gate-level netlists mapped to a standard cell library, enabling quantitative comparison of area and architectural characteristics.
-
-\paragraph{Synthesis Flow.}
-
-We used Yosys 0.9, an open-source synthesis tool, to perform technology mapping of both multiplier designs to the Nangate 45nm Open Cell Library. The synthesis flow for each design followed a standard sequence: (1) reading the Verilog RTL and standard cell library, (2) hierarchy processing and optimization, (3) finite state machine optimization, (4) memory optimization, (5) flattening for technology mapping, (6) flip-flop mapping to library cells, (7) combinational logic mapping using ABC with a 1.0 ns target clock period, and (8) final optimization and cleanup. This process generated gate-level netlists where each logic operation is implemented using standard cells from the Nangate library, providing concrete area and cell count metrics for comparison.
-
-\paragraph{Design Wrappers.}
-
-To ensure fair comparison, we created synthesis-specific wrapper modules that isolate the core multiplier logic from testbench code. The L-Mul wrapper instantiates our \texttt{lmul\_bf16} module, while the IEEE BF16 wrapper instantiates a standard IEEE-754 BF16 multiplier implementation that performs full mantissa multiplication. Both wrappers maintain identical interfaces with ready/valid handshaking protocols, ensuring equivalent control logic overhead in the comparison.
-
-\paragraph{Technology Library.}
-
-The Nangate 45nm Open Cell Library provides a comprehensive set of standard cells including basic logic gates (AND, OR, XOR, NAND, NOR), complex gates (AOI, OAI), flip-flops, and specialized cells. This library is widely used in academic research and provides realistic area and timing characteristics for 45nm CMOS technology. All area measurements are reported in library-specific area units, which represent the physical silicon area required for each standard cell.
-
-\subsection{Software Testing}
-
-To support comprehensive validation and performance analysis of LMUL across different computational contexts, we developed multiple software implementations targeting distinct use cases. These implementations enable us to verify correctness and benchmark performance characteristics.
-
-\paragraph{Scalar Implementations and Comparisons.}
-
-For element-wise multiplication operations, we implemented scalar LMUL versions across multiple frameworks. Our pure Python scalar implementation processes individual BF16 operand pairs and serves as our primary reference for validation, providing a fast and transparent way to generate expected results without the overhead of hardware simulation. The Python version follows the exact same algorithm as our Verilog implementation, ensuring bit-exact matches for verification. For efficient batch processing, we developed vectorized NumPy and PyTorch implementations that operate on entire arrays of BF16 values simultaneously, leveraging optimized array operations and SIMD capabilities to process thousands of element-wise multiplications in parallel. These scalar implementations are used in our speed and accuracy testing frameworks to compare LMUL performance and accuracy against standard floating-point multiplication across different input ranges and batch sizes, enabling us to understand the performance characteristics and numerical behavior of LMUL at the fundamental operation level.
-
-\paragraph{Matrix Multiplication Implementations and Comparisons.}
-
-For matrix-level operations, we implemented LMUL-based matrix multiplication functions in both NumPy and PyTorch that perform full matrix multiplications using LMUL for the underlying element-wise products. These implementations broadcast input matrices to compute all pairwise LMUL products, then sum along the appropriate dimensions to produce matrix multiplication results. The NumPy implementation enables direct comparison with standard BLAS-optimized matrix multiplication, while the PyTorch version integrates with neural network frameworks and includes a custom \texttt{torch.autograd.Function} that enables automatic differentiation during training. Our matrix multiplication implementations are evaluated in dedicated speed and accuracy testing frameworks that compare LMUL-based matrix operations against standard NumPy and PyTorch matrix multiplication across various matrix sizes, revealing how the approximate nature of LMUL propagates through matrix operations and providing performance benchmarks for potential neural network integration scenarios.
-
-\subsection{MLP–L-Mul Integration}
-
-\label{subsec:mlp_lmul}
-
-To investigate the integration of approximate arithmetic within neural networks, we implemented a modified multilayer perceptron (MLP) in PyTorch capable of operating under both conventional and L-Mul modes. The objective was to directly substitute the standard floating-point multiply operation in the forward pass with an approximate function that more closely resembles a hardware-efficient arithmetic primitive.
-
-\paragraph{Model Architecture.}
-
-The MLP architecture consists of two fully connected layers with ReLU activations, followed by a log-softmax output layer. The first layer maps a flattened $28\times 28$ input image to a 128-dimensional hidden representation, while the second projects to the 10 output classes corresponding to the MNIST digits. 
-
-\paragraph{Vectorized Implementation.}
-
-For efficiency, a custom function \texttt{lmul\_linear} was implemented to perform the equivalent of a dense linear transformation using L-Mul arithmetic. Given an input tensor $x \in \mathbb{R}^{B \times I}$ and a weight matrix $W \in \mathbb{R}^{O \times I}$, the computation proceeds as
-
-\begin{equation}
-Y_{b,o} = \sum_{i=1}^{I} \text{L-Mul}(x_{b,i}, W_{o,i}) + b_o
-\end{equation}
-
-where $b$ denotes the batch dimension. Broadcasting and tensor expansion were used to apply L-Mul elementwise over all input–weight pairs, followed by summation across input features.
-
-\paragraph{Training and Evaluation Procedure.}
-
-The model was first trained for both two and five epochs on the MNIST training set using standard floating-point arithmetic and the Adam optimizer. After training, the learned weights were evaluated under the L-Mul mode using the same architecture and parameter values. This allowed direct comparison between true multiplication and its L-Mul approximation under identical learned representations. All experiments were conducted on CPU using PyTorch's built-in automatic differentiation and tensor operations.
-
-\subsection{LSTM–L-Mul Integration}
-
-To test L-Mul's approximation cost among other neural networks, we implemented a Long-Short Term Memory (LSTM) in PyTorch capable of operating under both conventional and L-Mul multiplication. Like the MLP, the objective is to directly substitute the standard floating-point multiply operation in the forward pass with an approximate function (L-Mul). 
-
-\paragraph{Model Architecture.}
-
-For each timestep in a sequence, the input embedding $x_t$ is concatenated with the previous hidden state $h_{t-1}$ and passed through linear transformations to compute the LSTM gates: input ($i_t$), forget ($f_t$), cell candidate ($g_t$), and output ($o_t$). The cell state $c_t$ and hidden state $h_t$ are then updated according to the standard LSTM equations:
-
-\begin{equation}    
-c_t = f_t \odot c_{t-1} + i_t \odot g_t, \quad
-h_t = o_t \odot \tanh(c_t)
-\end{equation}
-
-
-For sequence classification, the final hidden state $h_T$ is used as input to a linear layer to produce logits for the output classes. A token is sampled from these logits, and its embedding is used as the input for the next timestep. The hidden and cell states carry over, providing context, while the logits themselves are only used for sampling and not fed directly back into the model. For language modeling, each timestep's hidden state can be used to predict the next token, and generation continues recursively until an end-of-sequence token or a maximum length is reached.
-
-\paragraph{PyTorch L-Mul Implementation}  
-
-Considering that the LSTM is significantly more computationally intensive than the MLP layer, a specialized L-Mul algorithm was implemented to optimize runtime and allow PyTorch compilation. The algorithm simulates bfloat16 multiplication within float32 tensors by extracting the sign and field bits of each input, performing field addition with bias correction, and handling underflow and overflow conditions explicitly. The resulting bits are then repacked into a float32 tensor, with a small heuristic bitshift correction added to improve accuracy for LSTM operations, where multiplication errors accumulate rapidly. Finally, zeros and subnormal values are explicitly managed to maintain numerical stability. 
-
-\paragraph{Training and Evaluation Procedure.}
-
-The model was first trained for three epochs across 5 seeds on the FashionMNIST, KMNIST, SeqMNIST datasets using standard floating-point arithmetic and the Adam optimizer. As in the MLP Layer methodology section, after training, the learned weights were evaluated under the L-Mul mode using the same architecture and parameter values against floating-point multiplication.
-
-\subsection{CNN–L-Mul Integration}
-\label{subsec:cnn_lmul}
-
-To evaluate L-Mul in a convolutional architecture, we implemented a simple convolutional neural network (CNN) capable of operating under both conventional and L-Mul multiplication modes. The objective was to observe the effect of L-Mul on a model that relies heavily on convolutional layers, maintaining the same architecture and training process while only changing the multiplication operator during inference.
-
-\paragraph{Model Architecture.}
-
-The CNN consists of two convolutional layers followed by two fully connected layers. The first convolution produces 32 feature maps and the second produces 64 feature maps. After each convolution, we apply a ReLU activation followed by max pooling to reduce spatial size. The output is flattened and passed through a linear layer with 128 units, followed by a final layer that returns 10 class scores.
-
-\paragraph{Using L-Mul Inside Convolutions.}
-
-To use L-Mul in this setting, we created a version of the convolution calculation where every multiplication between the input and kernel weight is replaced by L-Mul. We used broadcasting so that the operator applies across all spatial positions and channels simultaneously. The summation part of the convolution remains unchanged, allowing us to keep the overall structure of the operation while changing only the arithmetic.
-
-\paragraph{Training and Evaluation Procedure.}
-
-The model was trained normally using floating-point arithmetic on MNIST. After training, we ran two evaluations: the first used standard multiplication and the second used L-Mul for all multiplications in both the convolutional and linear layers. Since everything else in the model stayed the same, any difference in accuracy comes from the arithmetic change alone.
-
-\section{Results}
-
-\subsection{Numerical Accuracy Evaluation}
-
-We evaluated the accuracy of LMUL implementations at both the scalar (element-wise) and matrix multiplication levels, comparing them against standard floating-point arithmetic and verifying consistency across different software implementations.
-
-\paragraph{Scalar Accuracy Evaluation.}
-
-For element-wise multiplication operations, we compared multiple LMUL implementations against standard floating-point multiplication. Our evaluation includes Python scalar LMUL, NumPy vectorized LMUL, PyTorch vectorized LMUL, and Verilog hardware simulation, all tested against standard IEEE 32-bit floating-point multiplication. For each test configuration, we generated $N = 10,000$ randomly sampled operand pairs, with each operand drawn uniformly from the range [-10,000, +10,000]. The inputs were evaluated by all multiplication methods, and the average absolute error was normalized by the numerical range of the test dataset to yield a percentage error metric.
-
-The results demonstrate that all LMUL implementations produce consistent results, with the Verilog hardware simulation matching the Python LMUL emulator exactly. When compared to standard floating-point multiplication, LMUL exhibits a bounded and predictable precision loss consistent with the reduced precision of the BF16-style format used internally. These results indicate that LMUL preserves correctness relative to its software specification while introducing precision loss that is small enough to support downstream inference tasks.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/scalar_accuracy.png}
-    \caption{Accuracy comparison of scalar LMUL implementations against standard floating-point multiplication.}
-    \label{fig:scalar_accuracy}
-\end{figure}
-
-\paragraph{Matrix Multiplication Accuracy Evaluation.}
-
-For matrix-level operations, we evaluated LMUL-based matrix multiplication against standard NumPy and PyTorch matrix multiplication implementations. We tested $N = 100$ randomly generated matrix pairs of size $20 \times 20$, with values drawn from uniform distributions. The evaluation compares NumPy standard matrix multiplication, PyTorch standard matrix multiplication, NumPy LMUL matrix multiplication, and PyTorch LMUL matrix multiplication, measuring pairwise percentage mismatch between implementations.
-
-The results reveal how the approximate nature of LMUL propagates through matrix operations, showing the cumulative effect of element-wise approximation errors when aggregated across full matrix multiplications. This analysis provides insights into the numerical stability of LMUL for neural network applications where matrix operations are fundamental.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/matrix_accuracy.png}
-    \caption{Pairwise accuracy comparison heat matrix for matrix multiplication implementations.}
-    \label{fig:matrix_accuracy}
-\end{figure}
-
-\subsection{Execution Speed}
-
-We benchmarked the performance of LMUL implementations at both scalar and matrix multiplication levels, comparing them against standard implementations across various batch sizes and matrix dimensions.
-
-\paragraph{Scalar Multiplication Speed.}
-
-We benchmarked multiple multiplication backends for element-wise operations across batch sizes ranging from $10^1$ to $10^5$ operations. The evaluation includes standard Python \texttt{float32} multiplication, NumPy vectorized multiplication, PyTorch vectorized multiplication, Python scalar LMUL, NumPy vectorized LMUL, PyTorch vectorized LMUL, Verilog LMUL hardware simulation, and parallelized Verilog simulation with 4 DUTs. The measured quantity is the average time per multiplication after removing initialization overhead.
-
-As shown in Figure~\ref{fig:scalar_speed}, NumPy achieves the lowest latency due to optimized vectorized execution, reaching sub-nanosecond performance for large batches. Standard Python and PyTorch multiplications scale well as loop overhead amortizes. The LMUL hardware simulation path incurs larger per-call overhead from Verilog simulation, but its time per operation decreases with batch size. This reflects simulator cost rather than hardware speed---a synthesized implementation would operate at clock-cycle scale. The Python LMUL model is slower due to explicit bit-level emulation, while vectorized NumPy and PyTorch LMUL implementations provide intermediate performance.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\linewidth]{figure/scalar_speed.png}
-    \caption{Average time per scalar multiplication (log--log scale) for multiple implementations over increasing batch sizes.}
-    \label{fig:scalar_speed}
-\end{figure}
-
-\paragraph{Matrix Multiplication Speed.}
-
-We benchmarked matrix multiplication performance for standard and LMUL-based implementations across matrix sizes ranging from $10 \times 10$ to $200 \times 200$. The evaluation compares NumPy standard matrix multiplication, PyTorch standard matrix multiplication, NumPy LMUL matrix multiplication, and PyTorch LMUL matrix multiplication. Performance is measured as time per operation normalized by matrix size ($n^3$ operations for $n \times n$ matrices).
-
-As shown in Figure~\ref{fig:matrix_speed}, standard NumPy and PyTorch implementations leverage optimized BLAS routines for high performance. LMUL-based matrix multiplication implementations show different performance characteristics due to the overhead of BF16 conversion and element-wise LMUL operations, though they provide the approximate arithmetic needed for neural network inference scenarios. The results demonstrate the performance trade-offs when using approximate arithmetic for matrix operations in software implementations.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\linewidth]{figure/matrix_speed.png}
-    \caption{Time per operation for matrix multiplication implementations across different matrix sizes (log--log scale).}
-    \label{fig:matrix_speed}
-\end{figure}
-
-\subsection{MLP–L-Mul Integration Results}
-
-After training the baseline multilayer perceptron (MLP) for five epochs on the MNIST dataset using standard floating-point arithmetic, the model achieved a test accuracy of 97.02\%. The same trained weights were subsequently evaluated using the L-Mul arithmetic mode, in which all elementwise multiplications within the linear layers were replaced by the approximate L-Mul operator as described in Section~\ref{subsec:mlp_lmul}. The resulting test accuracy under L-Mul computation was 97.01\%.
-
-This outcome supports the hypothesis that approximate arithmetic primitives such as L-Mul can be integrated into neural inference pipelines without sacrificing predictive accuracy, provided that proper magnitude calibration is applied. The finding also suggests that hardware implementations based on L-Mul may yield reductions in power consumption or silicon area without compromising functional correctness at the algorithmic level.
-
-\subsection{LSTM L-Mul Integration Results}
-
-We evaluated the impact of replacing standard FP32 multiplication with the L-Mul operator inside the LSTM cell across FashionMNIST, KMNIST, and SeqMNIST. For each configuration, five runs were performed to estimate mean accuracy and variance.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.9\linewidth]{figure/LSTMInfer.png}
-    \caption{Comparison of FP32 vs.\ L-Mul inference accuracy across datasets. Error bars denote standard deviation over five runs.}
-    \label{fig:lstm_infer_bar}
-\end{figure}
-
-As shown in Figure~\ref{fig:lstm_infer_bar}, across all datasets, L-Mul closely matches FP32 performance.
-
-Overall, L-Mul introduces less than a \(1\%\) accuracy change across all tasks. Furthermore, upon investigating the FashionMNIST predictions between L-Mul and floating point multiplication LSTMs, there is a 96.6\% agreement rate between the two models. This demonstrates that the operator remains an effective approximation with relatively low classification error within a recurrent architecture (LSTM) but non-negligible prediction disagreement where multiplicative approximation errors can accumulate.
-
-\subsection{CNN–L-Mul Integration Results}
-
-We evaluated the impact of replacing standard FP32 multiplication with the L-Mul operator in the CNN architecture described in Section~\ref{subsec:cnn_lmul}. Table~\ref{tab:cnn_results} presents the test accuracy results for both standard and L-Mul arithmetic modes.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lcc}
-\hline
-\textbf{Dataset} & \textbf{Standard FP32} & \textbf{L-Mul} \\
-\hline
-MNIST & 98.30\% & 98.07\% \\
-\hline
-\end{tabular}
-\caption{CNN test accuracy comparison between standard FP32 and L-Mul arithmetic on MNIST.}
-\label{tab:cnn_results}
-\end{table}
-
-The results demonstrate that L-Mul maintains accuracy within 1\% of the standard floating-point baseline, with a difference of only 0.23 percentage points on MNIST. This small accuracy difference suggests that the convolutional structure helps smooth out the error introduced by the approximate operator, consistent with what we observed in the MLP and LSTM experiments. Across all three model architectures (MLP, LSTM, and CNN), L-Mul maintains accuracy within approximately 1\% of the floating-point baseline, demonstrating its robustness across diverse neural network architectures.
-
-\subsection{Hardware Synthesis Comparison}
-
-To quantify the hardware efficiency advantages of L-Mul, we synthesized both the L-Mul and IEEE BF16 multiplier designs using the methodology described in Section~\ref{subsec:synthesis_methodology}. This synthesis process converts our Verilog RTL descriptions into gate-level netlists, enabling quantitative comparison of area and architectural characteristics.
-
-\paragraph{Area Metrics.}
-
-Table~\ref{tab:synthesis_area} presents the area comparison between L-Mul and IEEE BF16 multipliers. The L-Mul design achieves a 66.8\% reduction in standard cell area compared to the IEEE multiplier, using 180.88 area units versus 545.03 area units. This represents a 3.01× reduction in silicon area, meaning that approximately three L-Mul units can fit in the same area as one IEEE multiplier. The cell count comparison shows a 63.0\% reduction, with L-Mul requiring 181 cells compared to 489 cells for the IEEE design.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lccc}
-\hline
-\textbf{Metric} & \textbf{L-Mul} & \textbf{IEEE BF16} & \textbf{Improvement} \\
-\hline
-Standard Cell Area & 180.88 units & 545.03 units & 66.8\% reduction \\
-Number of Cells & 181 & 489 & 63.0\% reduction \\
-Area Ratio (L-Mul/IEEE) & 0.332 & 1.000 & 3.01× smaller \\
-\hline
-\end{tabular}
-\caption{Area comparison between L-Mul and IEEE BF16 multipliers synthesized with Nangate 45nm library.}
-\label{tab:synthesis_area}
-\end{table}
-
-\paragraph{Architectural Analysis.}
-
-The cell type breakdown reveals the fundamental architectural difference between the two designs. The L-Mul implementation uses only basic logic gates (AND, OR, XOR, NAND, NOR) and adders—no multiplier cells are present. In contrast, the IEEE BF16 multiplier contains complex multiplier logic implemented as optimized gate networks to perform 8×8 bit mantissa multiplication. This architectural difference explains the area savings: L-Mul avoids the expensive multiplier hardware entirely, replacing it with simple addition operations. This finding connects to our software and neural network results, demonstrating that L-Mul maintains accuracy despite using simpler arithmetic operations.
-
-\section{Discussion}
-The results obtained from our experiments demonstrate that the L-Mul algorithm can serve as a highly efficient approximation to standard floating-point multiplication with minimal loss in numerical accuracy. Our evaluation across MLP, LSTM, and CNN architectures shows that L-Mul maintains accuracy within 1\% of standard floating-point implementations, suggesting neural networks tolerate small arithmetic errors well across diverse architectures. The 96.6\% prediction agreement rate observed in LSTM experiments demonstrates that while multiplicative approximation errors can accumulate in recurrent architectures, the overall impact remains bounded and acceptable for inference tasks. The CNN results further support this finding, showing that convolutional structures help smooth out approximation errors. This resilience suggests that strict IEEE-754 compliance is unnecessary for effective inference, enabling hardware designs that favor efficiency over precision through L-Mul or similar methods.
-
-From a software optimization perspective, our thorough exploration of vectorized implementations in NumPy and PyTorch revealed that while LMUL can be efficiently implemented using array operations and broadcasting, these software implementations are unable to compete with native BLAS-optimized floating-point operations in terms of raw performance. The overhead of BF16 conversion, element-wise LMUL computation, and lack of hardware-accelerated routines result in slower execution compared to standard matrix multiplication. This performance gap highlights the importance of hardware acceleration for LMUL to realize its theoretical efficiency advantages.
-
-From a hardware perspective, the implications are substantial. Traditional floating-point multiplication is among the most power and area intensive operations in digital accelerators. Our Verilog simulation work (Section~\ref{subsec:simulation_infrastructure}) validated functional correctness, ensuring that the hardware design produces the same results as our software implementations, but simulation does not provide hardware efficiency metrics. Our synthesis results (Section~\ref{subsec:synthesis_methodology}) provide the missing quantitative evidence: L-Mul achieves a 66.8\% reduction in standard cell area and a 63.0\% reduction in cell count compared to IEEE BF16 multiplication, confirming that substituting multiplication with primarily addition-based logic significantly reduces gate count and silicon area. These synthesis results demonstrate that L-Mul's theoretical advantages translate to actual hardware efficiency, complementing our software accuracy results to show both algorithmic correctness and hardware efficiency.
-
-\paragraph{Future Work.}
-Several important directions remain for future exploration. First, while actual chip integration may be costly, we can leverage our unit operation test results to measure theoretical performance gains in real neural network models. By applying Amdahl's law based on the percentage of compute time spent on matrix multiplication operations, we can estimate the overall speedup and efficiency improvements that L-Mul would provide in deployed systems. This theoretical analysis, combined with our synthesis results quantifying area advantages (66.8\% reduction), provides a practical framework for evaluating L-Mul's impact without requiring expensive physical hardware implementation.
-
-Second, further exploration of LMUL integration in diverse ML pipelines is warranted. Our current evaluation covers MLPs, LSTMs, and CNNs, but testing on Transformer architectures and sequential token generators would provide broader validation of LMUL's applicability. Experiments on more complex tasks such as language modeling and large-scale vision tasks would help establish the boundaries of LMUL's effectiveness, particularly in layers with high sensitivity to numerical error (e.g., attention mechanisms or normalization layers).
-
-Third, a comprehensive analysis of the costs and obstacles associated with implementing a LMUL hardware accelerator is needed. This includes evaluation of chip manufacturing costs, integration complexity with existing systems, operating system compatibility, and software stack requirements. Understanding these practical constraints is crucial for assessing the real-world viability of LMUL as an alternative to traditional floating-point arithmetic in commercial AI accelerators.
-
-\section{Conclusion}
-
-In our report, we focused on the integration of the L-Mul algorithm into neural network architectures to explore how arithmetic approximation can coexist with conventional neural network operations. Our results showcase the successful implementation of L-Mul across multiple software frameworks, hardware simulation for correctness validation, and hardware synthesis for efficiency quantification.
-
-This project developed modified MLP, LSTM, and CNN architectures using L-Mul in the forward pass, substituting standard floating-point multiplications with an approximation operation. The architectures maintained equivalent predictive accuracy to their baselines (97.01\% vs. 97.02\% for MLP, less than 1\% accuracy change for LSTM across all datasets, and 98.07\% vs. 98.30\% for CNN on MNIST), validating our hypothesis that incorporating L-Mul can be achieved without compromising algorithmic performance. Beyond software validation, we completed hardware synthesis of both L-Mul and IEEE BF16 multiplier designs, obtaining concrete metrics that demonstrate a 66.8\% area reduction and 63.0\% cell reduction for L-Mul compared to standard IEEE multipliers.
-
-Our immediate milestones include leveraging our unit operation test results to measure theoretical performance gains in real neural network models using Amdahl's law, based on the percentage of compute time spent on matrix multiplication operations. This theoretical analysis, combined with our synthesis results quantifying area advantages, will provide a practical framework for evaluating L-Mul's impact without requiring expensive physical hardware implementation. Additionally, we will extend our comprehensive evaluation across multiple architectures, moving beyond MLPs, LSTMs, and CNNs to include Transformer architectures and sequential token generators, ensuring broad validation of L-Mul's applicability across diverse machine learning workloads.
-
-Our final deliverable will also include detailed analysis of implementation costs, system integration challenges, and practical deployment considerations for L-Mul-based accelerators. This includes evaluation of chip manufacturing costs, integration complexity with existing systems, operating system compatibility, and software stack requirements, providing a complete assessment of the real-world viability of L-Mul as an alternative to traditional floating-point arithmetic in commercial AI accelerators.
-
-% \bibliography{reference}
-% \bibliographystyle{style/dsc180bibstyle}
+\subsubsection{Throughput and Speedup Estimation}
+System-level throughput is modeled as:
+\[
+\text{Throughput} = N_{\text{units}} \times f_{\text{clock}} \times \text{ops/cycle}
+\]
+where $N_{\text{units}}$ is the number of parallel compute units, $f_{\text{clock}}$ is the operating frequency, and ops/cycle depends on the pipeline depth and data reuse patterns.
+
+By leveraging L-Mul's area advantage, approximately \textbf{3$\times$ more L-Mul units} can be instantiated within the same chip area as IEEE multipliers. This enables higher parallelism and potentially \textbf{3$\times$ system-level speedup}, assuming compute-bound workloads and sufficient memory bandwidth. The actual speedup depends on Amdahl's Law and the fraction of computation that can be accelerated.
+
+\subsubsection{Memory and Control Overhead}
+Real accelerators require memory hierarchies, control logic, and I/O interfaces. To account for these overheads, we synthesize the PE array with simple memory buffers and control FSMs, and measure their contribution to total area and power. This provides a more realistic estimate of system-level resource utilization. For full-system projections, we extrapolate from the PE array results, assuming proportional scaling of memory and control logic with the number of compute units.
+
+
+\subsection{Tiled Block Matric Multiplication with Qwen 2.5-0.5B}
+The primary target for computation will be a Tiled Block Matrix Multiplication kernel. Because LLM weight matrices are too large to fit entirely in the FPGA's BRAM, we partition the matrices into smaller $B \times B$ blocks. This strategy allows the hardware to load a block of weights once and reuse it across multiple vector operations, limiting the frequency off chip DRAM accesses. We will implement two versions of this kernel: a version using  IEEE-754 multipliers and a LMUL version.  By comparing these two versions, we aim to demonstrate that the LMUL can maintain the high-dimensional representational requirements of the Qwen-2.5 model while providing a more efficient hardware than traditional floating-point units.
+
+\paragraph{PYNQ Integration and Development}
+Consistent with our preliminary design, the Qwen accelerator operates on BF16. We maintain the model's original precision without quantization, because our LMUL operates on floating points. For software to communicate to the hardware, we will use PYNQ in Python. A Python script will use direct memory access to stream the Qwen weights to the FPGA's memory. 
+
+\subsection{NanoGPT}
+
+To further investigate L-Mul's impact on neural networks, we use NanoGPT, a minimal implementation of a GPT-2 style autoregressive transformer language model developed by Andrej Karpathy. This model was selected because of its reproducible GPT-style architecture with enough customizability to fit our L-Mul tensor operations into for experimentation. Its simplicity also enables us to isolate the effects of our L-Mul operation replacements for ablation testing. 
+
+\paragraph{Model Architecture}
+NanoGPT consists of: 
+\begin{itemize}
+    \item A token embedding layer, which takes tokens in their integer representation and outputs a float vector in a specified embedding dimension, also presented as the model's hidden width. 
+    \item A stack of Transformer blocks combining masked multi-head self-attention and feed-forward (MLP) sublayers. 
+    \item A linear langue modeling head that maps hidden states to vocabulary logits.
+\end{itemize}
+Our configuration of NanoGPT features the following parameters: a block size of 32, a vocabulary size of 50,304, 4 Transformer block layers, 4 self-attention heads per Transformer block, and an embedding dimension of 48. 
+\paragraph{L-Mul Integration}
+To utilize L-Mul within NanoGPT's model architecture, toggleable L-Mul Linear Layers were implemented in place of PyTorch's nn.Linear layer for forward passes. These L-Mul Linear Layers utilize the PyTorch L-Mul implementation listed in LSTM–L-Mul Integration. The three main architectures in which we can toggle L-Mul operations for are the language model head, Tranformer block feed-forward, and self-attention layers.
+\paragraph{Shakespeare-Char Model (Controlled Training)}
+To obtain a fully controlled training baseline, we train a NanoGPT language model from scratch on the Shakespeare-Char dataset. This dataset consists of character-level text sequences, enabling efficient training and rapid iteration on architectural modifications. 
+\paragraph{OpenWebText Model (Pretrained Evaluation)}
+To evaluate L-Mul within a more realistic large-corpus language modeling setting, we also use a pretrained nanoGPT model trained on OpenWebText. This pretrained checkpoint provides a much broader linguistic distribution and vocabulary compared to Shakespeare-Char, enabling for the evaluation of L-Mul under conditions more representative of general-purpose language modeling. The pretrained model is used strictly for inference and perplexity evaluation to assess how LMUL modifications affect an already-trained Transformer.
+\paragraph{Evaluation}
+Both L-Mul and base Model performances are evaluated using token-level cross-entropy and perplexity on held-out validation data. For the Shakespeare-Char dataset, validation batches are constructed by sampling random subsequences from the validation corpus. Because character-level modeling exhibits limited long-range dependency structure, random subsequence sampling provides a representative estimate of predictive performance while reducing evaluation bias.
+
+For the OpenWebText model, validation is performed using sequences with fixed starting positions drawn sequentially from the validation corpus. This approach preserves the context required for stable perplexity estimation in word-level language modeling, where predictive accuracy depends strongly on long-range dependencies across tokens.
+
+Controlled ablation experiments are performed by selectively enabling LMUL operations in attention projections, MLP layers, and output heads, allowing isolation of their contribution to predictive performance.
+
+\subsection{Neural Network Ablation Studies}
+
+Ablation studies were conducted to identify which components of each architecture are most sensitive to L-Mul substitution, rather than evaluating the full model in a single setting. Isolating sensitivity by layer or module informs hardware prioritization: components that tolerate approximation with minimal accuracy loss are natural candidates for dedicated L-Mul units.
+
+\paragraph{LSTM Ablation.} The LSTM was divided into two logical parts: (1) the gate computation, i.e., the matrix multiplication that produces the input, forget, cell-candidate, and output gates ($i$, $f$, $g$, $o$) from the weight matrix and concatenated input; and (2) the state update, which updates the cell state and hidden state. A modified LSTM class was implemented with two boolean flags to enable or disable L-Mul independently in each part. Perplexity was compared on the Shakespeare dataset using pretrained weights. Preliminary results indicate that the state-update path performs slightly better with L-Mul enabled, while the gate path remains roughly unchanged.
+
+\paragraph{CNN Ablation.} A similar decomposition was applied to the CNN, separating convolutional layers from fully connected (FC) layers, which perform distinct operations. The convolutional layers use \texttt{lmul\_conv2d}, which unfolds the input into patches and performs the convolution via L-Mul; the FC layers use \texttt{lmul\_linear}. In preliminary runs, the FC layers retained accuracy well under L-Mul, whereas the convolutional layers showed greater sensitivity. This is consistent with the fact that convolutions operate over the full spatial extent of the feature maps, so approximation errors can accumulate across positions. The findings suggest that hardware designs may prioritize L-Mul in dense (linear) layers before extending it to convolutional layers.
+
+\paragraph{Website and Documentation.} A project website was developed to centralize algorithm descriptions (including the code used for L-Mul), tables of accuracy and hardware metrics (e.g., area reduction and cell count), and team contributions. A bar chart was added to improve readability of the accuracy comparisons. The site is updated as additional ablation and hardware evaluation results become available.
+
+% \section{Results}
+
+% \subsection{Gem5 Simulation}
+
+% Summary statistics from the simulations are presented in Table~\ref{tab:gem5_results}.
+
+% \begin{table}[H]
+% \centering
+% \caption{Summary of gem5 comparison across matrix sizes $n \in \{4, 64, 512\}$: LMUL accelerator (MMIO) vs.\ IEEE CPU-only BF16 matmul.}
+% \label{tab:gem5_results}
+% \begin{tabular}{@{}lrrrrrr@{}}
+% \toprule
+% & \multicolumn{2}{c}{$n = 4$} & \multicolumn{2}{c}{$n = 64$} & \multicolumn{2}{c}{$n = 512$} \\
+% \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+% \textbf{Metric} & LMUL & IEEE & LMUL & IEEE & LMUL & IEEE \\
+% \midrule
+% Simulation time (s) & 0.00055 & 0.00061 & 0.0152 & 0.202 & 0.930 & 95.8 \\
+% CPU cycles & 1.09M & 1.22M & 30.3M & 404M & 1.86B & 191.5B \\
+% Instructions & 8.2k & 9.1k & 199k & 2.82M & 12.2M & 1.35B \\
+% CPI & 134.1 & 133.8 & 152.1 & 143.2 & 152.1 & 141.4 \\
+% IPC & 0.0075 & 0.0075 & 0.0066 & 0.0070 & 0.0066 & 0.0071 \\
+% DRAM energy ($\mu$J) & 667k & 743k & 17.4M & 239M & 1.07e9 & 1.17e11 \\
+% \midrule
+% \multicolumn{7}{l}{\textit{LMUL run only:}} \\
+% Accelerator total cycles & 4 & --- & 16,460 & --- & 2.10M & --- \\
+% Accelerator total ops & 64 & --- & 262k & --- & 134M & --- \\
+% \bottomrule
+% \end{tabular}
+% \end{table}
+
+% \section{Discussion}
+
+% \subsection{Notes on Gem5 Simulation}
+
+% The current gem5 setup lets us compare an LMUL accelerator (MMIO data path) against a CPU-only IEEE BF16 matmul on the same workload and dimensions. Any reported speedups should be interpreted as accelerator (MMIO) vs.\ naive CPU (scalar, no SIMD or tiling), not as a comparison with a DMA-based accelerator or an optimized CPU baseline. More practical designs would use DMA for bulk data transfer, which would change both absolute performance and the balance between transfer and compute. The IEEE path is intentionally naive (BF16$\to$float$\to$BF16 in a scalar triple-loop) to keep the comparison controlled; production CPU code would use SIMD, tiling, or dedicated BF16 support where available.
+
+% The simulation can report \emph{DRAM energy} from the memory system, which reflects energy consumed by main memory when data passes through it. For the IEEE run, all matmul data ($A$, $B$, $C$) goes through the memory system, so DRAM energy is relevant. However, for the LMUL run, matmul data is streamed via MMIO and does not go through DRAM, so DRAM energy for that run is largely from other traffic. Since the accelerator device itself has no power model yet, we can not yet report on its energy or power.
+
+% \subsection{Future Work}
+
+% \subsubsection{Gem5 Simulation}
+% In order to provide the most realistic evaluation of an LMUL accelerator, we plan to (i) move bulk data transfer off the CPU by implementing DMA so the accelerator or a DMA engine moves $A$, $B$, and $C$ between main memory and the device; (ii) strengthen the IEEE baseline by optimizing the CPU matmul path (e.g., native or emulated BF16 where possible, better loop structure or tiling) so speedups are not overstated against an intentionally weak baseline; (iii) categorize where cycles are spent (memory traffic, compute, MMIO, polling) in both runs so we can see how DMA and a stronger CPU baseline change the tradeoff; (iv) add a power model to the accelerator so we can compare energy cost in addition to latency; and (v) potentially incorporate silicon area evaluation, but this is not natively supported in gem5 and would have to be sourced from a separate synthesis.
+
+\section{Contributions}
+\begin{itemize}
+    \renewcommand{\labelitemi}{--}
+    \item Owen: Docker setup, lmul verilog files, gem5 simulation.
+    \item Edgar: iVerilog tests, Vivado testbench simulation/optimization and RTL implementation.
+    \item Pranav: Website development \& delivery, ablation testing \& optimization, LSTM \& CNN evaluation 
+    \item Idhant: Hardware synthesis workflow (Yosys, OpenSTA), unit and system-level evaluation methodology, power analysis framework (VCD generation and estimation).
+    \item Brendan: NanoGPT Training, ablation testing, and perplexity analysis. LSTM and MLP implementation. L-Mul Linear Layer implementation.
+    \item Brandon: Tiled matrix multiplication in Vitis HLS,  LMUL algorithm into C++, qwen model loading.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% Appendix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \clearpage
-% \makeappendix
+\clearpage
+\makeappendix
 
-% \subsection{Training Details}
+\subsection{Context and Motivation}
 
-% \subsection{Additional Figures}
+As large language models (LLMs) and other large neural networks integrate into modern society, their applications are increasingly bottlenecked by computational intensity. The core operation driving these models is floating-point multiplication in matrices, which accounts for approximately 65--85\% of operations in LLMs like ChatGPT \citep{dettmers2022llmint8}. Given the scale at which these models operate, even slight improvements in each multiplication operation could yield substantial impacts on overall efficiency and performance. As model sizes continue to grow and deployment expands to energy-constrained edge devices, developing more efficient alternatives to traditional floating-point multiplication becomes critical for sustainable AI deployment.
 
-% \subsection{Additional Tables}
+\subsection{Problem Statement}
 
+Enhancing floating-point multiplication has emerged as an active area of research, with several approaches exploring approximate arithmetic to reduce computational cost. Linear-complexity Multiplication (L-Mul) is an algorithm that estimates floating-point multiplication in $\mathcal{O}(m)$ time with respect to the size of the data type (mantissa bits), as opposed to the $\mathcal{O}(m^2)$ complexity of traditional multiplication \citep{luo2024addition}. This theoretical advantage suggests significant potential for speedup, energy savings and silicon area reduction in hardware implementations.
+
+Previous work has validated performance and energy trade-offs of L-Mul in baseline tasks, particularly multilayer perceptrons (MLPs) trained on MNIST \citep{lmul2023capstone}. These results demonstrate that L-Mul can maintain accuracy within 1\% of standard floating-point multiplication, reduce area by 76.1\%, and reduce power by 96.6\%. However, this evaluation lacks generalizability to real-world applications, which are at a much larger scale in terms of size and complexity. The algorithm remains largely theoretical, having been proposed only recently, and has not yet seen comprehensive testing in practice across diverse neural network architectures and complex tasks. For our future evaluations, we will focus on FashionMNIST as our primary dataset for classification tasks. FashionMNIST provides 70,000 labeled images across 10 classes of clothing items, offering a more challenging classification problem than MNIST while maintaining similar structure and scale, making it suitable for evaluating L-Mul's effectiveness in practical image classification scenarios.
+
+With L-Mul being proposed just over a year ago, the gap between theoretical promise and practical deployment may stem from several factors: the cost of implementing specialized hardware, challenges in operating system integration to achieve real performance metrics, and insufficient validation across the breadth of neural network architectures used in production systems.
+
+\subsection{Primary Output}
+
+Our project will produce a comprehensive analysis of L-Mul as a hardware accelerator for floating-point multiplication in deep neural networks. The primary deliverables include:
+
+\begin{itemize}
+    \item \textbf{Performance Analysis}: Quantitative evaluation of estimated changes in performance (speed, power, and accuracy) when accelerating key operations such as fp matrix multiplication in large neural networks using L-Mul, compared against standard floating-point multiplication implementations.
+    
+    \item \textbf{Accuracy Experimentation}: Validation of accuracy performance across complex tasks and architectures, including Transformers and LSTMs on FashionMNIST classification and sequential token generation tasks.
+    
+    \item \textbf{Cost and Obstacle Analysis}: Comprehensive evaluation of implementation costs and deployment challenges, including chip manufacturing costs, operating system compatibility requirements, hardware-software interface design, and integration complexity with existing neural network frameworks.
+\end{itemize}
+All analyses and experimental results will be communicated through a detailed technical report documenting methodology, findings, and recommendations for future work. Code implementations, hardware designs, and experimental notebooks will be made publicly available to facilitate reproducibility and further research.
+
+\subsection{Path to Success}
+
+Given our work in Quarter 1, we can ensure that data related to L-Mul benchmarks can be realistically obtained. We can run our experiments on local desktop computers equipped with sufficient GPU and memory resources, as well as on cloud platforms such as DSMLP. Preliminary tests confirm that data loading, preprocessing, and model training can be conducted efficiently, and that existing neural network implementations can be modified to incorporate L-Mul in both software and hardware settings. For hardware evaluation, Icarus Verilog (iverilog) provides simulation runtime and clock-cycle estimates, and Yosys with OpenSTA have been explored to yield cell area, cell count, timing metrics, and power estimates. Preliminary results from our MLP, LSTM, and CNN classification tests show promise for extending L-Mul to Transformers or LSTMs on classification as well as new tasks such as token generation or regression, with accuracy maintained within 1\% of standard floating-point implementations across diverse architectures in early runs.
+
+\bibliography{reference}
+\bibliographystyle{style/dsc180bibstyle}
 
 \end{document}
