@@ -70,7 +70,24 @@ Contains reproducible notebooks (after container setup) for LMUL accuracy analys
 - `NNs/eval_OWT.py`
   - Script to evaluate perplexity across a validation dataset that requires context.
 - `transformerLMUL.ipynb`
-  - Jupyter Notebook for testing NanoGPT scripts and perplexity analysis. 
+  - Jupyter Notebook for testing NanoGPT scripts and perplexity analysis.
+
+### NanoGPT  (`NN_test/`)
+
+To Evaluate Perplexity for the `shakespeare-char` dataset, run 
+- `python3 eval_perplexity.py --out_dir=out-shakespeare-char`
+
+To Evaluate Perplexity for the `OWT` (OpenWebText) dataset, run 
+- `python3 eval_OWT.py --out_dir=OWT --OWT`
+
+Both scripts have a `--use_lmul` and `--panel` flag
+- `use_lmul` activates LMUL in all layers when appended to a script call
+- `--panel` requires a string of 3 bits (e.g 010) to determine which layers are impacted. The first bit corresponds to lm_head, the second to Causal Self-Attention, and the last one is for the Feed-Forward MLPs. This flag overwrites `use_lmul`
+
+To run these scripts, both ckpt.pt's must be inserted into their corresponding folders, `shwakespeare-char` and `OWT`. You can find them [here](https://drive.google.com/drive/folders/15XIgIqL3yuFddpIpBQIox_zi6KImcnWC?usp=sharing) on Google Drive. 
+
+You can also directly sample the models via:
+- `python3 sample.py --out_dir=<MODEL DIRECTORY> --start="<START STRING>"`
 
 ### gem5 Full-System Simulation (`gem5-sim/`)
 
