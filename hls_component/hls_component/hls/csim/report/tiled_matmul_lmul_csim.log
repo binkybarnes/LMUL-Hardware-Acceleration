@@ -1,0 +1,26 @@
+INFO: [SIM 2] *************** CSIM start ***************
+   Compiling ../../../../hello_tb.cpp in debug mode
+   Compiling ../../../../hello.cpp in debug mode
+   Generating csim.exe
+>> Running LMUL Hardware Simulation...
+
+Index | HW (LMUL Bitfield) | SW (Normal Re-encoded) | Diff
+------------------------------------------------------------
+[0][0] |               192 |                   128 | 64
+[0][1] |               192 |                   128 | 64
+[0][2] |               192 |                   128 | 64
+[0][3] |               192 |                   128 | 64
+[1][0] |               320 |                   256 | 64
+[1][1] |               320 |                   256 | 64
+[1][2] |               320 |                   256 | 64
+[1][3] |               320 |                   256 | 64
+[2][0] |               448 |                   384 | 64
+[2][1] |               448 |                   384 | 64
+[2][2] |               448 |                   384 | 64
+[2][3] |               448 |                   384 | 64
+[3][0] |               576 |                   512 | 64
+[3][1] |               576 |                   512 | 64
+[3][2] |               576 |                   512 | 64
+[3][3] |               576 |                   512 | 64
+ERR: [SIM 100] 'csim_design' failed: nonzero return value.
+INFO: [SIM 3] *************** CSIM finish ***************

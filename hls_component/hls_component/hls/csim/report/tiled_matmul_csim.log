@@ -1,0 +1,10 @@
+INFO: [SIM 2] *************** CSIM start ***************
+   Compiling ../../../../superblock_tb.cpp in debug mode
+   Compiling ../../../../hello.cpp in debug mode
+   Generating csim.exe
+>> Loading Superblock binary files...
+>> Running Superblock Hardware Simulation...
+>> Verifying Results...
+SUPERBLOCK TEST PASSED!
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************

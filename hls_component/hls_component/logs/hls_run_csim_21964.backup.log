@@ -1,0 +1,49 @@
+  **** HLS Build v2025.2 6295257
+INFO: [HLS 200-2005] Using work_dir C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component 
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-10] Creating and opening component 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component'.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-2174] Applying component config ini file hls_config.cfg
+INFO: [HLS 200-1465] Applying config ini 'syn.file=./hello.cpp' from hls_config.cfg(7)
+INFO: [HLS 200-10] Adding design file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hello.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./hello_tb.cpp' from hls_config.cfg(8)
+INFO: [HLS 200-10] Adding test bench file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hello_tb.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'syn.top=block_multiply' from hls_config.cfg(9)
+INFO: [HLS 200-1465] Applying config ini 'flow_target=vivado' from hls_config.cfg(4)
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1465] Applying config ini 'part=xcvu9p-flga2104-2-i' from hls_config.cfg(1)
+INFO: [HLS 200-1611] Setting target device to 'xcvu9p-flga2104-2-i'
+INFO: [HLS 200-1465] Applying config ini 'package.output.format=ip_catalog' from hls_config.cfg(5)
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [HLS 200-2191] C-Simulation will use clang-16 as the compiler
+INFO: [HLS 200-2036] Building debug C Simulation binaries
+   Compiling ../../../../hello_tb.cpp in debug mode
+   Compiling ../../../../hello.cpp in debug mode
+   Generating csim.exe
+>> Running LMUL Hardware Simulation...
+
+Index | HW (LMUL) | SW (Normal) | Diff
+---------------------------------------
+[0][0] | 128 | 16256 | -16128
+[0][1] | 128 | 16256 | -16128
+[0][2] | 128 | 16256 | -16128
+[0][3] | 128 | 16256 | -16128
+[1][0] | 256 | 32512 | -32256
+[1][1] | 256 | 32512 | -32256
+[1][2] | 256 | 32512 | -32256
+[1][3] | 256 | 32512 | -32256
+[2][0] | 384 | 48768 | -48384
+[2][1] | 384 | 48768 | -48384
+[2][2] | 384 | 48768 | -48384
+[2][3] | 384 | 48768 | -48384
+[3][0] | 512 | 65024 | -64512
+[3][1] | 512 | 65024 | -64512
+[3][2] | 512 | 65024 | -64512
+[3][3] | 512 | 65024 | -64512
+INFO: [SIM 211-1] CSim done with 0 errors.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+INFO: [HLS 200-112] Total CPU user time: 3 seconds. Total CPU system time: 2 seconds. Total elapsed time: 7.667 seconds; peak allocated memory: 371.512 MB.
+INFO: [vitis-run 60-791] Total elapsed time: 0h 0m 13s

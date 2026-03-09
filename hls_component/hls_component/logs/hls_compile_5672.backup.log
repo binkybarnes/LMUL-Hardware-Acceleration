@@ -1,0 +1,389 @@
+  **** HLS Build v2025.2 6295257
+INFO: [HLS 200-2005] Using work_dir C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component 
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-10] Creating and opening component 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component'.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-2174] Applying component config ini file hls_config.cfg
+WARNING: [HLS 200-2001] file not found './superblock_tb - Copy.cpp' see [hls] from hls_config.cfg(9)
+INFO: [HLS 200-1465] Applying config ini 'syn.file=./hello.cpp' from hls_config.cfg(7)
+INFO: [HLS 200-10] Adding design file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hello.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb - Copy.cpp' from hls_config.cfg(9)
+WARNING: [HLS 200-40] Cannot find test bench file './superblock_tb'
+WARNING: [HLS 200-40] Cannot find test bench file '-'
+WARNING: [HLS 200-40] Cannot find test bench file 'Copy.cpp'
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb.cpp' from hls_config.cfg(10)
+INFO: [HLS 200-10] Adding test bench file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/superblock_tb.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'syn.top=qwen_superblock' from hls_config.cfg(8)
+INFO: [HLS 200-1465] Applying config ini 'flow_target=vivado' from hls_config.cfg(4)
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1465] Applying config ini 'part=xczu9eg-ffvb1156-2-e' from hls_config.cfg(1)
+INFO: [HLS 200-1611] Setting target device to 'xczu9eg-ffvb1156-2-e'
+INFO: [HLS 200-1465] Applying config ini 'package.output.format=ip_catalog' from hls_config.cfg(5)
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 3 seconds. CPU system time: 2 seconds. Elapsed time: 5.846 seconds; current allocated memory: 372.746 MB.
+INFO: [HLS 200-2191] C-Synthesis will use clang-16 as the compiler
+INFO: [HLS 200-10] Analyzing design file 'hello.cpp' ... 
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 3.076 seconds; current allocated memory: 375.277 MB.
+INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
+INFO: [HLS 200-1995] There were 395 instructions in the design after the 'Compile/Link' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 1,565 instructions in the design after the 'Unroll/Inline (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 1,522 instructions in the design after the 'Unroll/Inline (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 1,332 instructions in the design after the 'Unroll/Inline (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 1,270 instructions in the design after the 'Unroll/Inline (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 5,935 instructions in the design after the 'Array/Struct (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,601 instructions in the design after the 'Array/Struct (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,601 instructions in the design after the 'Array/Struct (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,601 instructions in the design after the 'Array/Struct (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,322 instructions in the design after the 'Array/Struct (step 5)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,334 instructions in the design after the 'Performance (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 3,332 instructions in the design after the 'Performance (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 7,862 instructions in the design after the 'Performance (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 5,971 instructions in the design after the 'Performance (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 6,125 instructions in the design after the 'HW Transforms (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 6,256 instructions in the design after the 'HW Transforms (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_298_7' is marked as complete unroll implied by the pipeline pragma (hello.cpp:298:39)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_321_12' is marked as complete unroll implied by the pipeline pragma (hello.cpp:321:36)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_298_7' (hello.cpp:298:39) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:275:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_321_12' (hello.cpp:321:36) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:275:0)
+WARNING: [HLS 214-366] Duplicating function 'qwen_linear_layer(half*, half*, half*, int, int, int)' as different function signatures were detected between this call site and other call site(s). This may impact the resources used in the design. (hello.cpp:342:5)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'A'. (hello.cpp:332:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W1'. (hello.cpp:332:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W2'. (hello.cpp:332:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'C'. (hello.cpp:332:0)
+INFO: [HLS 214-248] Applying array_partition to 'bufA': Cyclic partitioning with factor 16 on dimension 2. (hello.cpp:276:10)
+INFO: [HLS 214-248] Applying array_partition to 'bufW': Cyclic partitioning with factor 16 on dimension 1. (hello.cpp:277:10)
+INFO: [HLS 214-376] Pipelining loop< VITIS_LOOP_290_4> at hello.cpp:290:35 due to pipeline_loops threshold
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=2' for array 'bufC' due to pipeline pragma (hello.cpp:320:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=cyclic factor=16 dim=1' for array 'temp' due to pipeline pragma (hello.cpp:320:1)
+INFO: [HLS 214-248] Applying array_partition to 'bufC': Complete partitioning on dimension 2. (hello.cpp:278:10)
+INFO: [HLS 214-248] Applying array_partition to 'temp': Cyclic partitioning with factor 16 on dimension 1. (hello.cpp:340:10)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:299:38)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem1'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:300:38)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem2'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:300:38)
+INFO: [HLS 214-115] Multiple burst writes of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:319:52)
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 1 seconds. CPU system time: 1 seconds. Elapsed time: 15.682 seconds; current allocated memory: 378.309 MB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.005 seconds; current allocated memory: 378.309 MB.
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.786 seconds; current allocated memory: 389.047 MB.
+INFO: [HLS 200-10] Checking synthesizability ...
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.626 seconds; current allocated memory: 399.523 MB.
+INFO: [XFORM 203-712] Applying dataflow to function 'qwen_superblock' (hello.cpp:330), detected/extracted 2 process function(s): 
+	 'qwen_linear_layer'
+	 'qwen_linear_layer.1'.
+INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 2.875 seconds; current allocated memory: 428.164 MB.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_289_3'(hello.cpp:289:31) and 'VITIS_LOOP_290_4'(hello.cpp:290:35) in function 'qwen_linear_layer.1' into perfectly nested loops.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_306_9'(hello.cpp:306:39) and 'VITIS_LOOP_308_10'(hello.cpp:308:44) in function 'qwen_linear_layer.1' into perfectly nested loops.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_305_8'(hello.cpp:305:35) and 'VITIS_LOOP_306_9'(hello.cpp:306:39) in function 'qwen_linear_layer.1' into perfectly nested loops.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_289_3'(hello.cpp:289:31) and 'VITIS_LOOP_290_4'(hello.cpp:290:35) in function 'qwen_linear_layer' into perfectly nested loops.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_306_9'(hello.cpp:306:39) and 'VITIS_LOOP_308_10'(hello.cpp:308:44) in function 'qwen_linear_layer' into perfectly nested loops.
+INFO: [HLS 200-2061] Successfully converted nested loops 'VITIS_LOOP_305_8'(hello.cpp:305:35) and 'VITIS_LOOP_306_9'(hello.cpp:306:39) in function 'qwen_linear_layer' into perfectly nested loops.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_289_3' (hello.cpp:289:31) in function 'qwen_linear_layer.1'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_306_9' (hello.cpp:306:39) in function 'qwen_linear_layer.1'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_305_8' (hello.cpp:305:35) in function 'qwen_linear_layer.1'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_289_3' (hello.cpp:289:31) in function 'qwen_linear_layer'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_306_9' (hello.cpp:306:39) in function 'qwen_linear_layer'.
+INFO: [XFORM 203-541] Flattening a loop nest 'VITIS_LOOP_305_8' (hello.cpp:305:35) in function 'qwen_linear_layer'.
+WARNING: [HLS 200-1449] Process qwen_linear_layer.1 has both a predecessor and reads an input from its caller (see the GUI dataflow viewer). This may lead to lower throughput. Consider copying this input via a predecessor process.
+INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 5 seconds. CPU system time: 0 seconds. Elapsed time: 5.017 seconds; current allocated memory: 538.277 MB.
+INFO: [HLS 200-10] Starting hardware synthesis ...
+INFO: [HLS 200-10] Synthesizing 'qwen_superblock' ...
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_296_6' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_296_6'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_319_11' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_319_11'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1' to 'qwen_linear_layer_1'.
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_289_3_VITIS_LOOP_290_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_289_3_VITIS_LOOP_290_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.706 seconds; current allocated memory: 544.914 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.076 seconds; current allocated memory: 545.953 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_296_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_296_6'.
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('gmem0_addr_read', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_1', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_2', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_3', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_4', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_5', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_6', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_7', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_8', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_9', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_10', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_11', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_12', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_13', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_14', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_15', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_16', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_17', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_18', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_19', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_20', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_21', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_22', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_23', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_24', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_25', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_26', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_27', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_28', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_29', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_30', hello.cpp:299) on port 'gmem0' (hello.cpp:299), bus read operation ('gmem0_addr_read_31', hello.cpp:299) on port 'gmem0' (hello.cpp:299) accessing 'gmem0' m_axi read
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('gmem1_addr_read', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_1', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_2', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_3', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_4', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_5', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_6', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_7', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_8', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_9', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_10', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_11', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_12', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_13', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_14', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_15', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_16', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_17', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_18', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_19', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_20', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_21', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_22', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_23', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_24', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_25', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_26', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_27', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_28', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_29', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_30', hello.cpp:300) on port 'gmem1' (hello.cpp:300), bus read operation ('gmem1_addr_read_31', hello.cpp:300) on port 'gmem1' (hello.cpp:300) accessing 'gmem1' m_axi read
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 32, Depth = 43, loop 'VITIS_LOOP_296_6'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 2.461 seconds; current allocated memory: 562.547 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.447 seconds; current allocated memory: 562.707 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+WARNING: [HLS 200-887] Cannot meet target clock period from 'hadd' operation 16 bit ('acc', hello.cpp:311) to 'store' operation ('acc_1_write_ln307', hello.cpp:307) of variable 'acc', hello.cpp:307 16 bit on local variable 'acc', hello.cpp:307 (combination delay: 8.69289 ns) to honor II or Latency constraint in region 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+Resolution: For help on HLS 200-887 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-887.html
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 6, loop 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'
+WARNING: [HLS 200-871] Estimated clock period (13.808 ns) exceeds the target (target clock period: 10.000 ns, clock uncertainty: 2.700 ns, effective delay budget: 7.300 ns).
+Resolution: For help on HLS 200-871 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-871.html
+WARNING: [HLS 200-1016] The critical path in module 'qwen_linear_layer_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' consists of the following:
+	'hadd' operation 16 bit ('acc', hello.cpp:311) [582]  (5.904 ns)
+	'phi' operation 16 bit ('acc') with incoming values : ('bufC_8_load_3') ('acc', hello.cpp:311) [675]  (0.000 ns)
+	'load' operation 16 bit ('add81_lcssa18115_load') on local variable 'add81_lcssa18115' [191]  (0.000 ns)
+	'select' operation 16 bit ('bufC_8_load_170_mid2', hello.cpp:305) [236]  (0.357 ns)
+	'store' operation ('bufC_8_load_170_write_ln305', hello.cpp:305) of variable 'bufC_8_load_170_mid2', hello.cpp:305 16 bit on local variable 'bufC_8_load_170' [346]  (0.427 ns)
+	'load' operation 16 bit ('bufC_8_load_2', hello.cpp:307) on local variable 'bufC_8_load_170' [461]  (0.000 ns)
+	'sparsemux' operation 16 bit ('acc', hello.cpp:307) [470]  (0.789 ns)
+	'store' operation ('acc_1_write_ln307', hello.cpp:307) of variable 'acc', hello.cpp:307 16 bit on local variable 'acc', hello.cpp:307 [471]  (0.427 ns)
+	'load' operation 16 bit ('acc_1_load', hello.cpp:311) on local variable 'acc', hello.cpp:307 [506]  (0.000 ns)
+	'hadd' operation 16 bit ('acc', hello.cpp:311) [582]  (5.904 ns)
+
+Resolution: For help on HLS 200-1016 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1016.html
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.64 seconds; current allocated memory: 567.730 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.636 seconds; current allocated memory: 567.730 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_319_11' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-486] Changing DSP latency (root=mul_ln322) to 3 in order to utilize available DSP registers.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_319_11'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 4, loop 'VITIS_LOOP_319_11'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 2.3 seconds; current allocated memory: 596.758 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.415 seconds; current allocated memory: 596.758 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.454 seconds; current allocated memory: 596.758 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.083 seconds; current allocated memory: 596.758 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-1457] Automatically inferring inferring RAM_1WNR storage type for array 'bufC'. Use bind_storage pragma to override this type.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_289_3_VITIS_LOOP_290_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_289_3_VITIS_LOOP_290_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.17 seconds; current allocated memory: 596.758 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.047 seconds; current allocated memory: 596.758 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_296_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-486] Changing DSP latency (root=mul_ln299) to 3 in order to utilize available DSP registers.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_296_6'.
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('gmem2_addr_read', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_1', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_2', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_3', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_4', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_5', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_6', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_7', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_8', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_9', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_10', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_11', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_12', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_13', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_14', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_15', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_16', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_17', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_18', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_19', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_20', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_21', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_22', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_23', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_24', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_25', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_26', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_27', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_28', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_29', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_30', hello.cpp:300) on port 'gmem2' (hello.cpp:300), bus read operation ('gmem2_addr_read_31', hello.cpp:300) on port 'gmem2' (hello.cpp:300) accessing 'gmem2' m_axi read
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 32, Depth = 43, loop 'VITIS_LOOP_296_6'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 6 seconds. CPU system time: 0 seconds. Elapsed time: 6.098 seconds; current allocated memory: 597.660 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.729 seconds; current allocated memory: 597.695 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-1457] Automatically inferring inferring RAM_1WNR storage type for array 'bufC'. Use bind_storage pragma to override this type.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+WARNING: [HLS 200-886] Cannot meet target clock period in 'hadd' operation 16 bit ('acc', hello.cpp:311) (combination delay: 24.600 ns) to honor II constraint (II=1) in region 'loop 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10''.
+Resolution: For help on HLS 200-886 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-886.html
+WARNING: [HLS 200-887] Cannot meet target clock period from 'hadd' operation 16 bit ('acc', hello.cpp:311) to 'store' operation ('acc_1_write_ln307', hello.cpp:307) of variable 'acc', hello.cpp:311 16 bit on local variable 'acc', hello.cpp:307 (combination delay: 25.027 ns) to honor II or Latency constraint in region 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+Resolution: For help on HLS 200-887 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-887.html
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 6, loop 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'
+WARNING: [HLS 200-871] Estimated clock period (25.027 ns) exceeds the target (target clock period: 10.000 ns, clock uncertainty: 2.700 ns, effective delay budget: 7.300 ns).
+Resolution: For help on HLS 200-871 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-871.html
+WARNING: [HLS 200-1016] The critical path in module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' consists of the following:
+	'load' operation 16 bit ('acc_1_load', hello.cpp:311) on local variable 'acc', hello.cpp:307 [82]  (0.000 ns)
+	'hadd' operation 16 bit ('acc', hello.cpp:311) [158]  (24.600 ns)
+	'store' operation ('acc_1_write_ln307', hello.cpp:307) of variable 'acc', hello.cpp:311 16 bit on local variable 'acc', hello.cpp:307 [168]  (0.427 ns)
+
+Resolution: For help on HLS 200-1016 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1016.html
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.003 seconds; current allocated memory: 597.719 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.079 seconds; current allocated memory: 597.719 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_319_11' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-1457] Automatically inferring inferring RAM_1WNR storage type for array 'bufC'. Use bind_storage pragma to override this type.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_319_11'.
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319), bus write operation ('gmem0_addr_write_ln319', hello.cpp:319) on port 'gmem0' (hello.cpp:319) accessing 'gmem0' m_axi write
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 32, Depth = 40, loop 'VITIS_LOOP_319_11'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.478 seconds; current allocated memory: 597.719 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.096 seconds; current allocated memory: 597.719 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.208 seconds; current allocated memory: 597.758 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.088 seconds; current allocated memory: 597.758 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_superblock' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.117 seconds; current allocated memory: 597.961 MB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 598.020 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.158 seconds; current allocated memory: 600.324 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_Pipeline_VITIS_LOOP_296_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_Pipeline_VITIS_LOOP_296_6' pipeline 'VITIS_LOOP_296_6' pipeline type 'loop pipeline'
+INFO: [RTGEN 206-100] Generating core module 'mul_31ns_31ns_62_1_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'mul_32s_31ns_62_1_1': 1 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_Pipeline_VITIS_LOOP_296_6'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 1 seconds. Elapsed time: 1.307 seconds; current allocated memory: 610.984 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' pipeline 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' pipeline type 'loop pipeline'
+INFO: [RTGEN 206-100] Generating core module 'hadd_16ns_16ns_16_2_full_dsp_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'hmul_16ns_16ns_16_2_max_dsp_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'sparsemux_33_4_16_1_1': 2 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'sparsemux_65_5_16_1_1': 1 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 2 seconds. CPU system time: 2 seconds. Elapsed time: 3.879 seconds; current allocated memory: 637.238 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_Pipeline_VITIS_LOOP_319_11' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_Pipeline_VITIS_LOOP_319_11' pipeline 'VITIS_LOOP_319_11' pipeline type 'loop pipeline'
+INFO: [RTGEN 206-100] Generating core module 'am_addmul_15s_6ns_15s_15_4_1': 1 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_Pipeline_VITIS_LOOP_319_11'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 2.191 seconds; current allocated memory: 654.691 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer'.
+INFO: [RTMG 210-278] Implementing memory 'qwen_superblock_qwen_linear_layer_bufA_RAM_AUTO_1R1W' using auto RAMs.
+INFO: [RTMG 210-278] Implementing memory 'qwen_superblock_qwen_linear_layer_bufC_RAM_AUTO_1R1W' using auto RAMs.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 2 seconds. Elapsed time: 2.929 seconds; current allocated memory: 677.293 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_289_3_VITIS_LOOP_290_4'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.595 seconds; current allocated memory: 683.852 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_296_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_296_6' pipeline 'VITIS_LOOP_296_6' pipeline type 'loop pipeline'
+WARNING: [RTGEN 206-101] RTL name 'sparsemux_33_4_16_1_1' is changed to 'sparsemux_33_4_16_1_1_x' due to conflict.
+INFO: [RTGEN 206-100] Generating core module 'am_addmul_15s_6ns_15s_15_4_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'sparsemux_33_4_16_1_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'sparsemux_33_4_16_1_1_x': 16 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_296_6'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 1.693 seconds; current allocated memory: 701.172 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' pipeline 'VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10' pipeline type 'loop pipeline'
+INFO: [RTGEN 206-100] Generating core module 'hadd_16ns_16ns_16_1_full_dsp_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'hmul_16ns_16ns_16_2_max_dsp_1': 1 instance(s).
+INFO: [RTGEN 206-100] Generating core module 'sparsemux_33_4_16_1_1': 2 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_305_8_VITIS_LOOP_306_9_VITIS_LOOP_308_10'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 2 seconds. CPU system time: 4 seconds. Elapsed time: 5.483 seconds; current allocated memory: 751.863 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_319_11' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-1030] Apply Unified Pipeline Control on module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_319_11' pipeline 'VITIS_LOOP_319_11' pipeline type 'loop pipeline'
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_319_11'.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.507 seconds; current allocated memory: 751.863 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_linear_layer_1' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [RTGEN 206-100] Generating core module 'mul_32s_26ns_58_1_1': 1 instance(s).
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_linear_layer_1'.
+INFO: [RTMG 210-278] Implementing memory 'qwen_superblock_qwen_linear_layer_1_bufA_RAM_AUTO_1R1W' using auto RAMs.
+INFO: [RTMG 210-278] Implementing memory 'qwen_superblock_qwen_linear_layer_1_bufC_RAM_1WNR_AUTO_1R1W' using auto RAMs.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.816 seconds; current allocated memory: 751.863 MB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-10] -- Generating RTL for module 'qwen_superblock' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+WARNING: [RTGEN 206-101] Design contains AXI ports. Reset is fixed to synchronous and active low.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/gmem0' to 'm_axi'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/gmem1' to 'm_axi'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/gmem2' to 'm_axi'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/A' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/W1' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/W2' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/C' to 's_axilite & ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/M' to 'ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/N_W1' to 'ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/N_W2' to 'ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on port 'qwen_superblock/K' to 'ap_none'.
+INFO: [RTGEN 206-500] Setting interface mode on function 'qwen_superblock' to 's_axilite & ap_ctrl_hs'.
+INFO: [RTGEN 206-100] Bundling port 'A', 'W1', 'W2', 'C' and 'return' to AXI-Lite port control.
+INFO: [RTGEN 206-100] Finished creating RTL model for 'qwen_superblock'.
+INFO: [HLS 200-740] Implementing PIPO qwen_superblock_temp_RAM_AUTO_1R1W using a separate memory for each block
+INFO: [RTMG 210-278] Implementing memory 'qwen_superblock_temp_RAM_AUTO_1R1W_memcore' using auto RAMs.
+INFO: [HLS 200-111] Finished Creating RTL model: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.77 seconds; current allocated memory: 757.379 MB.
+INFO: [HLS 200-111] Finished Generating all RTL models: CPU user time: 1 seconds. CPU system time: 1 seconds. Elapsed time: 1.169 seconds; current allocated memory: 765.082 MB.
+INFO: [HLS 200-1603] Design has inferred MAXI bursts and missed bursts, see Vitis HLS GUI synthesis summary report for detailed information.
+INFO: [HLS 200-2225] Wrote inferred directives to file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/inferred_directives.ini
+INFO: [HLS 200-111] Finished Updating report files: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 2.703 seconds; current allocated memory: 778.414 MB.
+INFO: [VHDL 208-304] Generating VHDL RTL for qwen_superblock.
+INFO: [VLOG 209-307] Generating Verilog RTL for qwen_superblock.
+INFO: [HLS 200-790] **** Loop Constraint Status: All loop constraints were NOT satisfied.
+INFO: [HLS 200-789] **** Estimated Fmax: 39.96 MHz
+INFO: [HLS 200-112] Total CPU user time: 43 seconds. Total CPU system time: 14 seconds. Total elapsed time: 77.706 seconds; peak allocated memory: 778.453 MB.
+INFO: [v++ 60-791] Total elapsed time: 0h 1m 23s

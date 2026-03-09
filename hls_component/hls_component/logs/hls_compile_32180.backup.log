@@ -1,0 +1,1321 @@
+  **** HLS Build v2025.2 6295257
+INFO: [HLS 200-2005] Using work_dir C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component 
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-10] Creating and opening component 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component'.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-2174] Applying component config ini file hls_config.cfg
+WARNING: [HLS 200-2001] file not found './superblock_tb - Copy.cpp' see [hls] from hls_config.cfg(9)
+INFO: [HLS 200-1465] Applying config ini 'syn.file=./hello.cpp' from hls_config.cfg(7)
+INFO: [HLS 200-10] Adding design file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hello.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb - Copy.cpp' from hls_config.cfg(9)
+WARNING: [HLS 200-40] Cannot find test bench file './superblock_tb'
+WARNING: [HLS 200-40] Cannot find test bench file '-'
+WARNING: [HLS 200-40] Cannot find test bench file 'Copy.cpp'
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb_lmul.cpp' from hls_config.cfg(10)
+INFO: [HLS 200-10] Adding test bench file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/superblock_tb_lmul.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'syn.top=qwen_superblock' from hls_config.cfg(8)
+INFO: [HLS 200-1465] Applying config ini 'flow_target=vivado' from hls_config.cfg(4)
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1465] Applying config ini 'part=xczu9eg-ffvb1156-2-e' from hls_config.cfg(1)
+INFO: [HLS 200-1611] Setting target device to 'xczu9eg-ffvb1156-2-e'
+INFO: [HLS 200-1465] Applying config ini 'package.output.format=ip_catalog' from hls_config.cfg(5)
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 2 seconds. CPU system time: 2 seconds. Elapsed time: 6.762 seconds; current allocated memory: 371.059 MB.
+INFO: [HLS 200-2191] C-Synthesis will use clang-16 as the compiler
+INFO: [HLS 200-10] Analyzing design file 'hello.cpp' ... 
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 9.89 seconds; current allocated memory: 373.785 MB.
+INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
+INFO: [HLS 200-1995] There were 1,115 instructions in the design after the 'Compile/Link' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 26,703 instructions in the design after the 'Unroll/Inline (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 21,228 instructions in the design after the 'Unroll/Inline (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 24,694 instructions in the design after the 'Unroll/Inline (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 24,694 instructions in the design after the 'Unroll/Inline (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+WARNING: [HLS 200-1995] There were 107,429 instructions in the design after the 'Array/Struct' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 38,319 instructions in the design after the 'Array/Struct (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 38,319 instructions in the design after the 'Array/Struct (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 38,257 instructions in the design after the 'Array/Struct (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 42,008 instructions in the design after the 'Array/Struct (step 5)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 42,020 instructions in the design after the 'Performance' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 37,924 instructions in the design after the 'Performance (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+WARNING: [HLS 200-1995] There were 155,511 instructions in the design after the 'Performance (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 58,811 instructions in the design after the 'Performance (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 58,837 instructions in the design after the 'HW Transforms' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 62,173 instructions in the design after the 'HW Transforms (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 214-131] Inlining function 'fixed_to_bf16(long long)' into 'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)' (hello.cpp:302:42)
+INFO: [HLS 214-131] Inlining function 'bf16_to_fixed(unsigned short)' into 'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)' (hello.cpp:279:38)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_277_7' is marked as complete unroll implied by the pipeline pragma (hello.cpp:277:39)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_287_9' is marked as complete unroll implied by the pipeline pragma (hello.cpp:287:39)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_289_10' is marked as complete unroll implied by the pipeline pragma (hello.cpp:289:44)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_301_12' is marked as complete unroll implied by the pipeline pragma (hello.cpp:301:36)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_267_3' (hello.cpp:267:31) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:253:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_277_7' (hello.cpp:277:39) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:253:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_287_9' (hello.cpp:287:39) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:253:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_289_10' (hello.cpp:289:44) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:253:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_301_12' (hello.cpp:301:36) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:253:0)
+WARNING: [HLS 214-366] Duplicating function 'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)' as different function signatures were detected between this call site and other call site(s). This may impact the resources used in the design. (hello.cpp:328:5)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'A'. (hello.cpp:317:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W1'. (hello.cpp:317:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W2'. (hello.cpp:317:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'C'. (hello.cpp:317:0)
+INFO: [HLS 214-248] Applying array_partition to 'bufA': Cyclic partitioning with factor 16 on dimension 2. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW': Cyclic partitioning with factor 16 on dimension 1. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufC': Complete partitioning on dimension 2. (hello.cpp:257:13)
+INFO: [HLS 214-376] Pipelining loop< VITIS_LOOP_269_4> at hello.cpp:269:35 due to pipeline_loops threshold
+INFO: [HLS 214-449] Partitioning array 'bufW_0' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_1' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_2' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_3' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_4' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_5' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_6' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_7' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_8' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_9' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_10' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_11' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_12' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_13' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_14' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-449] Partitioning array 'bufW_15' dimension 2 due to constant index. (hello.cpp:256:13)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_0' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_1' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_10' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_11' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_12' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_13' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_14' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_15' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_2' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_3' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_4' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_5' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_6' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_7' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_8' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=complete dim=1' for array 'bufA_9' due to pipeline pragma (hello.cpp:286:1)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=cyclic factor=16 dim=1' for array 'temp' due to pipeline pragma (hello.cpp:300:1)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_0': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_1': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_2': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_3': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_4': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_5': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_6': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_7': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_8': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_9': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_10': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_11': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_12': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_13': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_14': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufA_15': Complete partitioning on dimension 1. (hello.cpp:255:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_0': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_1': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_2': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_3': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_4': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_5': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_6': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_7': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_8': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_9': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_10': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_11': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_12': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_13': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_14': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'bufW_15': Complete partitioning on dimension 2. (hello.cpp:256:13)
+INFO: [HLS 214-248] Applying array_partition to 'temp': Cyclic partitioning with factor 16 on dimension 1. (hello.cpp:326:14)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:278:52)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem1'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:279:52)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem2'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:279:52)
+INFO: [HLS 214-115] Multiple burst writes of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:302:40)
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 134.295 seconds; current allocated memory: 382.039 MB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.005 seconds; current allocated memory: 382.039 MB.
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 23 seconds. CPU system time: 0 seconds. Elapsed time: 23.633 seconds; current allocated memory: 533.219 MB.
+INFO: [HLS 200-10] Checking synthesizability ...
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 14 seconds. CPU system time: 0 seconds. Elapsed time: 14.371 seconds; current allocated memory: 549.070 MB.
+INFO: [XFORM 203-712] Applying dataflow to function 'qwen_superblock' (hello.cpp:312), detected/extracted 2 process function(s): 
+	 'qwen_linear_layer'
+	 'qwen_linear_layer.1'.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:275:49) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:279:52) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:278:62) to (hello.cpp:278:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer.1'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:300:1) to (hello.cpp:299:32) in function 'qwen_linear_layer.1'... converting 193 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:275:49) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:279:52) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:278:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:95:39) to (hello.cpp:279:36) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:300:1) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [XFORM 203-401] Performing if-conversion on hyperblock from (hello.cpp:302:56) to (hello.cpp:302:40) in function 'qwen_linear_layer'... converting 7 basic blocks.
+INFO: [HLS 200-111] Finished Loop, function and other optimizations: CPU user time: 77 seconds. CPU system time: 1 seconds. Elapsed time: 86.42 seconds; current allocated memory: 748.734 MB.
+WARNING: [HLS 200-1449] Process qwen_linear_layer.1 has both a predecessor and reads an input from its caller (see the GUI dataflow viewer). This may lead to lower throughput. Consider copying this input via a predecessor process.
+INFO: [HLS 200-111] Finished Architecture Synthesis: CPU user time: 73 seconds. CPU system time: 0 seconds. Elapsed time: 73.717 seconds; current allocated memory: 1.562 GB.
+INFO: [HLS 200-10] Starting hardware synthesis ...
+INFO: [HLS 200-10] Synthesizing 'qwen_superblock' ...
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_4' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_4'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_41' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_41'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_42' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_42'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_43' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_43'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_44' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_44'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_45' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_45'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_46' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_46'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_47' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_47'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_48' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_48'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_49' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_49'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_410' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_410'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_411' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_411'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_412' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_412'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_413' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_413'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_414' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_414'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_415' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_415'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_416' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_416'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_417' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_417'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_418' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_418'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_419' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_419'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_420' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_420'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_421' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_421'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_422' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_422'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_423' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_423'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_424' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_424'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_425' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_425'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_426' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_426'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_427' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_427'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_428' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_428'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_429' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_429'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_430' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_430'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_269_431' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_431'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_275_6' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_275_6'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_285_8' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_285_8'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1_Pipeline_VITIS_LOOP_299_11' to 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_299_11'.
+WARNING: [SYN 201-103] Legalizing function name 'qwen_linear_layer.1' to 'qwen_linear_layer_1'.
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 90 seconds. CPU system time: 1 seconds. Elapsed time: 90.794 seconds; current allocated memory: 1.817 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.06 seconds; current allocated memory: 1.818 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_432' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.243 seconds; current allocated memory: 1.819 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 1.819 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_433' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.234 seconds; current allocated memory: 1.820 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.820 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_434' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.249 seconds; current allocated memory: 1.821 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 1.821 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_435' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.285 seconds; current allocated memory: 1.821 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 1.821 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_436' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.258 seconds; current allocated memory: 1.822 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 1.822 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_437' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.25 seconds; current allocated memory: 1.823 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 1.823 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_438' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.238 seconds; current allocated memory: 1.824 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 1.824 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_439' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.049 seconds; current allocated memory: 1.825 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.059 seconds; current allocated memory: 1.825 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_440' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.296 seconds; current allocated memory: 1.826 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.826 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_441' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.334 seconds; current allocated memory: 1.827 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.053 seconds; current allocated memory: 1.827 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_442' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.29 seconds; current allocated memory: 1.828 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.056 seconds; current allocated memory: 1.828 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_443' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.835 seconds; current allocated memory: 1.828 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 1.828 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_444' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.24 seconds; current allocated memory: 1.829 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.829 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_445' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.252 seconds; current allocated memory: 1.830 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 1.830 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_446' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.24 seconds; current allocated memory: 1.832 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.047 seconds; current allocated memory: 1.832 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_447' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.114 seconds; current allocated memory: 1.832 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.832 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_448' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.262 seconds; current allocated memory: 1.833 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.052 seconds; current allocated memory: 1.833 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_449' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.251 seconds; current allocated memory: 1.834 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.834 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_450' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.239 seconds; current allocated memory: 1.835 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 1.835 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_451' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.034 seconds; current allocated memory: 1.836 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 1.836 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_452' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.24 seconds; current allocated memory: 1.837 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 1.837 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_453' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.299 seconds; current allocated memory: 1.838 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 1.838 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_454' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.245 seconds; current allocated memory: 1.839 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 1.839 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_455' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.996 seconds; current allocated memory: 1.840 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.053 seconds; current allocated memory: 1.840 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_456' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.31 seconds; current allocated memory: 1.841 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.055 seconds; current allocated memory: 1.841 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_457' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.314 seconds; current allocated memory: 1.842 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.053 seconds; current allocated memory: 1.842 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_458' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.31 seconds; current allocated memory: 1.843 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.054 seconds; current allocated memory: 1.843 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_459' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.849 seconds; current allocated memory: 1.844 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 1.844 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_460' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.239 seconds; current allocated memory: 1.845 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 1.845 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_461' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.244 seconds; current allocated memory: 1.846 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 1.846 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_269_462' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.247 seconds; current allocated memory: 1.847 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.052 seconds; current allocated memory: 1.847 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_275_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_275_6'.
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278), bus read operation ('bf', hello.cpp:278) on port 'gmem0' (hello.cpp:278) accessing 'gmem0' m_axi read
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem1' (hello.cpp:279) accessing 'gmem1' m_axi read
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 32, Depth = 43, loop 'VITIS_LOOP_275_6'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 24 seconds. CPU system time: 0 seconds. Elapsed time: 26.523 seconds; current allocated memory: 1.966 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 18 seconds. CPU system time: 0 seconds. Elapsed time: 18.002 seconds; current allocated memory: 1.966 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_285_8' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_285_8'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 2, loop 'VITIS_LOOP_285_8'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 225 seconds. CPU system time: 0 seconds. Elapsed time: 225.382 seconds; current allocated memory: 2.058 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 35 seconds. CPU system time: 1 seconds. Elapsed time: 35.191 seconds; current allocated memory: 2.058 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_Pipeline_VITIS_LOOP_299_11' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-486] Changing DSP latency (root=mul_ln302) to 3 in order to utilize available DSP registers.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_299_11'.
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 1, Depth = 4, loop 'VITIS_LOOP_299_11'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 11 seconds. CPU system time: 0 seconds. Elapsed time: 11.802 seconds; current allocated memory: 2.058 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 1.046 seconds; current allocated memory: 2.058 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 26 seconds. CPU system time: 0 seconds. Elapsed time: 26.565 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 12 seconds. CPU system time: 0 seconds. Elapsed time: 11.568 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_4' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 3 seconds. CPU system time: 1 seconds. Elapsed time: 3.958 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_41' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.185 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.053 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_42' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.187 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_43' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.183 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_44' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.252 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.052 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_45' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.182 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.053 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_46' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.183 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_47' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.184 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_48' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.342 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.057 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_49' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.273 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.063 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_410' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.281 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.061 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_411' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.247 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.055 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_412' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.864 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_413' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.175 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_414' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.176 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_415' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.171 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_416' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.346 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.06 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_417' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.201 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_418' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.183 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_419' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.176 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_420' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.211 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_421' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.175 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.051 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_422' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.199 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_423' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.177 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.049 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_424' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.234 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.05 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_425' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.23 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.061 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_426' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.246 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.06 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_427' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.284 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.056 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_428' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.022 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.047 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_429' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.173 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.046 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_430' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.188 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.048 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_269_431' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_269_4'.
+INFO: [HLS 200-1470] Pipelining result : Target II = NA, Final II = 1, Depth = 1, loop 'VITIS_LOOP_269_4'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 1 seconds. CPU system time: 0 seconds. Elapsed time: 0.195 seconds; current allocated memory: 2.119 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.047 seconds; current allocated memory: 2.119 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_275_6' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [HLS 200-486] Changing DSP latency (root=mul_ln278) to 3 in order to utilize available DSP registers.
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_275_6'.
+WARNING: [HLS 200-448] Lower bound of II is 32 due to multiple bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279), bus read operation ('bf', hello.cpp:279) on port 'gmem2' (hello.cpp:279) accessing 'gmem2' m_axi read
+INFO: [HLS 200-1470] Pipelining result : Target II = 1, Final II = 32, Depth = 69, loop 'VITIS_LOOP_275_6'
+INFO: [SCHED 204-11] Finished scheduling.
+INFO: [HLS 200-111] Finished Scheduling: CPU user time: 47 seconds. CPU system time: 0 seconds. Elapsed time: 48.519 seconds; current allocated memory: 2.176 GB.
+INFO: [BIND 205-100] Starting micro-architecture generation ...
+INFO: [BIND 205-101] Performing variable lifetime analysis.
+INFO: [BIND 205-101] Exploring resource sharing.
+INFO: [BIND 205-101] Binding ...
+INFO: [BIND 205-100] Finished micro-architecture generation.
+INFO: [HLS 200-111] Finished Binding: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 2.853 seconds; current allocated memory: 2.176 GB.
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [HLS 200-42] -- Implementing module 'qwen_linear_layer_1_Pipeline_VITIS_LOOP_285_8' 
+INFO: [HLS 200-10] ----------------------------------------------------------------
+INFO: [SCHED 204-11] Starting scheduling ...
+INFO: [SCHED 204-61] Pipelining loop 'VITIS_LOOP_285_8'.

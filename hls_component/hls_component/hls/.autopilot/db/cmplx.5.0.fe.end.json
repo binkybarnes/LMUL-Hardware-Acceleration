@@ -1,0 +1,226 @@
+{
+    "1": {
+        "name": "qwen_linear_layer_Pipeline_VITIS_LOOP_268_8_VITIS_LOOP_269_9_VITIS_LOOP_274_10",
+        "file": "hello.cpp",
+        "fileloc": "268",
+        "instructions": "1155",
+        "total_instructions": "1155",
+        "calls": "",
+        "basicblocks": "79",
+        "memory_accesses": "621",
+        "control_depth": "4",
+        "def_use_depth": "2",
+        "loads": {
+            "L": "294"
+        },
+        "stores": {
+            "L": "332"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "2": {
+        "name": "qwen_linear_layer",
+        "file": "hello.cpp",
+        "fileloc": "230",
+        "instructions": "214",
+        "total_instructions": "5515",
+        "calls": "4 5 6 1",
+        "basicblocks": "14",
+        "memory_accesses": "0",
+        "control_depth": "0",
+        "def_use_depth": "3",
+        "loads": {
+            "L": "3"
+        },
+        "stores": {
+            "L": "4"
+        },
+        "loops": {
+            "L": "1",
+            "N": "2"
+        }
+    },
+    "3": {
+        "name": "qwen_linear_layer.1_Pipeline_VITIS_LOOP_268_8_VITIS_LOOP_269_9_VITIS_LOOP_274_10",
+        "file": "hello.cpp",
+        "fileloc": "268",
+        "instructions": "1155",
+        "total_instructions": "1155",
+        "calls": "",
+        "basicblocks": "79",
+        "memory_accesses": "621",
+        "control_depth": "4",
+        "def_use_depth": "2",
+        "loads": {
+            "L": "294"
+        },
+        "stores": {
+            "L": "332"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "4": {
+        "name": "qwen_linear_layer_Pipeline_VITIS_LOOP_250_3",
+        "file": "hello.cpp",
+        "fileloc": "250",
+        "instructions": "274",
+        "total_instructions": "274",
+        "calls": "",
+        "basicblocks": "4",
+        "memory_accesses": "130",
+        "control_depth": "1",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "1"
+        },
+        "stores": {
+            "L": "130"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "0": {
+        "name": "qwen_superblock",
+        "file": "hello.cpp",
+        "fileloc": "305",
+        "instructions": "52",
+        "total_instructions": "10580",
+        "calls": "2 8",
+        "basicblocks": "1",
+        "memory_accesses": "0",
+        "control_depth": "0",
+        "def_use_depth": "1"
+    },
+    "5": {
+        "name": "qwen_linear_layer_Pipeline_VITIS_LOOP_291_11",
+        "file": "hello.cpp",
+        "fileloc": "291",
+        "instructions": "2582",
+        "total_instructions": "2582",
+        "calls": "",
+        "basicblocks": "548",
+        "memory_accesses": "578",
+        "control_depth": "2",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "65"
+        },
+        "stores": {
+            "L": "514"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "6": {
+        "name": "qwen_linear_layer_Pipeline_VITIS_LOOP_259_6",
+        "file": "hello.cpp",
+        "fileloc": "259",
+        "instructions": "1290",
+        "total_instructions": "1290",
+        "calls": "",
+        "basicblocks": "21",
+        "memory_accesses": "612",
+        "control_depth": "2",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "1"
+        },
+        "stores": {
+            "L": "546"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "7": {
+        "name": "qwen_linear_layer.1_Pipeline_VITIS_LOOP_250_3",
+        "file": "hello.cpp",
+        "fileloc": "250",
+        "instructions": "274",
+        "total_instructions": "274",
+        "calls": "",
+        "basicblocks": "4",
+        "memory_accesses": "130",
+        "control_depth": "1",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "1"
+        },
+        "stores": {
+            "L": "130"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "8": {
+        "name": "qwen_linear_layer",
+        "file": "hello.cpp",
+        "fileloc": "230",
+        "instructions": "218",
+        "total_instructions": "5013",
+        "calls": "7 9 10 3",
+        "basicblocks": "14",
+        "memory_accesses": "0",
+        "control_depth": "0",
+        "def_use_depth": "3",
+        "loads": {
+            "L": "3"
+        },
+        "stores": {
+            "L": "4"
+        },
+        "loops": {
+            "L": "1",
+            "N": "2"
+        }
+    },
+    "9": {
+        "name": "qwen_linear_layer.1_Pipeline_VITIS_LOOP_291_11",
+        "file": "hello.cpp",
+        "fileloc": "291",
+        "instructions": "934",
+        "total_instructions": "934",
+        "calls": "",
+        "basicblocks": "4",
+        "memory_accesses": "102",
+        "control_depth": "1",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "66"
+        },
+        "stores": {
+            "L": "4"
+        },
+        "loops": {
+            "L": "1"
+        }
+    },
+    "10": {
+        "name": "qwen_linear_layer.1_Pipeline_VITIS_LOOP_259_6",
+        "file": "hello.cpp",
+        "fileloc": "259",
+        "instructions": "2432",
+        "total_instructions": "2432",
+        "calls": "",
+        "basicblocks": "21",
+        "memory_accesses": "1093",
+        "control_depth": "2",
+        "def_use_depth": "1",
+        "loads": {
+            "L": "514"
+        },
+        "stores": {
+            "L": "548"
+        },
+        "loops": {
+            "L": "1"
+        }
+    }
+}

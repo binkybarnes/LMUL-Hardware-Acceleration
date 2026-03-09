@@ -1,0 +1,96 @@
+  **** HLS Build v2025.2 6295257
+INFO: [HLS 200-2005] Using work_dir C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component 
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-10] Creating and opening component 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component'.
+INFO: [HLS 200-1505] Using default flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-2174] Applying component config ini file hls_config.cfg
+WARNING: [HLS 200-2001] file not found './superblock_tb - Copy.cpp' see [hls] from hls_config.cfg(9)
+INFO: [HLS 200-1465] Applying config ini 'syn.file=./hello.cpp' from hls_config.cfg(7)
+INFO: [HLS 200-10] Adding design file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hello.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb - Copy.cpp' from hls_config.cfg(9)
+WARNING: [HLS 200-40] Cannot find test bench file './superblock_tb'
+WARNING: [HLS 200-40] Cannot find test bench file '-'
+WARNING: [HLS 200-40] Cannot find test bench file 'Copy.cpp'
+INFO: [HLS 200-1465] Applying config ini 'tb.file=./superblock_tb_lmul.cpp' from hls_config.cfg(10)
+INFO: [HLS 200-10] Adding test bench file 'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/superblock_tb_lmul.cpp' to the project
+INFO: [HLS 200-1465] Applying config ini 'syn.top=qwen_superblock' from hls_config.cfg(8)
+INFO: [HLS 200-1465] Applying config ini 'flow_target=vivado' from hls_config.cfg(4)
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1465] Applying config ini 'part=xczu9eg-ffvb1156-2-e' from hls_config.cfg(1)
+INFO: [HLS 200-1611] Setting target device to 'xczu9eg-ffvb1156-2-e'
+INFO: [HLS 200-1465] Applying config ini 'package.output.format=ip_catalog' from hls_config.cfg(5)
+INFO: [HLS 200-2176] Writing Vitis IDE component file C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/vitis-comp.json
+INFO: [HLS 200-111] Finished File checks and directory preparation: CPU user time: 3 seconds. CPU system time: 2 seconds. Elapsed time: 5.351 seconds; current allocated memory: 373.141 MB.
+INFO: [HLS 200-2191] C-Synthesis will use clang-16 as the compiler
+INFO: [HLS 200-10] Analyzing design file 'hello.cpp' ... 
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body (hello.cpp:412:32)
+Resolution: For help on HLS 214-113 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=214-113.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body (hello.cpp:412:38)
+Resolution: For help on HLS 214-113 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=214-113.html
+WARNING: [HLS 214-113] Either use an argument of the function or declare the variable inside the dataflow loop body (hello.cpp:412:44)
+Resolution: For help on HLS 214-113 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=214-113.html
+WARNING: [HLS 214-114] Since the only kind of statements allowed in a canonical dataflow region are variable declarations and function calls, the compiler may not be able to correctly handle the region (hello.cpp:400:9)
+Resolution: For help on HLS 214-114 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=214-114.html
+WARNING: [HLS 200-471] Dataflow form checks found 4 issue(s) in file hello.cpp
+Resolution: For help on HLS 200-471 see docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=200-471.html
+INFO: [HLS 200-111] Finished Source Code Analysis and Preprocessing: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 1.976 seconds; current allocated memory: 375.797 MB.
+INFO: [HLS 200-777] Using interface defaults for 'Vivado' flow target.
+INFO: [HLS 200-1995] There were 665 instructions in the design after the 'Compile/Link' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 8,691 instructions in the design after the 'Unroll/Inline (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 6,992 instructions in the design after the 'Unroll/Inline (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 6,552 instructions in the design after the 'Unroll/Inline (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 6,424 instructions in the design after the 'Unroll/Inline (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 18,825 instructions in the design after the 'Array/Struct (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 14,857 instructions in the design after the 'Array/Struct (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 14,857 instructions in the design after the 'Array/Struct (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 15,703 instructions in the design after the 'Array/Struct (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 14,668 instructions in the design after the 'Array/Struct (step 5)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 14,682 instructions in the design after the 'Performance (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 14,682 instructions in the design after the 'Performance (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 22,055 instructions in the design after the 'Performance (step 3)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 17,767 instructions in the design after the 'Performance (step 4)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 17,793 instructions in the design after the 'HW Transforms (step 1)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 200-1995] There were 17,965 instructions in the design after the 'HW Transforms (step 2)' phase of compilation. See the Design Size Report for more details (C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/syn/report/csynth_design_size.rpt:2)
+INFO: [HLS 214-131] Inlining function 'merged_lmul_to_fixed(unsigned short, unsigned short)' into 'compute_engine(unsigned short (*) [32], unsigned short (*) [32], int (*) [32])' (hello.cpp:157:33)
+INFO: [HLS 214-131] Inlining function 'fixed32_to_bf16(int)' into 'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)' (hello.cpp:419:42)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_405_7' is marked as complete unroll implied by the pipeline pragma (hello.cpp:405:39)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_418_9' is marked as complete unroll implied by the pipeline pragma (hello.cpp:418:35)
+INFO: [HLS 214-291] Loop 'VITIS_LOOP_155_3' is marked as complete unroll implied by the pipeline pragma (hello.cpp:155:31)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_392_3' (hello.cpp:392:31) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:376:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_405_7' (hello.cpp:405:39) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:376:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_418_9' (hello.cpp:418:35) in function 'qwen_linear_layer' completely with a factor of 32 (hello.cpp:376:0)
+INFO: [HLS 214-186] Unrolling loop 'VITIS_LOOP_155_3' (hello.cpp:155:31) in function 'compute_engine' completely with a factor of 32 (hello.cpp:150:0)
+WARNING: [HLS 214-366] Duplicating function 'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)' as different function signatures were detected between this call site and other call site(s). This may impact the resources used in the design. (hello.cpp:445:5)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'A'. (hello.cpp:434:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W1'. (hello.cpp:434:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'W2'. (hello.cpp:434:0)
+WARNING: [HLS 214-464] Skipping array undecay on variable length array 'C'. (hello.cpp:434:0)
+INFO: [HLS 214-248] Applying array_partition to 'bufC': Complete partitioning on dimension 2. (hello.cpp:381:13)
+INFO: [HLS 214-248] Applying array_reshape to 'bufA': Cyclic reshaping with factor 16 on dimension 2. (hello.cpp:379:14)
+INFO: [HLS 214-248] Applying array_reshape to 'bufW': Cyclic reshaping with factor 16 on dimension 1. (hello.cpp:380:14)
+INFO: [HLS 214-376] Pipelining loop< VITIS_LOOP_394_4> at hello.cpp:394:35 due to pipeline_loops threshold
+INFO: [HLS 214-437] Disabling loop flattening for loop 'VITIS_LOOP_397_5'. (hello.cpp:397:31)
+INFO: [HLS 214-449] Partitioning array 'bufW42' dimension 2 due to constant index. (hello.cpp:380:14)
+INFO: [HLS 214-270] Inferring pragma 'array_partition type=cyclic factor=16 dim=1' for array 'temp' due to pipeline pragma (hello.cpp:417:1)
+INFO: [HLS 214-248] Applying array_partition to 'bufW42': Complete partitioning on dimension 2. (hello.cpp:380:14)
+INFO: [HLS 214-248] Applying array_partition to 'temp': Cyclic partitioning with factor 16 on dimension 1. (hello.cpp:443:14)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:406:38)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem1'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:407:38)
+INFO: [HLS 214-115] Multiple burst reads of length 32 and bit width 16 has been inferred on bundle 'gmem2'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:407:38)
+INFO: [HLS 214-115] Multiple burst writes of length 32 and bit width 16 has been inferred on bundle 'gmem0'. These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings. (hello.cpp:419:40)
+INFO: [HLS 200-111] Finished Compiling Optimization and Transform: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 25.716 seconds; current allocated memory: 381.062 MB.
+INFO: [HLS 200-111] Finished Checking Pragmas: CPU user time: 0 seconds. CPU system time: 0 seconds. Elapsed time: 0.005 seconds; current allocated memory: 381.062 MB.
+INFO: [HLS 200-10] Starting code transformations ...
+INFO: [HLS 200-111] Finished Standard Transforms: CPU user time: 3 seconds. CPU system time: 0 seconds. Elapsed time: 3.218 seconds; current allocated memory: 435.426 MB.
+INFO: [HLS 200-10] Checking synthesizability ...
+WARNING: [SYNCHK 200-23] hello.cpp:407: variable-indexed range selection may cause suboptimal QoR.
+INFO: [SYNCHK 200-10] 0 error(s), 1 warning(s).
+INFO: [HLS 200-111] Finished Checking Synthesizability: CPU user time: 2 seconds. CPU system time: 0 seconds. Elapsed time: 2.193 seconds; current allocated memory: 453.301 MB.
+INFO: [XFORM 203-721] Changing loop 'VITIS_LOOP_403_6' (hello.cpp:403)  to a process function for dataflow in function 'qwen_linear_layer'.
+ERROR: [HLS 200-994] Cannot read value of  'k' from previous iterations in dataflow VITIS_LOOP_397_5  (hello.cpp:397)  of function 'qwen_linear_layer'.
+ERROR: [HLS 200-1715] Encountered problem during source synthesis
+ERROR: [HLS 200-70] Pre-synthesis failed.
+ERROR: 
+INFO: [HLS 200-112] Total CPU user time: 17 seconds. Total CPU system time: 2 seconds. Total elapsed time: 45.946 seconds; peak allocated memory: 464.387 MB.

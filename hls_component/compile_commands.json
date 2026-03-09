@@ -1,0 +1,39 @@
+[
+  {
+    "directory": "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component",
+    "arguments": [
+      "C:\\AMDDesignTools\\2025.2\\Vitis\\win64\\tools\\vcxx\\libexec\\clang++.exe",
+      "--sysroot=C:\\AMDDesignTools\\2025.2\\Vitis\\tps\\mingw\\10.0.0\\win64.o\\nt",
+      "-fhls",
+      "-hls-syn-headers-dir=C:\\AMDDesignTools\\2025.2\\Vitis\\common\\technology\\autopilot",
+      "-fhlstoplevel=qwen_superblock",
+      "-c",
+      "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component\\hello.cpp"
+    ],
+    "file": "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component\\hello.cpp"
+  },
+  {
+    "directory": "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component",
+    "arguments": [
+      "C:\\AMDDesignTools\\2025.2\\Vitis\\win64\\tools\\vcxx\\libexec\\clang++.exe",
+      "--sysroot=C:\\AMDDesignTools\\2025.2\\Vitis\\tps\\mingw\\10.0.0\\win64.o\\nt",
+      "-fhls-tb",
+      "-hls-sim-headers-dir=C:\\AMDDesignTools\\2025.2\\Vitis\\include",
+      "-c",
+      "superblock_tb - Copy.cpp"
+    ],
+    "file": "superblock_tb - Copy.cpp"
+  },
+  {
+    "directory": "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component",
+    "arguments": [
+      "C:\\AMDDesignTools\\2025.2\\Vitis\\win64\\tools\\vcxx\\libexec\\clang++.exe",
+      "--sysroot=C:\\AMDDesignTools\\2025.2\\Vitis\\tps\\mingw\\10.0.0\\win64.o\\nt",
+      "-fhls-tb",
+      "-hls-sim-headers-dir=C:\\AMDDesignTools\\2025.2\\Vitis\\include",
+      "-c",
+      "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component\\superblock_tb_lmul.cpp"
+    ],
+    "file": "C:\\Users\\Brandon\\Desktop\\codes\\hls_bruh\\hls_component\\superblock_tb_lmul.cpp"
+  }
+]

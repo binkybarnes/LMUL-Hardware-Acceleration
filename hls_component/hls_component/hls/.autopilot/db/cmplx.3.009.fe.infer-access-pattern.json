@@ -1,0 +1,50 @@
+{
+  "0": {
+    "basicblocks": 1,
+    "calls": "2 1",
+    "control_depth": 0,
+    "def_use_depth": 1,
+    "file": "hello.cpp",
+    "fileloc": 305,
+    "instructions": 13,
+    "memory_accesses": 0,
+    "name": "qwen_superblock",
+    "total_instructions": 5470
+  },
+  "1": {
+    "basicblocks": 188,
+    "calls": "",
+    "control_depth": 6,
+    "def_use_depth": 25,
+    "file": "hello.cpp",
+    "fileloc": 230,
+    "instructions": 2728,
+    "loads": {
+      "L": 97
+    },
+    "memory_accesses": 713,
+    "name": "qwen_linear_layer",
+    "stores": {
+      "L": 549
+    },
+    "total_instructions": 2728
+  },
+  "2": {
+    "basicblocks": 188,
+    "calls": "",
+    "control_depth": 6,
+    "def_use_depth": 25,
+    "file": "hello.cpp",
+    "fileloc": 230,
+    "instructions": 2729,
+    "loads": {
+      "L": 65
+    },
+    "memory_accesses": 713,
+    "name": "qwen_linear_layer",
+    "stores": {
+      "L": 581
+    },
+    "total_instructions": 2729
+  }
+}

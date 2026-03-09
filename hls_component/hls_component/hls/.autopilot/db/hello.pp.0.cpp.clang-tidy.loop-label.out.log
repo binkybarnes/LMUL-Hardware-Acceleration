@@ -1,0 +1,60 @@
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:622:5: remark: Added loop label VITIS_LOOP_244_1:   [xilinx-label-all-loops]
+    for (int i = 0; i < M; i += 32) {
+    ^
+    VITIS_LOOP_244_1: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:622:5: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:624:9: remark: Added loop label VITIS_LOOP_246_2:   [xilinx-label-all-loops]
+        for (int j = 0; j < N; j += 32) {
+        ^
+        VITIS_LOOP_246_2: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:624:9: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:628:13: remark: Added loop label VITIS_LOOP_250_3:   [xilinx-label-all-loops]
+            for(int r=0; r<32; r++) {
+            ^
+            VITIS_LOOP_250_3: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:628:13: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:630:17: remark: Added loop label VITIS_LOOP_252_4:   [xilinx-label-all-loops]
+                for(int c=0; c<32; c++) bufC[r][c] = 0;
+                ^
+                VITIS_LOOP_252_4: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:630:17: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:633:13: remark: Added loop label VITIS_LOOP_255_5:   [xilinx-label-all-loops]
+            for (int k = 0; k < K; k += 32) {
+            ^
+            VITIS_LOOP_255_5: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:633:13: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:637:17: remark: Added loop label VITIS_LOOP_259_6:   [xilinx-label-all-loops]
+                for(int r=0; r<32; r++) {
+                ^
+                VITIS_LOOP_259_6: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:637:17: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:639:21: remark: Added loop label VITIS_LOOP_261_7:   [xilinx-label-all-loops]
+                    for(int c=0; c<32; c++) {
+                    ^
+                    VITIS_LOOP_261_7: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:639:21: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:646:17: remark: Added loop label VITIS_LOOP_268_8:   [xilinx-label-all-loops]
+                for (int ti = 0; ti < 32; ti++) {
+                ^
+                VITIS_LOOP_268_8: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:646:17: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:647:21: remark: Added loop label VITIS_LOOP_269_9:   [xilinx-label-all-loops]
+                    for (int tj = 0; tj < 32; tj++) {
+                    ^
+                    VITIS_LOOP_269_9: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:647:21: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:652:25: remark: Added loop label VITIS_LOOP_274_10:   [xilinx-label-all-loops]
+                        for (int tk = 0; tk < 32; tk++) {
+                        ^
+                        VITIS_LOOP_274_10: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:652:25: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:669:13: remark: Added loop label VITIS_LOOP_291_11:   [xilinx-label-all-loops]
+            for(int r=0; r<32; r++) {
+            ^
+            VITIS_LOOP_291_11: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:669:13: note: FIX-IT applied suggested code changes
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:671:17: remark: Added loop label VITIS_LOOP_293_12:   [xilinx-label-all-loops]
+                for(int c=0; c<32; c++) {
+                ^
+                VITIS_LOOP_293_12: 
+C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp:671:17: note: FIX-IT applied suggested code changes

@@ -1,0 +1,148 @@
+---
+MainSourceFile:  'C:/Users/Brandon/Desktop/codes/hls_bruh/hls_component/hls_component/hls/.autopilot/db/hello.pp.0.cpp'
+Diagnostics:
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_244_1:  '
+      FilePath:        hello.cpp
+      FileOffset:      244
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23516
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_244_1: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_246_2:  '
+      FilePath:        hello.cpp
+      FileOffset:      246
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23597
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_246_2: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_250_3:  '
+      FilePath:        hello.cpp
+      FileOffset:      250
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23685
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_250_3: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_252_4:  '
+      FilePath:        hello.cpp
+      FileOffset:      252
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23755
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_252_4: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_255_5:  '
+      FilePath:        hello.cpp
+      FileOffset:      255
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23822
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_255_5: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_259_6:  '
+      FilePath:        hello.cpp
+      FileOffset:      259
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23914
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_259_6: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_261_7:  '
+      FilePath:        hello.cpp
+      FileOffset:      261
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          23981
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_261_7: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_268_8:  '
+      FilePath:        hello.cpp
+      FileOffset:      268
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          24179
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_268_8: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_269_9:  '
+      FilePath:        hello.cpp
+      FileOffset:      269
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          24233
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_269_9: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_274_10:  '
+      FilePath:        hello.cpp
+      FileOffset:      274
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          24346
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_274_10: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_291_11:  '
+      FilePath:        hello.cpp
+      FileOffset:      291
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          24694
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_291_11: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_293_12:  '
+      FilePath:        hello.cpp
+      FileOffset:      293
+      Replacements:
+        - FilePath:        'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component\hls_component\hls\.autopilot\db\hello.pp.0.cpp'
+          Offset:          24757
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_293_12: '
+    Level:           Remark
+    BuildDirectory:  'C:\Users\Brandon\Desktop\codes\hls_bruh\hls_component'
+...

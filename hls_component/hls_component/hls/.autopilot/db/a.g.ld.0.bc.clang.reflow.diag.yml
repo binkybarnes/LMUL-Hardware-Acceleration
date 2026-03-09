@@ -1,0 +1,1870 @@
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: hello.cpp, Line: 278, Column: 49 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'lmul(unsigned short, unsigned short)'
+    DebugLoc:        { File: hello.cpp, Line: 68, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 42 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'fixed32_to_bf16(int)'
+    DebugLoc:        { File: hello.cpp, Line: 119, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ''''
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: hello.cpp, Line: 281, Column: 36 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Inlining function '''
+  - Callee:          'bf16_to_fixed32(unsigned short)'
+    DebugLoc:        { File: hello.cpp, Line: 96, Column: 0 }
+  - String:          ''' into '''
+  - Caller:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ''''
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: hello.cpp, Line: 322, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - Callee:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 261, Column: 39 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_261_7
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 293, Column: 36 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_293_12
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaPartiallyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_250_3
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:250:31'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' partially '
+  - String:          ''
+  - String:          'with a factor of '
+  - Factor:          '4'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_261_7
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:261:39'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_293_12
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:293:36'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Failure
+Pass:            reflow-function-uniquification
+Name:            FunctionUniquification
+DebugLoc:        { File: hello.cpp, Line: 322, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Duplicating function '''
+  - Name:            'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+  - String:          ''' as different function signatures were detected between this call site and other call site(s). This may impact the resources used in the design.'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: hello.cpp, Line: 322, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - Callee:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: hello.cpp, Line: 323, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - Callee:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+Function:        apatb_qwen_superblock_ir
+Args:            
+  - Callee:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          apatb_qwen_superblock_ir
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       A
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       W1
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       W2
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       C
+  - String:          '''.'
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 237, Column: 14 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufA
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '16'
+  - String:          ' on dimension '
+  - Dim:             '2'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 238, Column: 14 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufW
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '16'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 237, Column: 14 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufA
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '16'
+  - String:          ' on dimension '
+  - Dim:             '2'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 238, Column: 14 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufW
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '16'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgepseq
+  - ArrayName:       A
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.79
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.102
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.125
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.148
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.171
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.194
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.217
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.240
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.263
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.286
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.309
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.332
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.355
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.378
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.401
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.424
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.447
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.470
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.493
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.516
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.539
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.562
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.585
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.608
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.631
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.654
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.677
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.700
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.723
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.746
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.769
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.792
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgep493seq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.120
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.143
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.166
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.189
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.212
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.235
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.258
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.281
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.304
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.327
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.350
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.373
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.396
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.419
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.442
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.465
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.488
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.511
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.534
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.557
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.580
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.603
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.626
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.649
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.672
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.695
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.718
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.741
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.764
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.787
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.810
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.865
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            IncompatibleStride
+DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          Stride is incompatible
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       A
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            IncompatibleStride
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          Stride is incompatible
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgep493seq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Sequential '
+  - Direction:       read
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgepseq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.83
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.106
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.129
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.152
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.175
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.198
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.221
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.244
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.267
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.290
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.313
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.336
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.359
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.382
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.405
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.428
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.451
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.474
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.497
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.520
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.543
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.566
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.589
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.612
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.635
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.658
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.681
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.704
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.727
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.750
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.773
+  - OrigAccess:      load
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          VITIS_LOOP_261_7.load.828
+...
+--- !Passed
+Pass:            reflow-burst-inference
+Name:            BurstInferred
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Sequential '
+  - Direction:       write
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' has been inferred'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        scevgep493seq
+  - ArrayName:       C
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_291_11
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:291:32'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.1.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.2.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.3.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.4.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.5.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.6.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.7.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.8.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.9.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.10.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.11.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.12.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.13.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.14.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.15.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.16.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.17.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.18.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.19.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.20.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.21.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.22.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.23.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.24.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.25.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.26.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.27.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.28.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.29.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.30.store.3
+  - OrigAccess:      store
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          for.inc119.31.store.37
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            IncompatibleStride
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          Stride is incompatible
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_259_6
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:259:35'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-inference
+Name:            IncompatibleStride
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          Stride is incompatible
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          scevgep493seq
+  - ArrayName:       C
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - LoopName:        VITIS_LOOP_291_11
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:291:32'
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i16
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       A
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i16
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgep493seq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i16
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+  - OrigDirection:   write
+  - OrigID:          scevgep493seq
+  - ArrayName:       C
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Missed
+Pass:            reflow-burst-widen
+Name:            GreaterOrEqualThreshold
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Could not widen since type '
+  - Type:            i16
+  - String:          ' size is greater than or equal to the max_widen_bitwidth threshold of '
+  - Threshold:       '0'
+  - String:          ' _XLX_SEP_ '
+  - OrigAccess:      call
+    DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+  - OrigDirection:   read
+  - OrigID:          scevgepseq
+  - ArrayName:       W
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !HLSReportInfo
+Pass:            reflow-auto-loop-pipeline
+Name:            AutoLoopPipeline
+Args:            
+  - String:          'Pipelining loop< '
+  - LoopName:        VITIS_LOOP_250_3
+  - String:          '> at '
+  - LoopLoc:         'hello.cpp:250:31'
+  - String:          ' due to pipeline_loops threshold'
+...
+--- !Passed
+Pass:            reflow-auto-loop-pipeline
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 250, Column: 31 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - PragmaType:      pipeline
+  - String:          ' '
+  - PragmaOptions:   ' '
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - PragmaInferReason: config_compile -pipeline_loops 64
+  - LoopName:        VITIS_LOOP_250_3
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:250:31'
+    DebugLoc:        { File: hello.cpp, Line: 250, Column: 31 }
+  - String:          ' '
+...
+--- !HLSReportInfo
+Pass:            reflow-auto-loop-pipeline
+Name:            AutoLoopPipeline
+Args:            
+  - String:          'Pipelining loop< '
+  - LoopName:        VITIS_LOOP_250_3
+  - String:          '> at '
+  - LoopLoc:         'hello.cpp:250:31'
+  - String:          ' due to pipeline_loops threshold'
+...
+--- !Passed
+Pass:            reflow-auto-loop-pipeline
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 250, Column: 31 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - PragmaType:      pipeline
+  - String:          ' '
+  - PragmaOptions:   ' '
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - PragmaInferReason: config_compile -pipeline_loops 64
+  - LoopName:        VITIS_LOOP_250_3
+  - String:          ' '
+  - LoopLoc:         'hello.cpp:250:31'
+    DebugLoc:        { File: hello.cpp, Line: 250, Column: 31 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-infer-unroll
+Name:            ImplicitUnroll
+DebugLoc:        { File: hello.cpp, Line: 252, Column: 35 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' is marked as complete unroll implied by the pipeline pragma'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-pragma-loop-unroll
+Name:            PragmaFullyUnroll
+DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Unrolling loop '''
+  - LoopName:        VITIS_LOOP_252_4
+  - String:          ''' ('
+  - LoopLoc:         'hello.cpp:252:35'
+  - String:          ') '
+  - String:          'in function '''
+  - String:          qwen_linear_layer
+  - String:          ''' completely with a factor of '
+  - Factor:          '32'
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - PragmaType:      array_partition
+  - String:          ' '
+  - PragmaOptions:   'dim=1 type=cyclic factor=2 variable=bufC'
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - VarLoc:          'hello.cpp:239:13'
+  - String:          ' '
+  - VarName:         bufC
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoArrayXform
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Inferring pragma '''
+  - PragmaType:      array_partition
+  - String:          ' type='
+  - Mode:            cyclic
+  - String:          ' factor='
+  - Factor:          '2'
+  - String:          ' dim='
+  - Dim:             '1'
+  - String:          ''' for array '''
+  - Name:            bufC
+  - String:          ''''
+  - String:          ' due to '
+  - String:          pipeline
+  - String:          ' pragma'
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - PragmaType:      array_partition
+  - String:          ' '
+  - PragmaOptions:   'dim=2 type=complete  variable=bufC'
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - VarLoc:          'hello.cpp:239:13'
+  - String:          ' '
+  - VarName:         bufC
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoArrayXform
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Inferring pragma '''
+  - PragmaType:      array_partition
+  - String:          ' type='
+  - Mode:            complete
+  - String:          ' dim='
+  - Dim:             '2'
+  - String:          ''' for array '''
+  - Name:            bufC
+  - String:          ''''
+  - String:          ' due to '
+  - String:          pipeline
+  - String:          ' pragma'
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - PragmaType:      array_partition
+  - String:          ' '
+  - PragmaOptions:   'dim=1 type=cyclic factor=2 variable=bufC'
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - VarLoc:          'hello.cpp:239:13'
+  - String:          ' '
+  - PragmaSrcLoc:    'hello.cpp:292:1'
+    DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+  - VarName:         bufC
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoArrayXform
+DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Inferring pragma '''
+  - PragmaType:      array_partition
+  - String:          ' type='
+  - Mode:            cyclic
+  - String:          ' factor='
+  - Factor:          '2'
+  - String:          ' dim='
+  - Dim:             '1'
+  - String:          ''' for array '''
+  - Name:            bufC
+  - String:          ''''
+  - String:          ' due to '
+  - String:          pipeline
+  - String:          ' pragma'
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - PragmaType:      array_partition
+  - String:          ' '
+  - PragmaOptions:   'dim=2 type=complete  variable=bufC'
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_linear_layer
+  - String:          ' '
+  - VarLoc:          'hello.cpp:239:13'
+  - String:          ' '
+  - PragmaSrcLoc:    'hello.cpp:292:1'
+    DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+  - VarName:         bufC
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoArrayXform
+DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Inferring pragma '''
+  - PragmaType:      array_partition
+  - String:          ' type='
+  - Mode:            complete
+  - String:          ' dim='
+  - Dim:             '2'
+  - String:          ''' for array '''
+  - Name:            bufC
+  - String:          ''''
+  - String:          ' due to '
+  - String:          pipeline
+  - String:          ' pragma'
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoParallelPerformanceDrivenVerbosePassed
+DebugLoc:        { File: hello.cpp, Line: 320, Column: 14 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - PragmaType:      array_partition
+  - String:          ' '
+  - PragmaOptions:   'dim=1 type=cyclic factor=16 variable=temp'
+  - String:          ' '
+  - PragmaIsAuto:    '1'
+  - String:          ' '
+  - PragmaFunction:  qwen_superblock
+  - String:          ' '
+  - VarLoc:          'hello.cpp:320:14'
+  - String:          ' '
+  - PragmaSrcLoc:    'hello.cpp:292:1'
+    DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+  - VarName:         temp
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-auto-array-partition
+Name:            AutoArrayXform
+DebugLoc:        { File: hello.cpp, Line: 292, Column: 1 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Inferring pragma '''
+  - PragmaType:      array_partition
+  - String:          ' type='
+  - Mode:            cyclic
+  - String:          ' factor='
+  - Factor:          '16'
+  - String:          ' dim='
+  - Dim:             '1'
+  - String:          ''' for array '''
+  - Name:            temp
+  - String:          ''''
+  - String:          ' due to '
+  - String:          pipeline
+  - String:          ' pragma'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       A
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       W1
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       W2
+  - String:          '''.'
+...
+--- !Failure
+Pass:            reflow-array-undecay
+Name:            WarnOnUnsupportedVLAUnDecay
+DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Skipping array undecay on variable length array '''
+  - ArrayName:       C
+  - String:          '''.'
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufC
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '2'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+  - String:          ' '
+  - Mode:            Complete
+  - String:          ' partitioning'
+  - String:          ' on dimension '
+  - Dim:             '2'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 239, Column: 13 }
+Function:        _Z17qwen_linear_layerPtS_S_iii
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          bufC
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '2'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+  - String:          ' '
+  - Mode:            Complete
+  - String:          ' partitioning'
+  - String:          ' on dimension '
+  - Dim:             '2'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-array-partition
+Name:            ArrayXform
+DebugLoc:        { File: hello.cpp, Line: 320, Column: 14 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - String:          'Applying '
+  - String:          array_partition
+  - String:          ' to '''
+  - UOName:          temp
+  - String:          ''':'
+  - String:          ' '
+  - Mode:            Cyclic
+  - String:          ' partitioning'
+  - String:          ' with factor '
+  - Factor:          '16'
+  - String:          ' on dimension '
+  - Dim:             '1'
+  - String:          .
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.1
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: hello.cpp, Line: 262, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.1
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem0
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.1
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq1
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem1
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.1
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem1
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.2
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem2
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.2)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: hello.cpp, Line: 263, Column: 38 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.2
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       reads
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem2
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredVerboseSummary
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.2
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       writes
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+  - String:          ' _XLX_SEP_ '
+  - AccessID:        seq1
+  - ArrayName:       ''
+  - String:          ' '
+  - BundleName:      gmem0
+  - String:          ' '
+  - Function:        'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.2)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' '
+...
+--- !Passed
+Pass:            reflow-burst-summary
+Name:            BurstInferredSummary
+DebugLoc:        { File: hello.cpp, Line: 295, Column: 40 }
+Function:        _Z17qwen_linear_layerPtS_S_iii.1.2
+Args:            
+  - String:          'Multiple burst '
+  - Direction:       writes
+  - String:          ' of length '
+  - Length:          '32'
+  - String:          ' and bit width '
+  - Width:           '16'
+  - String:          ' has been inferred on bundle '''
+  - BundleName:      gmem0
+  - String:          '''.'
+  - String:          ' These burst requests might be further partitioned into multiple requests during RTL generation, based on max_read_burst_length or max_write_burst_length settings.'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: hello.cpp, Line: 322, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - Callee:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.1)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' because it should never be inlined (cost=never)'
+...
+--- !Missed
+Pass:            inline
+Name:            NeverInline
+DebugLoc:        { File: hello.cpp, Line: 323, Column: 5 }
+Function:        _Z15qwen_superblockPtS_S_S_iiii
+Args:            
+  - Callee:          'qwen_linear_layer(unsigned short*, unsigned short*, unsigned short*, int, int, int) (.1.2)'
+    DebugLoc:        { File: hello.cpp, Line: 235, Column: 0 }
+  - String:          ' not inlined into '
+  - Caller:          'qwen_superblock(unsigned short*, unsigned short*, unsigned short*, unsigned short*, int, int, int, int)'
+    DebugLoc:        { File: hello.cpp, Line: 311, Column: 0 }
+  - String:          ' because it should never be inlined (cost=never)'
+...
